@@ -2100,17 +2100,512 @@
         }
 
         /* 10. MODAL DE NOTAS, TROCAS E ATESTADOS */
-// ... existing code ... -->
+        function updateOverrideButtonsUI() {
+            document.querySelectorAll('#note-modal .ov-btn').forEach(btn => {
+                const val = btn.dataset.ov || '';
+                const isActive = !modalAtestadoEnabled && currentSelectedOverride === val;
+                btn.classList.remove(
+                    'bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm',
+                    'bg-slate-50', 'dark:bg-oled', 'text-slate-600', 'dark:text-slate-300',
+                    'border-slate-200', 'dark:border-surfaceBorder', 'opacity-45'
+                );
+                if (isActive) {
+                    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
+                } else {
+                    btn.classList.add('bg-slate-50', 'dark:bg-oled', 'text-slate-600', 'dark:text-slate-300', 'border-slate-200', 'dark:border-surfaceBorder');
+                }
+                if (modalAtestadoEnabled) btn.classList.add('opacity-45');
+            });
+        }
+
+        function updateAtestadoUI() {
+            const toggleBtn = document.getElementById('atestado-toggle-btn');
+            const knob = document.getElementById('atestado-toggle-knob');
+            const controls = document.getElementById('atestado-controls');
+            const subtitle = document.getElementById('atestado-subtitle');
+            const notice = document.getElementById('atestado-origin-notice');
+            const daysInput = document.getElementById('atestado-days-input');
+            const previewBox = document.getElementById('atestado-preview-box');
+            if (!toggleBtn || !controls) return;
+
+            toggleBtn.setAttribute('aria-checked', modalAtestadoEnabled ? 'true' : 'false');
+            toggleBtn.classList.toggle('bg-rose-500', modalAtestadoEnabled);
+            toggleBtn.classList.toggle('bg-slate-300', !modalAtestadoEnabled);
+            toggleBtn.classList.toggle('dark:bg-surfaceBorder', !modalAtestadoEnabled);
+            if (knob) {
+                knob.classList.toggle('translate-x-5', modalAtestadoEnabled);
+                knob.classList.toggle('translate-x-0', !modalAtestadoEnabled);
+            }
+            controls.classList.toggle('hidden', !modalAtestadoEnabled);
+
+            if (!modalAtestadoEnabled) {
+                if (subtitle) subtitle.textContent = 'Marcar dias e calcular retorno';
+                if (notice) notice.classList.add('hidden');
+                return;
+            }
+
+            const startDate = modalAtestadoStartDate || currentModalDateStr;
+            const rawDays = parseInt(daysInput ? daysInput.value : '1', 10);
+            const days = Math.max(1, Math.min(180, isNaN(rawDays) ? 1 : rawDays));
+            const info = getAtestadoReturnInfo(startDate, days, currentTurma);
+            const retCfg = SHIFTS_CONFIG[info.returnShift] || SHIFTS_CONFIG.M;
+
+            if (subtitle) {
+                subtitle.textContent = `${days} ${days === 1 ? 'dia' : 'dias'} • Volta em ${formatDateShortBR(info.returnDateStr)}`;
+            }
+            if (notice) {
+                if (startDate !== currentModalDateStr) {
+                    const startNote = getNote(startDate, currentTurma).trim();
+                    notice.textContent = startNote
+                        ? `Atestado iniciado em ${formatDateShortBR(startDate)} (Obs. inicial: "${startNote}")`
+                        : `Editando atestado iniciado em ${formatDateShortBR(startDate)}.`;
+                    notice.classList.remove('hidden');
+                } else {
+                    notice.classList.add('hidden');
+                }
+            }
+            if (previewBox) {
+                const folgaMsg = info.skippedFolgas > 0
+                    ? `<div class="mt-1 text-[11px] font-semibold text-sky-700 dark:text-sky-300">Emenda com ${info.skippedFolgas} ${info.skippedFolgas === 1 ? 'dia de folga' : 'dias de folga'} da escala.</div>`
+                    : '';
+                previewBox.innerHTML = `
+                    <div class="font-bold text-slate-800 dark:text-slate-100">Afastamento: <span class="text-rose-600 dark:text-rose-400">${formatDateShortBR(info.startDateStr)} até ${formatDateShortBR(info.endDateStr)}</span></div>
+                    <div class="mt-1 font-extrabold text-sky-800 dark:text-sky-200">Retorno ao trabalho: ${formatDateFullBR(info.returnDateStr)} (${retCfg.name}${retCfg.hours ? ' • ' + retCfg.hours : ''})</div>
+                    ${folgaMsg}
+                `;
+            }
+        }
+
+        function openNoteModal(dateKey) {
+            if (!dateKey) return;
+            haptic();
+            currentModalDateStr = dateKey;
+            modalDirty = false;
+
+            const guard = document.getElementById('unsaved-guard');
+            if (guard) guard.classList.add('hidden');
+
+            const titleEl = document.getElementById('modal-date-title');
+            if (titleEl) {
+                titleEl.textContent = `Dia ${formatDateShortBR(dateKey)} • Turno ${TEAM_LETTERS[currentTurma]}`;
+            }
+
+            currentSelectedOverride = overridesDb[`${dateKey}_${currentTurma}`] || '';
+            const cov = findAtestadoCovering(dateKey, currentTurma);
+            const daysInput = document.getElementById('atestado-days-input');
+
+            if (cov) {
+                modalAtestadoEnabled = true;
+                modalEditingAtestadoId = cov.record.id;
+                modalAtestadoStartDate = cov.record.startDate;
+                if (daysInput) daysInput.value = String(cov.record.days);
+            } else {
+                modalAtestadoEnabled = false;
+                modalEditingAtestadoId = null;
+                modalAtestadoStartDate = dateKey;
+                if (daysInput) daysInput.value = '1';
+            }
+
+            const noteEl = document.getElementById('note-text');
+            if (noteEl) noteEl.value = getNote(dateKey, currentTurma);
+
+            updateOverrideButtonsUI();
+            updateAtestadoUI();
+            openAnimatedModal('note', 'note-modal', 'modal-content');
+        }
+        window.openModal = openNoteModal;
+
+        function markModalDirty() {
+            modalDirty = true;
+            const guard = document.getElementById('unsaved-guard');
+            if (guard) guard.classList.add('hidden');
+        }
+
+        function selectOverride(val) {
+            haptic();
+            currentSelectedOverride = val || '';
+            if (currentSelectedOverride && modalAtestadoEnabled) modalAtestadoEnabled = false;
+            updateOverrideButtonsUI();
+            updateAtestadoUI();
+            markModalDirty();
+        }
+
+        function toggleAtestadoMode() {
+            haptic();
+            modalAtestadoEnabled = !modalAtestadoEnabled;
+            if (modalAtestadoEnabled) {
+                currentSelectedOverride = '';
+                if (!modalAtestadoStartDate) modalAtestadoStartDate = currentModalDateStr;
+            }
+            updateOverrideButtonsUI();
+            updateAtestadoUI();
+            markModalDirty();
+        }
+
+        function adjustAtestadoDays(delta) {
+            haptic();
+            const inp = document.getElementById('atestado-days-input');
+            if (!inp) return;
+            const cur = parseInt(inp.value, 10) || 1;
+            inp.value = String(Math.max(1, Math.min(180, cur + delta)));
+            updateAtestadoUI();
+            markModalDirty();
+        }
+
+        function onAtestadoDaysInput() {
+            updateAtestadoUI();
+            markModalDirty();
+        }
+
+        function setAtestadoDays(n) {
+            haptic();
+            const inp = document.getElementById('atestado-days-input');
+            if (!inp) return;
+            inp.value = String(Math.max(1, Math.min(180, n)));
+            updateAtestadoUI();
+            markModalDirty();
+        }
+
+        function requestCloseModal() {
+            if (modalDirty) {
+                const guard = document.getElementById('unsaved-guard');
+                if (guard) {
+                    guard.classList.remove('hidden');
+                    guard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    return;
+                }
+            }
+            closeModal();
+        }
+
+        function closeModal() {
+            modalDirty = false;
+            const guard = document.getElementById('unsaved-guard');
+            if (guard) guard.classList.add('hidden');
+            closeAnimatedModal('note', 'note-modal', 'modal-content');
+        }
+
+        function saveNote() {
+            if (!currentModalDateStr) return;
+            haptic();
+            const noteEl = document.getElementById('note-text');
+            const text = noteEl ? noteEl.value.trim() : '';
+            const ovKey = `${currentModalDateStr}_${currentTurma}`;
+
+            setNote(currentModalDateStr, currentTurma, text);
+
+            if (modalAtestadoEnabled || !currentSelectedOverride) delete overridesDb[ovKey];
+            else overridesDb[ovKey] = currentSelectedOverride;
+
+            if (modalAtestadoEnabled) {
+                const inp = document.getElementById('atestado-days-input');
+                const days = Math.max(1, Math.min(180, parseInt(inp ? inp.value : '1', 10) || 1));
+                const startDate = modalAtestadoStartDate || currentModalDateStr;
+                const newDatesSet = new Set(getAtestadoDates({ startDate, days }));
+
+                atestadosDb = atestadosDb.filter(rec => {
+                    if (rec.turma !== currentTurma) return true;
+                    if (modalEditingAtestadoId && rec.id === modalEditingAtestadoId) return false;
+                    return !getAtestadoDates(rec).some(d => newDatesSet.has(d));
+                });
+
+                atestadosDb.push({
+                    id: modalEditingAtestadoId || (`at_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`),
+                    turma: currentTurma,
+                    startDate,
+                    days
+                });
+            } else if (modalEditingAtestadoId) {
+                atestadosDb = atestadosDb.filter(rec => rec.id !== modalEditingAtestadoId);
+            }
+
+            const ok = DB.flushAll();
+            closeModal();
+            renderApp({ preserveScroll: true, scrollToToday: false });
+            showToast(ok ? 'Alterações salvas!' : 'Salvo apenas nesta sessão.');
+        }
+
+        function deleteNote() {
+            if (!currentModalDateStr) return;
+            haptic();
+            setNote(currentModalDateStr, currentTurma, '');
+            delete overridesDb[`${currentModalDateStr}_${currentTurma}`];
+            if (modalEditingAtestadoId) {
+                atestadosDb = atestadosDb.filter(rec => rec.id !== modalEditingAtestadoId);
+            }
+            DB.flushAll();
+            closeModal();
+            renderApp({ preserveScroll: true, scrollToToday: false });
+            showToast('Registro do dia limpo!');
+        }
+
+        /* 11. EXPORTAÇÃO PARA AGENDA (.ICS) */
+        function exportICS() {
+            haptic();
+            const year = currentDate.getFullYear(), month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const mmStr = String(month + 1).padStart(2, '0');
+            const teamLetter = TEAM_LETTERS[currentTurma];
+            const teamDesc = teamNames[currentTurma] || DEFAULT_TEAM_DESC[currentTurma];
+            const escICS = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
+            const pad2 = (n) => String(n).padStart(2, '0');
+            const dtStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+            const lines = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Escala Imerys//Britagem ICP 1//PT-BR',
+                'CALSCALE:GREGORIAN',
+                `X-WR-CALNAME:Escala Imerys - Turno ${teamLetter}`
+            ];
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const ddStr = pad2(day);
+                const dateKey = `${year}-${mmStr}-${ddStr}`;
+                const cov = findAtestadoCovering(dateKey, currentTurma);
+                const ov = overridesDb[`${dateKey}_${currentTurma}`] || '';
+                const base = getShift(year, month, day, currentTurma);
+                const code = cov ? 'AT' : (ov || base);
+                const note = getNote(dateKey, currentTurma).trim();
+                const cfg = SHIFTS_CONFIG[code];
+
+                if (code === 'F' && !note) continue;
+
+                const summary = cov
+                    ? `Imerys (${teamLetter}) - Atestado (${cov.dayIndex}/${cov.totalDays})`
+                    : `Imerys (${teamLetter}) - ${cfg.name}${ov ? ' [Extra/Troca]' : ''}`;
+                const descParts = [`Turno ${teamLetter}: ${teamDesc}`];
+                if (cfg.hours) descParts.push(`Horário: ${cfg.hours}`);
+                if (note) descParts.push(`Obs: ${note}`);
+
+                const nextKey = addDaysKey(dateKey, 1).replace(/-/g, '');
+                const curCompact = `${year}${mmStr}${ddStr}`;
+
+                lines.push('BEGIN:VEVENT');
+                lines.push(`UID:imerys-${dateKey}-t${currentTurma}@escala-icp1`);
+                lines.push(`DTSTAMP:${dtStamp}`);
+                if (code === 'M') {
+                    lines.push(`DTSTART:${curCompact}T050000`);
+                    lines.push(`DTEND:${curCompact}T130000`);
+                } else if (code === 'T') {
+                    lines.push(`DTSTART:${curCompact}T130000`);
+                    lines.push(`DTEND:${curCompact}T210000`);
+                } else if (code === 'N') {
+                    lines.push(`DTSTART:${curCompact}T210000`);
+                    lines.push(`DTEND:${nextKey}T050000`);
+                } else {
+                    lines.push(`DTSTART;VALUE=DATE:${curCompact}`);
+                    lines.push(`DTEND;VALUE=DATE:${nextKey}`);
+                }
+                lines.push(`SUMMARY:${escICS(summary)}`);
+                lines.push(`DESCRIPTION:${escICS(descParts.join('\n'))}`);
+                lines.push('END:VEVENT');
+            }
+
+            lines.push('END:VCALENDAR');
+            const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Escala-Imerys-Turno-${teamLetter}-${year}-${mmStr}.ics`;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+            showToast(`Agenda .ICS (Turno ${teamLetter}) baixada!`);
+        }
+
+        /* 12. EVENTOS GLOBAIS, TECLADO, SCROLL 120/144Hz E INICIALIZAÇÃO */
+        function hydrateStateFromDB() {
+            const savedTurma = parseInt(DB.get('imerys_turma'), 10);
+            if ([0, 1, 2, 3].includes(savedTurma)) currentTurma = savedTurma;
+
+            const rawNotes = safeParseJSON(DB.get('imerys_notes'), {}, 'object');
+            notesDb = (rawNotes && typeof rawNotes === 'object' && !Array.isArray(rawNotes)) ? rawNotes : {};
+
+            const rawOv = safeParseJSON(DB.get('imerys_overrides'), {}, 'object');
+            overridesDb = (rawOv && typeof rawOv === 'object' && !Array.isArray(rawOv)) ? rawOv : {};
+
+            const rawAt = safeParseJSON(DB.get('imerys_atestados'), [], 'array');
+            atestadosDb = Array.isArray(rawAt) ? rawAt : [];
+
+            const rawTeams = safeParseJSON(DB.get('imerys_teams'), null, 'array');
+            if (Array.isArray(rawTeams) && rawTeams.length === 4) {
+                teamNames = rawTeams.map((v, i) => (typeof v === 'string' && v.trim()) ? v.trim().slice(0, 32) : DEFAULT_TEAM_DESC[i]);
+            } else {
+                teamNames = [...DEFAULT_TEAM_DESC];
+            }
+
+            if (migrateLegacyNotes(currentTurma)) {
+                DB.set('imerys_notes', JSON.stringify(notesDb));
+            }
+        }
+
+        function bindGlobalEvents() {
+            const tbodyEl = document.getElementById('schedule-tbody');
+            if (tbodyEl) {
+                tbodyEl.addEventListener('click', (e) => {
+                    const td = e.target.closest('td[data-date]');
+                    if (td) openNoteModal(td.dataset.date);
+                });
+            }
+
+            const atContainer = document.getElementById('atestados-container');
+            if (atContainer) {
+                atContainer.addEventListener('click', (e) => {
+                    const target = e.target.closest('[data-date], [data-open-date]');
+                    if (target) openNoteModal(target.dataset.date || target.dataset.openDate);
+                });
+            }
+
+            /* Shift + Scroll suave independente de Hz (60/90/120/144Hz+) */
+            const scroller = document.getElementById('table-scroll-container');
+            if (scroller) {
+                const stepWheel = (ts) => {
+                    if (wheelTargetX === null) { wheelRaf = 0; return; }
+                    const dt = wheelLastTs ? Math.min(0.05, (ts - wheelLastTs) / 1000) : (1 / 60);
+                    wheelLastTs = ts;
+                    const diff = wheelTargetX - scroller.scrollLeft;
+                    if (Math.abs(diff) < 0.75) {
+                        scroller.scrollLeft = wheelTargetX;
+                        wheelTargetX = null;
+                        wheelRaf = 0;
+                        return;
+                    }
+                    scroller.scrollLeft += diff * (1 - Math.exp(-16 * dt));
+                    wheelRaf = requestAnimationFrame(stepWheel);
+                };
+
+                scroller.addEventListener('wheel', (e) => {
+                    if (!e.shiftKey || scroller.scrollWidth <= scroller.clientWidth) return;
+                    const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+                    if (!delta) return;
+                    e.preventDefault();
+                    const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+                    if (prefersReducedMotion()) {
+                        scroller.scrollLeft = Math.max(0, Math.min(maxScroll, scroller.scrollLeft + delta));
+                        return;
+                    }
+                    const base = wheelTargetX !== null ? wheelTargetX : scroller.scrollLeft;
+                    wheelTargetX = Math.max(0, Math.min(maxScroll, base + delta));
+                    if (!wheelRaf) {
+                        wheelLastTs = 0;
+                        wheelRaf = requestAnimationFrame(stepWheel);
+                    }
+                }, { passive: false });
+            }
+
+            /* Atalhos de teclado no Desktop */
+            document.addEventListener('keydown', (e) => {
+                const noteOpen = !document.getElementById('note-modal')?.classList.contains('hidden');
+                const exportOpen = !document.getElementById('export-modal')?.classList.contains('hidden');
+                const teamsOpen = !document.getElementById('teams-modal')?.classList.contains('hidden');
+                const infoOpen = !document.getElementById('info-modal')?.classList.contains('hidden');
+                const iosOpen = !document.getElementById('ios-install-modal')?.classList.contains('hidden');
+
+                if (e.key === 'Escape') {
+                    if (noteOpen) requestCloseModal();
+                    else if (exportOpen) closeExportModal();
+                    else if (teamsOpen) closeTeamsModal();
+                    else if (infoOpen) closeInfoModal();
+                    else if (iosOpen) closeIosInstallPrompt();
+                    return;
+                }
+
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                    if (noteOpen) { e.preventDefault(); saveNote(); }
+                    else if (teamsOpen) { e.preventDefault(); saveTeamNames(); }
+                    return;
+                }
+
+                if (isAnyModalOpen()) return;
+                const tag = (document.activeElement && document.activeElement.tagName) || '';
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+                if (e.key === 'ArrowLeft') changeMonth(-1);
+                else if (e.key === 'ArrowRight') changeMonth(1);
+                else if (e.key === 't' || e.key === 'T') goToToday();
+            });
+
+            window.addEventListener('resize', () => {
+                updateSwipeHintVisibility();
+                if (!document.getElementById('export-modal')?.classList.contains('hidden')) {
+                    scaleA4Preview();
+                }
+            }, { passive: true });
+
             /* Garante folha A4 sempre pronta se o usuário apertar Ctrl+P / Cmd+P direto no PC */
             window.addEventListener('beforeprint', () => {
                 const printEl = document.getElementById('print-sheet');
                 if (!printEl) return;
-                const exportOpen = !document.getElementById('export-modal').classList.contains('hidden');
+                const exportOpen = !document.getElementById('export-modal')?.classList.contains('hidden');
                 if (exportOpen && exportMode === 'supervisor') {
                     printEl.innerHTML = buildSupervisorSheetHTML(buildSupervisorDataset(supTeamFilter, supSortMode));
                 } else {
                     printEl.innerHTML = buildA4SheetHTML(buildA4Dataset(a4IncludeChanges));
                 }
             });
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                const btn = document.getElementById('install-btn');
+                if (btn && !isInStandaloneMode()) btn.classList.remove('hidden');
+            });
+
+            window.addEventListener('appinstalled', () => {
+                deferredPrompt = null;
+                const btn = document.getElementById('install-btn');
+                if (btn) btn.classList.add('hidden');
+                showToast('Escala Imerys instalada!');
+            });
         }
-// ... existing code ... -->
+
+        async function initApp() {
+            hydrateStateFromDB();
+            bindGlobalEvents();
+            updateTeamSelectorUI();
+            renderApp({ scrollToToday: true });
+            updateStorageHealthUI();
+            initAppIcons();
+
+            if (isIosDevice() && !isInStandaloneMode()) {
+                const btn = document.getElementById('install-btn');
+                if (btn) btn.classList.remove('hidden');
+            }
+
+            /* Sincronização chave por chave com IndexedDB */
+            await DB.openIDB();
+            if (DB.idbAvailable) {
+                const idbData = await DB.idbGetAll();
+                let restoredFromIDB = false;
+                STORAGE_KEYS.forEach((k) => {
+                    const localVal = DB.get(k);
+                    const idbVal = Object.prototype.hasOwnProperty.call(idbData, k) ? idbData[k] : null;
+                    if (localVal === null && idbVal !== null) {
+                        DB.memory[k] = idbVal;
+                        if (DB.lsAvailable) { try { localStorage.setItem(k, idbVal); } catch (e) {} }
+                        restoredFromIDB = true;
+                    } else if (localVal !== null && idbVal === null) {
+                        DB.idbSet(k, localVal);
+                    }
+                });
+                if (restoredFromIDB) {
+                    hydrateStateFromDB();
+                    updateTeamSelectorUI();
+                    renderApp({ preserveScroll: true, scrollToToday: false });
+                }
+            }
+
+            if (navigator.storage && navigator.storage.persist) {
+                try { DB.persistedGranted = await navigator.storage.persist(); } catch (e) {}
+            }
+            updateStorageHealthUI();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp, { once: true });
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
