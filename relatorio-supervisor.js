@@ -1,17 +1,26 @@
 /* ============================================================================
-   MÓDULO COMPLETO: OCORRÊNCIAS, ATESTADO POR FUNCIONÁRIO, LEGENDA E RELATÓRIO
+   MÓDULO COMPLETO: OCORRÊNCIAS POR FUNCIONÁRIO, TROCA DE DIA E RELATÓRIO
    Escala Imerys • Britagem ICP 1 (iOS Safari/PWA, Android Chrome e PC 60-144Hz)
    ============================================================================ */
 (function () {
     if (window.__IMERYS_SUPERVISOR_LOADED__) return;
     window.__IMERYS_SUPERVISOR_LOADED__ = true;
 
+    const META_STORAGE_KEY = 'imerys_override_meta';
+    if (Array.isArray(STORAGE_KEYS) && !STORAGE_KEYS.includes(META_STORAGE_KEY)) {
+        STORAGE_KEYS.push(META_STORAGE_KEY);
+    }
+
     let exportMode = 'quadro'; // 'quadro' | 'supervisor'
     let supTeamFilter = 'all'; // 'all' | '0' | '1' | '2' | '3'
     let supSortMode = 'date';  // 'date' | 'team'
-    let modalAtestadoWho = 'both'; // '0' | '1' | 'both'
 
-    /* Estende SHIFTS_CONFIG sem reatribuir a constante */
+    let overrideMetaDb = {};
+    let modalAtestadoWho = 'both';
+    let modalOverrideWho = 'both';
+    let modalSwapWith = '';
+    let modalSwapWithTeam = '';
+
     if (typeof SHIFTS_CONFIG === 'object' && SHIFTS_CONFIG) {
         SHIFTS_CONFIG.FA = {
             name: 'Falta',
@@ -32,17 +41,40 @@
     const VALID_OVERRIDES = ['HE50', 'HE75', 'HE110', 'TD', 'F', 'FA', 'M', 'T', 'N'];
 
     const PALETTE = {
-        M:    { bg: '#dbeafe', fg: '#1e40af' },
-        T:    { bg: '#ffedd5', fg: '#9a3412' },
-        N:    { bg: '#e0e7ff', fg: '#3730a3' },
-        F:    { bg: '#dcfce7', fg: '#15803d' },
-        AT:   { bg: '#ffe4e6', fg: '#be123c' },
-        FA:   { bg: '#fee2e2', fg: '#b91c1c' },
-        HE:   { bg: '#fef3c7', fg: '#92400e' },
-        TD:   { bg: '#f3e8ff', fg: '#6b21a8' }
+        M:  { bg: '#dbeafe', fg: '#1e40af' },
+        T:  { bg: '#ffedd5', fg: '#9a3412' },
+        N:  { bg: '#e0e7ff', fg: '#3730a3' },
+        F:  { bg: '#dcfce7', fg: '#15803d' },
+        AT: { bg: '#ffe4e6', fg: '#be123c' },
+        FA: { bg: '#fee2e2', fg: '#b91c1c' },
+        HE: { bg: '#fef3c7', fg: '#92400e' },
+        TD: { bg: '#f3e8ff', fg: '#6b21a8' }
     };
 
-    /* 1. HELPERS DE FUNCIONÁRIOS DO TURNO E OCORRÊNCIAS */
+    /* 1. PERSISTÊNCIA ESTENDIDA (overrideMetaDb em localStorage + IndexedDB) */
+    function loadOverrideMetaFromDB() {
+        overrideMetaDb = safeParseJSON(DB.get(META_STORAGE_KEY), {}, 'object');
+    }
+    loadOverrideMetaFromDB();
+
+    const origHydrate = window.hydrateStateFromDB;
+    window.hydrateStateFromDB = function () {
+        if (typeof origHydrate === 'function') origHydrate();
+        loadOverrideMetaFromDB();
+    };
+
+    DB.flushAll = function () {
+        return [
+            this.set('imerys_turma', currentTurma),
+            this.set('imerys_notes', JSON.stringify(notesDb)),
+            this.set('imerys_overrides', JSON.stringify(overridesDb)),
+            this.set('imerys_atestados', JSON.stringify(atestadosDb)),
+            this.set('imerys_teams', JSON.stringify(teamNames)),
+            this.set(META_STORAGE_KEY, JSON.stringify(overrideMetaDb))
+        ].every(Boolean);
+    };
+
+    /* 2. HELPERS DE FUNCIONÁRIOS, TROCAS E OCORRÊNCIAS */
     function parseTeamMembers(teamStr) {
         const clean = String(teamStr || '').trim();
         if (!clean) return [];
@@ -58,7 +90,7 @@
         return first.length > 8 ? first.slice(0, 7) + '…' : first;
     }
 
-    function getAtestadoWhoInfo(rec, fallbackTurma) {
+    function resolveWhoInfo(rec, fallbackTurma) {
         const turmaIdx = (rec && typeof rec.turma === 'number') ? rec.turma : fallbackTurma;
         const teamStr = teamNames[turmaIdx] || DEFAULT_TEAM_DESC[turmaIdx] || '';
         const members = parseTeamMembers(teamStr);
@@ -68,6 +100,7 @@
             if (members.length === 1) {
                 return {
                     whoType: '0',
+                    whoName: members[0],
                     label: members[0],
                     fullLabel: members[0],
                     shortLabel: shortMemberName(members[0])
@@ -75,6 +108,7 @@
             }
             return {
                 whoType: 'both',
+                whoName: '',
                 label: 'Os dois',
                 fullLabel: `Os dois (${teamStr})`,
                 shortLabel: 'Os dois'
@@ -85,36 +119,55 @@
         const resolvedName = (rec && rec.whoName) ? rec.whoName : (members[idx] || teamStr);
         return {
             whoType: String(idx),
+            whoName: resolvedName,
             label: resolvedName,
             fullLabel: resolvedName,
             shortLabel: shortMemberName(resolvedName)
         };
     }
 
-    function getCurrentModalWhoInfo() {
-        const members = parseTeamMembers(teamNames[currentTurma]);
+    function getSelectionWhoInfo(whoState, turmaIdx) {
+        const teamStr = teamNames[turmaIdx] || DEFAULT_TEAM_DESC[turmaIdx] || '';
+        const members = parseTeamMembers(teamStr);
         if (members.length < 2) {
-            const single = members[0] || teamNames[currentTurma];
+            const single = members[0] || teamStr;
             return { whoType: '0', whoName: single, label: single, fullLabel: single, shortLabel: shortMemberName(single) };
         }
-        if (modalAtestadoWho === '0' || modalAtestadoWho === '1') {
-            const name = members[parseInt(modalAtestadoWho, 10)] || members[0];
-            return { whoType: modalAtestadoWho, whoName: name, label: name, fullLabel: name, shortLabel: shortMemberName(name) };
+        if (whoState === '0' || whoState === '1') {
+            const name = members[parseInt(whoState, 10)] || members[0];
+            return { whoType: whoState, whoName: name, label: name, fullLabel: name, shortLabel: shortMemberName(name) };
         }
         return {
             whoType: 'both',
             whoName: '',
             label: 'Os dois',
-            fullLabel: `Os dois (${teamNames[currentTurma]})`,
+            fullLabel: `Os dois (${teamStr})`,
             shortLabel: 'Os dois'
         };
+    }
+
+    function getOverrideMeta(dateKey, turmaIdx) {
+        const raw = overrideMetaDb[`${dateKey}_${turmaIdx}`];
+        return (raw && typeof raw === 'object') ? raw : null;
+    }
+
+    function formatSwapDisplay(meta, turmaIdx) {
+        const who = resolveWhoInfo(meta ? { ...meta, turma: turmaIdx } : { turma: turmaIdx, whoType: 'both' }, turmaIdx);
+        const target = meta && meta.swapWith ? String(meta.swapWith).trim() : '';
+        const targetTeam = meta && meta.swapWithTeam ? String(meta.swapWithTeam).trim() : '';
+        const targetFull = target ? (targetTeam ? `${target} (T.${targetTeam})` : target) : '';
+        const targetShort = target ? shortMemberName(target) : '';
+        const compactLabel = targetShort ? `⇄ ${targetShort}` : 'Troca';
+        const fullLabel = targetFull
+            ? `${who.label} ⇄ ${targetFull}`
+            : (who.whoType === 'both' ? 'Troca de Dia' : `${who.label} (Troca)`);
+        return { who, target, targetTeam, targetFull, targetShort, compactLabel, fullLabel };
     }
 
     function isExtraOverride(ov) {
         return ov === 'HE50' || ov === 'HE75' || ov === 'HE110' || ov === 'M' || ov === 'T' || ov === 'N';
     }
 
-    /* Sobrescreve getEffectiveShift para que HE/TD/FA não quebrem o cálculo de retorno do atestado */
     window.getEffectiveShift = function (dateKey, turmaIdx) {
         const ov = overridesDb[`${dateKey}_${turmaIdx}`];
         if (ov === 'F' || ov === 'M' || ov === 'T' || ov === 'N') return ov;
@@ -122,7 +175,7 @@
         return getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), turmaIdx);
     };
 
-    /* 2. ESTILOS COMPLEMENTARES (FALTA, TROCA, ATESTADO E RELATÓRIO DO SUPERVISOR) */
+    /* 3. ESTILOS COMPLEMENTARES */
     function injectModuleStyles() {
         if (document.getElementById('supervisor-report-styles')) return;
         const style = document.createElement('style');
@@ -138,7 +191,7 @@
                 font-weight: 800;
                 line-height: 1;
                 margin-top: 1px;
-                max-width: 28px;
+                max-width: 30px;
                 margin-left: auto;
                 margin-right: auto;
                 overflow: hidden;
@@ -153,14 +206,8 @@
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch;
             }
-            .a4-preview-spacer {
-                position: relative;
-                width: 100%;
-                min-height: 100%;
-            }
-            .a4-preview-frame.is-sup-preview .a4-preview-scaler {
-                height: auto !important;
-            }
+            .a4-preview-spacer { position: relative; width: 100%; min-height: 100%; }
+            .a4-preview-frame.is-sup-preview .a4-preview-scaler { height: auto !important; }
 
             .sup-sheet {
                 width: 1122px;
@@ -178,7 +225,7 @@
             .sup-kpi-grid {
                 margin-top: 14px;
                 display: grid;
-                grid-template-columns: 0.9fr 0.88fr 1.72fr 1.3fr;
+                grid-template-columns: 0.88fr 0.86fr 1.66fr 1.4fr;
                 gap: 11px;
             }
             .sup-kpi-card {
@@ -191,9 +238,9 @@
                 justify-content: space-between;
             }
             .sup-kpi-label {
-                font-size: 8.8px;
+                font-size: 8.6px;
                 font-weight: 900;
-                letter-spacing: 0.07em;
+                letter-spacing: 0.06em;
                 text-transform: uppercase;
                 color: #475569;
             }
@@ -206,7 +253,7 @@
                 font-variant-numeric: tabular-nums;
             }
             .sup-kpi-sub {
-                font-size: 9.8px;
+                font-size: 9.6px;
                 font-weight: 700;
                 color: #64748b;
                 margin-top: 3px;
@@ -277,8 +324,8 @@
             .sup-table tbody tr:nth-child(even) { background: #f8fafc; }
             .sup-table tbody tr:nth-child(odd) { background: #ffffff; }
 
-            .sup-col-date { width: 92px; }
-            .sup-col-team { width: 205px; }
+            .sup-col-date { width: 90px; }
+            .sup-col-team { width: 222px; }
             .sup-col-shift { width: 196px; }
 
             .sup-date-main {
@@ -330,18 +377,21 @@
                 margin-top: 2px;
                 word-break: break-word;
             }
-            .sup-who-pill {
+            .sup-person-pill {
                 display: inline-block;
                 margin-top: 4px;
                 padding: 2px 6px;
                 border-radius: 5px;
-                background: #ffe4e6;
-                border: 1px solid #fecdd3;
-                color: #be123c;
                 font-size: 9px;
                 font-weight: 900;
-                line-height: 1.2;
+                line-height: 1.25;
+                border: 1px solid transparent;
+                word-break: break-word;
             }
+            .sup-pill-at { background: #ffe4e6; border-color: #fecdd3; color: #be123c; }
+            .sup-pill-he { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+            .sup-pill-fa { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+            .sup-pill-td { background: #f3e8ff; border-color: #ddd6fe; color: #6b21a8; }
 
             .sup-shift-cell { display: flex; align-items: flex-start; gap: 8px; }
             .sup-shift-chip {
@@ -380,6 +430,7 @@
                 white-space: pre-wrap;
                 word-break: break-word;
             }
+            .sup-obs-empty { color: #94a3b8; font-weight: 700; }
             .sup-empty-box {
                 padding: 48px 24px;
                 text-align: center;
@@ -413,13 +464,8 @@
                     overflow: visible !important;
                     border-radius: 6px !important;
                 }
-                #print-sheet.is-supervisor-print .sup-table thead {
-                    display: table-header-group !important;
-                }
-                #print-sheet.is-supervisor-print .sup-table tbody tr {
-                    break-inside: avoid !important;
-                    page-break-inside: avoid !important;
-                }
+                #print-sheet.is-supervisor-print .sup-table thead { display: table-header-group !important; }
+                #print-sheet.is-supervisor-print .sup-table tbody tr,
                 #print-sheet.is-supervisor-print .sup-sign-grid,
                 #print-sheet.is-supervisor-print .a4-footer {
                     break-inside: avoid !important;
@@ -430,11 +476,11 @@
         document.head.appendChild(style);
     }
 
-    /* 3. ATUALIZAÇÃO DOS MODAIS (LEGENDA, OBSERVAÇÕES E EXPORTAÇÃO) */
+    /* 4. ATUALIZAÇÃO DOS MODAIS (LEGENDA, OBSERVAÇÕES E EXPORTAÇÃO) */
     function upgradeInfoModalDOM() {
         const panel = document.getElementById('info-modal-content');
-        if (!panel || panel.dataset.v2Upgraded === '1') return;
-        panel.dataset.v2Upgraded = '1';
+        if (!panel || panel.dataset.v3Upgraded === '1') return;
+        panel.dataset.v3Upgraded = '1';
 
         panel.innerHTML = `
             <div class="flex justify-between items-center mb-4">
@@ -470,8 +516,8 @@
 
     function upgradeNoteModalDOM() {
         const panel = document.getElementById('modal-content');
-        if (!panel || panel.dataset.v2Upgraded === '1') return;
-        panel.dataset.v2Upgraded = '1';
+        if (!panel || panel.dataset.v3Upgraded === '1') return;
+        panel.dataset.v3Upgraded = '1';
 
         panel.innerHTML = `
             <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
@@ -496,6 +542,19 @@
                     <button type="button" data-ov="F" onclick="selectOverride('F')" class="ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Folga</button>
                     <button type="button" data-ov="FA" onclick="selectOverride('FA')" class="ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Falta</button>
                 </div>
+
+                <!-- Painel Dinâmico de Funcionário (HE / Falta / Troca de Dia) -->
+                <div id="override-details-box" class="hidden mt-3 rounded-2xl border p-3.5 space-y-3">
+                    <div>
+                        <span id="override-who-label" class="block text-[11px] font-extrabold mb-1.5"></span>
+                        <div id="override-who-group" class="grid grid-cols-3 gap-1.5"></div>
+                    </div>
+                    <div id="swap-target-section" class="hidden pt-2.5 border-t border-purple-200/70 dark:border-purple-900/50 space-y-2">
+                        <span class="block text-[11px] font-extrabold text-purple-900 dark:text-purple-200">Troca com quem?</span>
+                        <div id="swap-presets-group" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
+                        <input type="text" id="swap-custom-input" maxlength="40" autocomplete="off" oninput="onSwapCustomInput()" placeholder="Ou digite outro nome..." class="w-full px-3 py-2 text-base font-semibold text-slate-800 dark:text-slate-100 bg-white dark:bg-oled border border-purple-200 dark:border-purple-900/60 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-slate-400 dark:placeholder:text-slate-500">
+                    </div>
+                </div>
             </div>
 
             <!-- Atestado Médico com Seleção de Funcionário -->
@@ -507,7 +566,7 @@
                         </span>
                         <div class="min-w-0">
                             <span class="block text-xs font-black text-rose-800 dark:text-rose-200 leading-tight">Atestado Médico</span>
-                            <span id="atestado-subtitle" class="block text-[10px] font-semibold text-rose-600/80 dark:text-rose-300/80 mt-0.5 truncate">Marcar dias e calcular retorno</span>
+                            <span id="atestado-subtitle" class="block text-[10px] font-semibold text-rose-600/80 dark:text-rose-300/80 mt-0.5 truncate">Marcar dias, funcionário e retorno</span>
                         </div>
                     </div>
                     <button type="button" id="atestado-toggle-btn" onclick="toggleAtestadoMode()" role="switch" aria-checked="false" class="w-12 h-7 rounded-full bg-slate-300 dark:bg-surfaceBorder p-1 transition-colors shrink-0 flex items-center cursor-pointer">
@@ -516,13 +575,10 @@
                 </div>
                 <div id="atestado-controls" class="hidden mt-3.5 pt-3.5 border-t border-rose-200/70 dark:border-rose-900/40 space-y-3">
                     <p id="atestado-origin-notice" class="hidden text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-white/70 dark:bg-oled/60 border border-rose-200 dark:border-rose-900/40 rounded-xl px-3 py-2 leading-snug"></p>
-
-                    <!-- Quem está de atestado -->
                     <div>
                         <span class="block text-[11px] font-extrabold text-rose-900 dark:text-rose-200 mb-1.5">Quem está de atestado:</span>
                         <div id="atestado-who-group" class="grid grid-cols-3 gap-1.5"></div>
                     </div>
-
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-[11px] font-extrabold text-rose-900 dark:text-rose-200">Quantidade de dias:</span>
                         <div class="flex items-center gap-1.5">
@@ -663,15 +719,20 @@
 
     function upgradeDesktopInlineLegend() {
         const legendRow = document.querySelector('section .hidden.md\\:flex.items-center.gap-3');
-        if (!legendRow || legendRow.dataset.hasFalta === '1') return;
-        legendRow.dataset.hasFalta = '1';
-        const span = document.createElement('span');
-        span.className = 'flex items-center gap-1';
-        span.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-600"></span>Falta';
-        legendRow.appendChild(span);
+        if (!legendRow || legendRow.dataset.hasExtras === '1') return;
+        legendRow.dataset.hasExtras = '1';
+        [
+            { cls: 'bg-red-600', label: 'Falta' },
+            { cls: 'bg-purple-500', label: 'Troca' }
+        ].forEach(it => {
+            const span = document.createElement('span');
+            span.className = 'flex items-center gap-1';
+            span.innerHTML = `<span class="w-2 h-2 rounded-full ${it.cls}"></span>${it.label}`;
+            legendRow.appendChild(span);
+        });
     }
 
-    /* 4. LÓGICA DO MODAL DE OBSERVAÇÕES, OCORRÊNCIAS E ATESTADO POR FUNCIONÁRIO */
+    /* 5. PAINÉIS INTERATIVOS DO MODAL DE OBSERVAÇÕES (HE, FALTA, TROCA E ATESTADO) */
     function renderAtestadoWhoButtons() {
         const group = document.getElementById('atestado-who-group');
         if (!group) return;
@@ -700,6 +761,110 @@
         }).join('');
     }
 
+    function renderOverrideDetailsUI() {
+        const box = document.getElementById('override-details-box');
+        const labelEl = document.getElementById('override-who-label');
+        const whoGroup = document.getElementById('override-who-group');
+        const swapSec = document.getElementById('swap-target-section');
+        const swapGroup = document.getElementById('swap-presets-group');
+        const swapInput = document.getElementById('swap-custom-input');
+        if (!box || !labelEl || !whoGroup) return;
+
+        const code = modalAtestadoEnabled ? '' : currentSelectedOverride;
+        const isHE = code === 'HE50' || code === 'HE75' || code === 'HE110';
+        const isFA = code === 'FA';
+        const isTD = code === 'TD';
+
+        if (!isHE && !isFA && !isTD) {
+            box.classList.add('hidden');
+            return;
+        }
+
+        box.classList.remove('hidden');
+
+        let theme;
+        if (isHE) {
+            theme = {
+                box: 'border-amber-200/90 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/20',
+                lbl: 'text-amber-900 dark:text-amber-200',
+                act: 'bg-amber-500 border-amber-500 text-white shadow-sm',
+                idle: 'bg-white hover:bg-amber-100/60 dark:bg-oled dark:hover:bg-amber-950/40 border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200',
+                title: `Quem fez a ${OVERRIDE_META[code].label}?`
+            };
+        } else if (isFA) {
+            theme = {
+                box: 'border-red-200/90 dark:border-red-900/60 bg-red-50/70 dark:bg-red-950/20',
+                lbl: 'text-red-900 dark:text-red-200',
+                act: 'bg-red-600 border-red-600 text-white shadow-sm',
+                idle: 'bg-white hover:bg-red-100/60 dark:bg-oled dark:hover:bg-red-950/40 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-200',
+                title: 'Quem faltou neste dia?'
+            };
+        } else {
+            theme = {
+                box: 'border-purple-200/90 dark:border-purple-900/60 bg-purple-50/70 dark:bg-purple-950/20',
+                lbl: 'text-purple-900 dark:text-purple-200',
+                act: 'bg-purple-600 border-purple-600 text-white shadow-sm',
+                idle: 'bg-white hover:bg-purple-100/60 dark:bg-oled dark:hover:bg-purple-950/40 border-purple-200 dark:border-purple-900/50 text-purple-800 dark:text-purple-200',
+                title: `Quem do Turno ${TEAM_LETTERS[currentTurma]} está trocando?`
+            };
+        }
+
+        box.className = `mt-3 rounded-2xl border p-3.5 space-y-3 ${theme.box}`;
+        labelEl.className = `block text-[11px] font-extrabold mb-1.5 ${theme.lbl}`;
+        labelEl.innerText = theme.title;
+
+        const members = parseTeamMembers(teamNames[currentTurma]);
+        let options;
+        if (members.length >= 2) {
+            options = [
+                { val: '0', label: members[0] },
+                { val: '1', label: members[1] },
+                { val: 'both', label: 'Os dois' }
+            ];
+            whoGroup.className = 'grid grid-cols-3 gap-1.5';
+        } else {
+            const single = members[0] || teamNames[currentTurma];
+            options = [{ val: '0', label: single }];
+            modalOverrideWho = '0';
+            whoGroup.className = 'grid grid-cols-1 gap-1.5';
+        }
+
+        whoGroup.innerHTML = options.map(opt => {
+            const act = modalOverrideWho === opt.val;
+            return `<button type="button" onclick="selectOverrideWho('${opt.val}')" class="py-2 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer ${act ? theme.act : theme.idle}" title="${escapeHTML(opt.label)}">${escapeHTML(opt.label)}</button>`;
+        }).join('');
+
+        /* Painel "Troca com quem?" exclusivo da Troca de Dia */
+        if (swapSec && swapGroup && swapInput) {
+            swapSec.classList.toggle('hidden', !isTD);
+            if (isTD) {
+                const presets = [];
+                for (let tIdx = 0; tIdx < 4; tIdx++) {
+                    if (tIdx === currentTurma) continue;
+                    const tLtr = TEAM_LETTERS[tIdx];
+                    const tMembers = parseTeamMembers(teamNames[tIdx]);
+                    tMembers.forEach((mName, mIdx) => {
+                        presets.push({ tIdx, mIdx, name: mName, teamLtr: tLtr });
+                    });
+                }
+
+                let matchedPreset = false;
+                swapGroup.innerHTML = presets.map(p => {
+                    const isSelected = modalSwapWith === p.name && (modalSwapWithTeam === p.teamLtr || !modalSwapWithTeam);
+                    if (isSelected) matchedPreset = true;
+                    const cls = isSelected
+                        ? 'bg-purple-600 border-purple-600 text-white shadow-sm'
+                        : 'bg-white hover:bg-purple-100/60 dark:bg-oled dark:hover:bg-purple-950/40 border-purple-200 dark:border-purple-900/50 text-purple-900 dark:text-purple-200';
+                    return `<button type="button" onclick="selectSwapPreset(${p.tIdx}, ${p.mIdx})" class="py-2 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer ${cls}" title="${escapeHTML(`${p.name} (Turno ${p.teamLtr})`)}">${escapeHTML(p.name)} <span class="opacity-70">(${p.teamLtr})</span></button>`;
+                }).join('');
+
+                if (document.activeElement !== swapInput) {
+                    swapInput.value = matchedPreset ? '' : modalSwapWith;
+                }
+            }
+        }
+    }
+
     window.selectAtestadoWho = function (val, silent = false) {
         if (!silent) { haptic(); markModalDirty(); }
         modalAtestadoWho = String(val || 'both');
@@ -707,11 +872,42 @@
         updateAtestadoPreview();
     };
 
+    window.selectOverrideWho = function (val, silent = false) {
+        if (!silent) { haptic(); markModalDirty(); }
+        modalOverrideWho = String(val || 'both');
+        renderOverrideDetailsUI();
+    };
+
+    window.selectSwapPreset = function (tIdx, mIdx) {
+        haptic();
+        markModalDirty();
+        const tLtr = TEAM_LETTERS[tIdx] || '';
+        const tMembers = parseTeamMembers(teamNames[tIdx]);
+        const name = tMembers[mIdx] || '';
+        if (modalSwapWith === name && modalSwapWithTeam === tLtr) {
+            modalSwapWith = '';
+            modalSwapWithTeam = '';
+        } else {
+            modalSwapWith = name;
+            modalSwapWithTeam = tLtr;
+        }
+        const swapInput = document.getElementById('swap-custom-input');
+        if (swapInput) swapInput.value = '';
+        renderOverrideDetailsUI();
+    };
+
+    window.onSwapCustomInput = function () {
+        markModalDirty();
+        const swapInput = document.getElementById('swap-custom-input');
+        modalSwapWith = swapInput ? swapInput.value.trim().slice(0, 40) : '';
+        modalSwapWithTeam = '';
+        renderOverrideDetailsUI();
+    };
+
     window.selectOverride = function (code, silent = false) {
         if (!silent) {
             haptic();
             markModalDirty();
-            /* Permite desmarcar clicando novamente no mesmo botão */
             if (code && currentSelectedOverride === code && !modalAtestadoEnabled) {
                 code = '';
             }
@@ -734,6 +930,8 @@
             const isAct = !modalAtestadoEnabled && val === currentSelectedOverride;
             btn.className = `ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer ${isAct ? (activeStyles[val] || activeStyles.HE50) : idleStyle}`;
         });
+
+        renderOverrideDetailsUI();
     };
 
     window.updateAtestadoPreview = function () {
@@ -742,7 +940,7 @@
         const days = Math.max(1, Math.min(180, parseInt(document.getElementById('atestado-days-input').value, 10) || 1));
         const ret = computeReturnInfo(modalAtestadoStartDate, days, currentTurma, modalEditingAtestadoId);
         const sh = SHIFTS_CONFIG[ret.returnShiftCode] || SHIFTS_CONFIG.M;
-        const who = getCurrentModalWhoInfo();
+        const who = getSelectionWhoInfo(modalAtestadoWho, currentTurma);
         const pTxt = days === 1
             ? `${formatShortDate(modalAtestadoStartDate)} (1 dia)`
             : `${formatShortDate(modalAtestadoStartDate)} até ${formatShortDate(ret.endDate)} (${days} dias)`;
@@ -774,6 +972,7 @@
             ctrl.classList.add('hidden');
             if (noteEl) noteEl.placeholder = 'Observações para este dia...';
         }
+        renderOverrideDetailsUI();
     };
 
     window.toggleAtestadoMode = function () {
@@ -794,11 +993,13 @@
         const dt = parseDateKey(dateKey);
         const base = getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), currentTurma);
         const activeOv = overridesDb[`${dateKey}_${currentTurma}`] || '';
+        const activeMeta = getOverrideMeta(dateKey, currentTurma);
         const existingAt = findAtestadoOnDate(dateKey, currentTurma);
+        const members = parseTeamMembers(teamNames[currentTurma]);
 
         let badge = '';
         if (existingAt) {
-            const whoInfo = getAtestadoWhoInfo(existingAt.record, currentTurma);
+            const whoInfo = resolveWhoInfo(existingAt.record, currentTurma);
             badge = ` • ATESTADO (${whoInfo.label})`;
         } else if (activeOv && OVERRIDE_META[activeOv]) {
             badge = ` • ${OVERRIDE_META[activeOv].label.toUpperCase()}`;
@@ -810,9 +1011,14 @@
         document.getElementById('modal-date-title').innerHTML = `Dia ${dt.getDate()} de ${MONTH_SHORT[dt.getMonth()]} <br><span class="text-[13px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Turno ${TEAM_LETTERS[currentTurma]} • ${escapeHTML(baseCfg.name)}${escapeHTML(badge)}</span>`;
         document.getElementById('note-text').value = getNote(dateKey, currentTurma);
 
+        /* Restaura seleção de funcionário e parceiro de troca */
+        modalOverrideWho = (activeMeta && activeMeta.whoType) ? String(activeMeta.whoType) : (members.length >= 2 ? '0' : '0');
+        modalSwapWith = (activeMeta && activeMeta.swapWith) ? String(activeMeta.swapWith) : '';
+        modalSwapWithTeam = (activeMeta && activeMeta.swapWithTeam) ? String(activeMeta.swapWithTeam) : '';
+
         const originNotice = document.getElementById('atestado-origin-notice');
         if (existingAt) {
-            const whoInfo = getAtestadoWhoInfo(existingAt.record, currentTurma);
+            const whoInfo = resolveWhoInfo(existingAt.record, currentTurma);
             modalEditingAtestadoId = existingAt.record.id;
             modalAtestadoStartDate = existingAt.record.startDate;
             modalAtestadoWho = whoInfo.whoType;
@@ -828,7 +1034,6 @@
             setAtestadoUI(true);
             selectOverride('', true);
         } else {
-            const members = parseTeamMembers(teamNames[currentTurma]);
             modalEditingAtestadoId = null;
             modalAtestadoStartDate = dateKey;
             modalAtestadoWho = members.length >= 2 ? 'both' : '0';
@@ -848,11 +1053,12 @@
         const v = document.getElementById('note-text').value.trim();
         setNote(currentModalDateStr, currentTurma, v);
         let toastMsg = isClear ? 'Registro do dia limpo!' : 'Alterações salvas!';
+        const ovKey = `${currentModalDateStr}_${currentTurma}`;
 
         if (modalAtestadoEnabled) {
             const days = Math.max(1, Math.min(180, parseInt(document.getElementById('atestado-days-input').value, 10) || 1));
             const startDate = modalAtestadoStartDate || currentModalDateStr;
-            const who = getCurrentModalWhoInfo();
+            const who = getSelectionWhoInfo(modalAtestadoWho, currentTurma);
             const newRec = {
                 id: modalEditingAtestadoId || `at_${Date.now()}`,
                 turma: currentTurma,
@@ -864,7 +1070,10 @@
             const newDates = new Set(getAtestadoDates(newRec));
             atestadosDb = atestadosDb.filter(r => r.id !== modalEditingAtestadoId && (r.turma !== currentTurma || !getAtestadoDates(r).some(d => newDates.has(d))));
             atestadosDb.push(newRec);
-            newDates.forEach(d => { delete overridesDb[`${d}_${currentTurma}`]; });
+            newDates.forEach(d => {
+                delete overridesDb[`${d}_${currentTurma}`];
+                delete overrideMetaDb[`${d}_${currentTurma}`];
+            });
             const ret = computeReturnInfo(startDate, days, currentTurma, newRec.id);
             const retName = (SHIFTS_CONFIG[ret.returnShiftCode] || SHIFTS_CONFIG.M).name;
             toastMsg = `Atestado (${who.label}) salvo! Retorno: ${formatShortDate(ret.returnDateKey)} (${retName})`;
@@ -873,9 +1082,26 @@
                 atestadosDb = atestadosDb.filter(r => r.id !== modalEditingAtestadoId);
                 toastMsg = isClear ? 'Atestado e registro do dia removidos.' : 'Atestado removido da escala.';
             }
-            const ovKey = `${currentModalDateStr}_${currentTurma}`;
-            if (currentSelectedOverride) overridesDb[ovKey] = currentSelectedOverride;
-            else delete overridesDb[ovKey];
+            if (currentSelectedOverride) {
+                overridesDb[ovKey] = currentSelectedOverride;
+                if (currentSelectedOverride === 'HE50' || currentSelectedOverride === 'HE75' || currentSelectedOverride === 'HE110' || currentSelectedOverride === 'FA') {
+                    const who = getSelectionWhoInfo(modalOverrideWho, currentTurma);
+                    overrideMetaDb[ovKey] = { whoType: who.whoType, whoName: who.whoName };
+                } else if (currentSelectedOverride === 'TD') {
+                    const who = getSelectionWhoInfo(modalOverrideWho, currentTurma);
+                    overrideMetaDb[ovKey] = {
+                        whoType: who.whoType,
+                        whoName: who.whoName,
+                        swapWith: String(modalSwapWith || '').trim().slice(0, 40),
+                        swapWithTeam: String(modalSwapWithTeam || '').trim().slice(0, 2)
+                    };
+                } else {
+                    delete overrideMetaDb[ovKey];
+                }
+            } else {
+                delete overridesDb[ovKey];
+                delete overrideMetaDb[ovKey];
+            }
         }
 
         const ok = DB.flushAll();
@@ -888,11 +1114,13 @@
     window.deleteNote = function () {
         document.getElementById('note-text').value = '';
         currentSelectedOverride = '';
+        modalSwapWith = '';
+        modalSwapWithTeam = '';
         setAtestadoUI(false);
         saveNote(true);
     };
 
-    /* 5. RENDERIZAÇÃO PRINCIPAL DA TABELA E RESUMO DE ATESTADOS (COM FUNCIONÁRIO + FALTAS + HE + TROCA) */
+    /* 6. RENDERIZAÇÃO PRINCIPAL DA ESCALA GERAL */
     window.renderApp = function (shouldScrollToday = false, swapDirection = 0) {
         try {
             const sc = document.getElementById('table-scroll-wrap');
@@ -916,7 +1144,7 @@
             const monthStartKey = formatDateKey(year, month, 1), monthEndKey = formatDateKey(year, month, daysInMonth);
             atestadosDb.filter(r => r.turma === currentTurma).sort((a, b) => a.startDate.localeCompare(b.startDate)).forEach(rec => {
                 const dates = getAtestadoDates(rec);
-                const whoInfo = getAtestadoWhoInfo(rec, currentTurma);
+                const whoInfo = resolveWhoInfo(rec, currentTurma);
                 dates.forEach((d, idx) => {
                     atestadoDayMap[d] = { record: rec, whoInfo, dayIndex: idx + 1, totalDays: dates.length, endDate: dates[dates.length - 1] };
                 });
@@ -947,7 +1175,7 @@
                 if (holi) hListParts.push(`<div class="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-surfaceBorder last:border-0 last:pb-0"><span class="font-black text-red-500 dark:text-red-400 text-sm min-w-[22px] text-right tabular-nums">${day}</span><span class="text-slate-700 dark:text-slate-300 font-medium text-sm leading-tight">${escapeHTML(holi)}</span></div>`);
                 const todayHeaderStyle = isToday ? 'bg-blue-100/75 dark:bg-blue-950/60 border-b-2 border-b-blue-500' : '';
                 const holiTitle = holi ? ` title="${escapeHTML(`Dia ${day}/${mmStr} • Feriado: ${holi}`)}"` : '';
-                headerCells.push(`<th ${isToday ? 'id="col-today"' : ''}${holiTitle} class="p-1.5 md:py-2 md:px-0.5 min-w-[42px] xl:min-w-[36px] border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 ${todayHeaderStyle}"><div class="flex flex-col items-center"><span class="text-[13px] font-black leading-tight tabular-nums ${dayColor}">${day}</span><span class="text-[9px] font-bold ${isSunday || holi || isToday ? 'opacity-95' : 'opacity-60'} ${dayColor}">${DOW_NAMES[dow]}</span></div></th>`);
+                headerCells.push(`<th ${isToday ? 'id="col-today"' : ''}${holiTitle} class="p-1.5 md:py-2 md:px-0.5 min-w-[44px] xl:min-w-[38px] border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 ${todayHeaderStyle}"><div class="flex flex-col items-center"><span class="text-[13px] font-black leading-tight tabular-nums ${dayColor}">${day}</span><span class="text-[9px] font-bold ${isSunday || holi || isToday ? 'opacity-95' : 'opacity-60'} ${dayColor}">${DOW_NAMES[dow]}</span></div></th>`);
             }
 
             const bodyRows = [];
@@ -961,6 +1189,7 @@
                     const baseShift = getShift(year, month, day, idx);
                     if (isSel) {
                         const ovShift = overridesDb[`${dateKey}_${idx}`] || '';
+                        const ovMeta = getOverrideMeta(dateKey, idx);
                         const atInfo = atestadoDayMap[dateKey];
                         const retEntry = (!atInfo && returnDateMap[dateKey]) ? returnDateMap[dateKey] : null;
                         const dayNote = getNote(dateKey, idx);
@@ -977,13 +1206,14 @@
                             code = 'AT';
                             style = SHIFTS_CONFIG.AT.style;
                             monthAtDaysCount++;
-                            sub = `<span class="text-[7px] font-black leading-none mt-0.5 truncate max-w-[38px] opacity-95">${escapeHTML(atInfo.whoInfo.shortLabel)}</span><span class="text-[7px] font-extrabold leading-none opacity-75 tabular-nums">${atInfo.dayIndex}/${atInfo.totalDays}</span>`;
+                            sub = `<span class="text-[7px] font-black leading-none mt-0.5 truncate max-w-[40px] opacity-95">${escapeHTML(atInfo.whoInfo.shortLabel)}</span><span class="text-[7px] font-extrabold leading-none opacity-75 tabular-nums">${atInfo.dayIndex}/${atInfo.totalDays}</span>`;
                             tipParts.push(`Atestado Médico (${atInfo.dayIndex}/${atInfo.totalDays}) • ${atInfo.whoInfo.fullLabel}`);
                         } else if (ovShift === 'FA') {
+                            const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                             code = 'FA';
                             style = SHIFTS_CONFIG.FA.style;
-                            sub = '<span class="text-[7px] font-black uppercase leading-none opacity-85 mt-0.5">Falta</span>';
-                            tipParts.push(`Falta (Escala: ${SHIFTS_CONFIG[baseShift].name})`);
+                            sub = `<span class="text-[7px] font-black leading-none mt-0.5 truncate max-w-[40px] opacity-95">${escapeHTML(who.shortLabel)}</span>`;
+                            tipParts.push(`Falta • ${who.fullLabel} (Escala: ${SHIFTS_CONFIG[baseShift].name})`);
                         } else if (ovShift === 'F') {
                             code = 'F';
                             style = SHIFTS_CONFIG.F.style;
@@ -995,19 +1225,21 @@
                             tipParts.push('Folga (Alterado)');
                         } else if (ovShift === 'HE50' || ovShift === 'HE75' || ovShift === 'HE110') {
                             const meta = OVERRIDE_META[ovShift];
+                            const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                             counts[baseShift]++;
                             ring = ' ring-2 ring-inset ring-amber-400 dark:ring-amber-500';
                             badgeDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>';
-                            sub = `<span class="text-[7.5px] font-black leading-none text-amber-700 dark:text-amber-300 mt-0.5 tabular-nums">${meta.code}</span>`;
+                            sub = `<span class="text-[7px] font-black leading-none text-amber-700 dark:text-amber-300 mt-0.5 tabular-nums">${meta.code}</span><span class="text-[6.5px] font-extrabold leading-none opacity-85 truncate max-w-[40px]">${escapeHTML(who.shortLabel)}</span>`;
                             const baseCfg = SHIFTS_CONFIG[baseShift];
-                            tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • ${meta.label}`);
+                            tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • ${meta.label} (${who.fullLabel})`);
                         } else if (ovShift === 'TD') {
+                            const swap = formatSwapDisplay(ovMeta, idx);
                             counts[baseShift]++;
                             ring = ' ring-2 ring-inset ring-purple-500 dark:ring-purple-400';
                             badgeDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-purple-500 rounded-full"></span>';
-                            sub = '<span class="text-[7px] font-black uppercase leading-none text-purple-700 dark:text-purple-300 mt-0.5">Troca</span>';
+                            sub = `<span class="text-[6.5px] font-black leading-none text-purple-700 dark:text-purple-300 mt-0.5 truncate max-w-[40px]">${escapeHTML(swap.compactLabel)}</span>`;
                             const baseCfg = SHIFTS_CONFIG[baseShift];
-                            tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • Troca de Dia`);
+                            tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • Troca: ${swap.fullLabel}`);
                         } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
                             code = ovShift;
                             style = SHIFTS_CONFIG[ovShift].style;
@@ -1029,12 +1261,21 @@
                         if (holi) tipParts.push(`Feriado: ${holi}`);
                         if (dayNote) tipParts.push(`Obs: ${dayNote}`);
 
-                        cells.push(`<td data-action="note" data-date="${dateKey}" data-day="${day}" title="${escapeHTML(tipParts.join('\n'))}" class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 relative text-center text-sm ${style}${ring} cursor-pointer cell-smooth cell-active active:scale-95"><div class="w-full h-full flex flex-col items-center justify-center min-h-[42px] md:min-h-[48px] px-0.5"><span class="leading-none">${code}</span>${sub}${badgeDot}${noteDot}</div></td>`);
+                        cells.push(`<td data-action="note" data-date="${dateKey}" data-day="${day}" title="${escapeHTML(tipParts.join('\n'))}" class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 relative text-center text-sm ${style}${ring} cursor-pointer cell-smooth cell-active active:scale-95"><div class="w-full h-full flex flex-col items-center justify-center min-h-[46px] md:min-h-[52px] px-0.5"><span class="leading-none">${code}</span>${sub}${badgeDot}${noteDot}</div></td>`);
                     } else {
+                        const ovOther = overridesDb[`${dateKey}_${idx}`] || '';
+                        const ovOtherMeta = getOverrideMeta(dateKey, idx);
                         const dim = baseShift === 'F' ? 'text-green-600/65 dark:text-green-400/60 font-bold' : 'text-slate-400 dark:text-slate-500 font-medium opacity-55';
                         const shCfg = SHIFTS_CONFIG[baseShift];
-                        const tip = `Dia ${String(day).padStart(2, '0')}/${mmStr} • Turno ${teamLtr} (${teamNames[idx]}) • ${shCfg.name}${shCfg.hours ? ` (${shCfg.hours})` : ''} • Clique para destacar`;
-                        cells.push(`<td data-action="team" data-team="${idx}" title="${escapeHTML(tip)}" class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 relative text-center text-sm cursor-pointer cell-smooth hover:opacity-90 ${isToday ? 'bg-blue-50/50 dark:bg-blue-900/20 ' : ''}${dim}"><div class="w-full h-full flex items-center justify-center min-h-[42px] md:min-h-[48px]">${baseShift}</div></td>`);
+                        let otherDot = '';
+                        let extraTip = '';
+                        if (ovOther === 'TD') {
+                            const swap = formatSwapDisplay(ovOtherMeta, idx);
+                            otherDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-purple-500/80 rounded-full"></span>';
+                            extraTip = ` • Troca: ${swap.fullLabel}`;
+                        }
+                        const tip = `Dia ${String(day).padStart(2, '0')}/${mmStr} • Turno ${teamLtr} (${teamNames[idx]}) • ${shCfg.name}${shCfg.hours ? ` (${shCfg.hours})` : ''}${extraTip} • Clique para destacar`;
+                        cells.push(`<td data-action="team" data-team="${idx}" title="${escapeHTML(tip)}" class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 relative text-center text-sm cursor-pointer cell-smooth hover:opacity-90 ${isToday ? 'bg-blue-50/50 dark:bg-blue-900/20 ' : ''}${dim}"><div class="w-full h-full flex items-center justify-center min-h-[46px] md:min-h-[52px]">${baseShift}${otherDot}</div></td>`);
                     }
                 }
                 bodyRows.push(`<tr class="${rowBg} border-b border-slate-200 dark:border-surfaceBorder last:border-b-0">${cells.join('')}</tr>`);
@@ -1080,7 +1321,7 @@
         }
     };
 
-    /* 6. QUADRO A4 HORIZONTAL (OPERADORES — COM FALTAS, TROCAS, HE E FUNCIONÁRIO NO ATESTADO) */
+    /* 7. QUADRO A4 HORIZONTAL (OPERADORES) */
     window.buildA4Dataset = function (includeChanges) {
         const year = currentDate.getFullYear(), month = currentDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -1104,7 +1345,7 @@
             const atMap = {};
             if (includeChanges) {
                 atestadosDb.filter(r => r.turma === idx).forEach(rec => {
-                    const whoInfo = getAtestadoWhoInfo(rec, idx);
+                    const whoInfo = resolveWhoInfo(rec, idx);
                     const dates = getAtestadoDates(rec);
                     dates.forEach((d, pos) => {
                         atMap[d] = { dayIndex: pos + 1, totalDays: dates.length, whoShort: whoInfo.shortLabel };
@@ -1121,24 +1362,28 @@
                         return { code: 'AT', sub: `${atInfo.dayIndex}/${atInfo.totalDays}`, whoShort: atInfo.whoShort, isOv: false, isTd: false };
                     }
                     const ov = overridesDb[`${dateKey}_${idx}`];
+                    const ovMeta = getOverrideMeta(dateKey, idx);
                     if (ov === 'FA') {
+                        const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                         counts.FA++;
                         hasAnyFa = true;
-                        return { code: 'FA', sub: '', whoShort: '', isOv: false, isTd: false };
+                        return { code: 'FA', sub: '', whoShort: who.shortLabel, isOv: false, isTd: false };
                     }
                     if (ov === 'F') {
                         counts.F++;
                         return { code: 'F', sub: '', whoShort: '', isOv: false, isTd: false };
                     }
                     if (ov === 'HE50' || ov === 'HE75' || ov === 'HE110') {
+                        const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                         counts[base]++;
                         hasAnyOv = true;
-                        return { code: base, sub: OVERRIDE_META[ov].code, whoShort: '', isOv: true, isTd: false };
+                        return { code: base, sub: OVERRIDE_META[ov].code, whoShort: who.shortLabel, isOv: true, isTd: false };
                     }
                     if (ov === 'TD') {
+                        const swap = formatSwapDisplay(ovMeta, idx);
                         counts[base]++;
                         hasAnyTd = true;
-                        return { code: base, sub: 'TR', whoShort: '', isOv: false, isTd: true };
+                        return { code: base, sub: swap.compactLabel, whoShort: '', isOv: false, isTd: true };
                     }
                     if (ov === 'M' || ov === 'T' || ov === 'N') {
                         counts[ov]++;
@@ -1166,7 +1411,7 @@
         const rowsHTML = data.teams.map(t => {
             const cellsHTML = t.cells.map(c => {
                 const extraCls = c.isOv ? ' a4-cell-ov' : (c.isTd ? ' a4-cell-td' : '');
-                const subHTML = c.sub ? `<span class="a4-cell-sub">${c.sub}</span>` : '';
+                const subHTML = c.sub ? `<span class="a4-cell-sub">${escapeHTML(c.sub)}</span>` : '';
                 const whoHTML = c.whoShort ? `<span class="a4-cell-who">${escapeHTML(c.whoShort)}</span>` : '';
                 return `<td class="a4-cell a4-cell-${c.code}${extraCls}"><span>${c.code}</span>${whoHTML}${subHTML}</td>`;
             }).join('');
@@ -1360,20 +1605,22 @@
                 }
 
                 ctx.fillStyle = p.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                if (cell.whoShort) {
-                    ctx.font = `900 28px ${font}`;
-                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2 - 24);
+                if (cell.whoShort && cell.sub) {
+                    ctx.font = `900 27px ${font}`;
+                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2 - 26);
                     ctx.font = `800 13px ${font}`;
-                    ctx.fillText(canvasTruncateText(ctx, cell.whoShort, dayColW - 8), x + dayColW / 2, y + teamRowH / 2 + 8);
+                    ctx.fillText(canvasTruncateText(ctx, cell.whoShort, dayColW - 8), x + dayColW / 2, y + teamRowH / 2 + 6);
                     ctx.font = `900 14px ${font}`;
                     ctx.fillText(cell.sub, x + dayColW / 2, y + teamRowH / 2 + 32);
+                } else if (cell.whoShort || cell.sub) {
+                    const bottomTxt = cell.whoShort || cell.sub;
+                    ctx.font = `900 30px ${font}`;
+                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2 - 14);
+                    ctx.font = `800 13px ${font}`;
+                    ctx.fillText(canvasTruncateText(ctx, bottomTxt, dayColW - 8), x + dayColW / 2, y + teamRowH / 2 + 24);
                 } else {
                     ctx.font = `900 31px ${font}`;
-                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2 - (cell.sub ? 12 : 0));
-                    if (cell.sub) {
-                        ctx.font = `900 15px ${font}`;
-                        ctx.fillText(cell.sub, x + dayColW / 2, y + teamRowH / 2 + 24);
-                    }
+                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2);
                 }
             });
         });
@@ -1547,7 +1794,7 @@
         }, 'image/png');
     }
 
-    /* 7. RELATÓRIO DO SUPERVISOR (DADOS, HTML, PNG E TEXTO) */
+    /* 8. RELATÓRIO DO SUPERVISOR (INCLUI TODAS AS OBSERVAÇÕES E OCORRÊNCIAS DA ESCALA GERAL) */
     function buildSupervisorDataset(teamFilter, sortMode) {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -1560,7 +1807,7 @@
         const atByTeam = [{}, {}, {}, {}];
         for (let idx = 0; idx < 4; idx++) {
             atestadosDb.filter(r => r.turma === idx).forEach(rec => {
-                const whoInfo = getAtestadoWhoInfo(rec, idx);
+                const whoInfo = resolveWhoInfo(rec, idx);
                 const retInfo = computeReturnInfo(rec.startDate, rec.days, idx, rec.id);
                 const dates = getAtestadoDates(rec);
                 dates.forEach((d, pos) => {
@@ -1578,7 +1825,8 @@
         const entries = [];
         const perTeamAll = [0, 0, 0, 0];
         const uniqueDaysSet = new Set();
-        let extrasCount = 0, atestadosCount = 0, faltasCount = 0;
+        const seenAtestadoIds = new Set();
+        let extrasCount = 0, atestadosCount = 0, faltasCount = 0, trocasCount = 0;
 
         for (let day = 1; day <= daysInMonth; day++) {
             const dateKey = `${year}-${mmStr}-${String(day).padStart(2, '0')}`;
@@ -1587,21 +1835,42 @@
             const holiday = holidaysMap[day] || '';
 
             for (let idx = 0; idx < 4; idx++) {
-                const text = getNote(dateKey, idx).trim();
-                if (!text) continue;
+                const rawNote = getNote(dateKey, idx).trim();
+                const ovShift = overridesDb[`${dateKey}_${idx}`] || '';
+                const ovMeta = getOverrideMeta(dateKey, idx);
+                const atInfo = atByTeam[idx][dateKey] || null;
+
+                let includeEntry = false;
+                let displayNote = rawNote;
+
+                if (atInfo) {
+                    const isFirstDayInMonth = !seenAtestadoIds.has(atInfo.record.id);
+                    if (isFirstDayInMonth) {
+                        seenAtestadoIds.add(atInfo.record.id);
+                        includeEntry = true;
+                        displayNote = getAtestadoReason(atInfo.record) || rawNote;
+                    } else if (rawNote && rawNote !== getNote(atInfo.record.startDate, idx).trim()) {
+                        /* Inclui dia posterior do atestado apenas se tiver anotação própria diferente */
+                        includeEntry = true;
+                        displayNote = rawNote;
+                    }
+                } else if (rawNote || ovShift) {
+                    includeEntry = true;
+                }
+
+                if (!includeEntry) continue;
+
                 perTeamAll[idx]++;
                 if (!targetTeams.includes(idx)) continue;
 
                 const baseShift = getShift(year, month, day, idx);
                 const baseCfg = SHIFTS_CONFIG[baseShift] || SHIFTS_CONFIG.M;
-                const ovShift = overridesDb[`${dateKey}_${idx}`] || '';
-                const atInfo = atByTeam[idx][dateKey] || null;
 
                 let chipCode = baseShift;
                 let chipPaletteKey = baseShift;
                 let shiftLabel = baseCfg.name;
                 let shiftSub = baseCfg.hours || 'Descanso';
-                let atWhoLabel = '';
+                let personBadge = null; // { text, pillCls, bg, bd, fg }
 
                 if (atInfo) {
                     atestadosCount++;
@@ -1610,30 +1879,53 @@
                     const retCfg = SHIFTS_CONFIG[atInfo.retInfo.returnShiftCode] || SHIFTS_CONFIG.M;
                     shiftLabel = `${atInfo.totalDays} ${atInfo.totalDays === 1 ? 'dia' : 'dias'}`;
                     shiftSub = `Volta: ${formatShortDate(atInfo.retInfo.returnDateKey)} (${retCfg.name})`;
-                    atWhoLabel = atInfo.whoInfo.fullLabel;
+                    personBadge = {
+                        text: `Atestado: ${atInfo.whoInfo.fullLabel}`,
+                        pillCls: 'sup-pill-at',
+                        bg: '#ffe4e6', bd: '#fecdd3', fg: '#be123c'
+                    };
                 } else if (ovShift === 'FA') {
                     faltasCount++;
+                    const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                     chipCode = 'FA';
                     chipPaletteKey = 'FA';
                     shiftLabel = 'Falta';
                     shiftSub = `Escala: ${baseCfg.name}`;
+                    personBadge = {
+                        text: `Falta: ${who.fullLabel}`,
+                        pillCls: 'sup-pill-fa',
+                        bg: '#fee2e2', bd: '#fecaca', fg: '#b91c1c'
+                    };
                 } else if (ovShift === 'HE50' || ovShift === 'HE75' || ovShift === 'HE110') {
                     extrasCount++;
                     const meta = OVERRIDE_META[ovShift];
+                    const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                     chipCode = meta.chip;
                     chipPaletteKey = 'HE';
                     shiftLabel = meta.label;
                     shiftSub = `Escala: ${baseCfg.name}`;
+                    personBadge = {
+                        text: `${meta.short}: ${who.fullLabel}`,
+                        pillCls: 'sup-pill-he',
+                        bg: '#fef3c7', bd: '#fde68a', fg: '#92400e'
+                    };
                 } else if (ovShift === 'TD') {
+                    trocasCount++;
+                    const swap = formatSwapDisplay(ovMeta, idx);
                     chipCode = 'TD';
                     chipPaletteKey = 'TD';
                     shiftLabel = 'Troca de Dia';
                     shiftSub = `Escala: ${baseCfg.name}`;
+                    personBadge = {
+                        text: `Troca: ${swap.fullLabel}`,
+                        pillCls: 'sup-pill-td',
+                        bg: '#f3e8ff', bd: '#ddd6fe', fg: '#6b21a8'
+                    };
                 } else if (ovShift === 'F') {
                     chipCode = 'F';
                     chipPaletteKey = 'F';
                     shiftLabel = 'Folga';
-                    shiftSub = 'Descanso';
+                    shiftSub = baseShift !== 'F' ? `Alterado de ${baseCfg.name}` : 'Descanso';
                 } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
                     extrasCount++;
                     const ovCfg = SHIFTS_CONFIG[ovShift];
@@ -1658,9 +1950,8 @@
                     chipPaletteKey,
                     shiftLabel,
                     shiftSub,
-                    isAt: Boolean(atInfo),
-                    atWhoLabel,
-                    text
+                    personBadge,
+                    text: displayNote
                 });
             }
         }
@@ -1669,11 +1960,12 @@
         else entries.sort((a, b) => (a.day - b.day) || (a.turmaIdx - b.turmaIdx));
 
         const totalAllMonth = perTeamAll.reduce((acc, n) => acc + n, 0);
-        const specialCount = extrasCount + atestadosCount + faltasCount;
+        const specialCount = extrasCount + atestadosCount + faltasCount + trocasCount;
         const specialParts = [];
         if (extrasCount) specialParts.push(`${extrasCount} HE`);
         if (atestadosCount) specialParts.push(`${atestadosCount} Atest.`);
         if (faltasCount) specialParts.push(`${faltasCount} Falta${faltasCount > 1 ? 's' : ''}`);
+        if (trocasCount) specialParts.push(`${trocasCount} Troca${trocasCount > 1 ? 's' : ''}`);
         const specialSub = specialParts.length ? specialParts.join(' • ') : 'Nenhuma ocorrência';
 
         const scopeLabel = teamFilter === 'all'
@@ -1695,9 +1987,6 @@
             perTeam: perTeamAll,
             specialCount,
             specialSub,
-            extrasCount,
-            atestadosCount,
-            faltasCount,
             issuedStr
         };
     }
@@ -1710,13 +1999,17 @@
 
         let tableBodyHTML = '';
         if (!data.entries.length) {
-            tableBodyHTML = `<tr><td colspan="4" class="sup-empty-box">Nenhuma observação registrada para o filtro selecionado neste mês.</td></tr>`;
+            tableBodyHTML = `<tr><td colspan="4" class="sup-empty-box">Nenhum registro ou observação encontrada para o filtro selecionado neste mês.</td></tr>`;
         } else {
             tableBodyHTML = data.entries.map(item => {
                 const redCls = (item.isSunday || item.holiday) ? ' sup-is-red' : '';
-                const whoBadgeHTML = item.atWhoLabel
-                    ? `<span class="sup-who-pill">Atestado: ${escapeHTML(item.atWhoLabel)}</span>`
+                const badgeHTML = item.personBadge
+                    ? `<span class="sup-person-pill ${item.personBadge.pillCls}">${escapeHTML(item.personBadge.text)}</span>`
                     : '';
+                const obsHTML = item.text
+                    ? `<div class="sup-obs-text">${escapeHTML(item.text)}</div>`
+                    : `<div class="sup-obs-text sup-obs-empty">—</div>`;
+
                 return `<tr>
                     <td class="${redCls}">
                         <span class="sup-date-main">${item.dateStr}</span>
@@ -1728,7 +2021,7 @@
                             <div>
                                 <span class="sup-team-title">Turno ${item.letter}</span>
                                 <span class="sup-team-names">${escapeHTML(item.teamName)}</span>
-                                ${whoBadgeHTML}
+                                ${badgeHTML}
                             </div>
                         </div>
                     </td>
@@ -1741,9 +2034,7 @@
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <div class="sup-obs-text">${escapeHTML(item.text)}</div>
-                    </td>
+                    <td>${obsHTML}</td>
                 </tr>`;
             }).join('');
         }
@@ -1765,7 +2056,7 @@
 
             <div class="sup-kpi-grid">
                 <div class="sup-kpi-card">
-                    <span class="sup-kpi-label">Observações no Mês</span>
+                    <span class="sup-kpi-label">Registros no Mês</span>
                     <div class="sup-kpi-val">${data.totalNotes}</div>
                     <span class="sup-kpi-sub">${data.teamFilter === 'all' ? 'Todos os turnos' : `de ${data.totalAllMonth} no mês`}</span>
                 </div>
@@ -1775,11 +2066,11 @@
                     <span class="sup-kpi-sub">de ${data.daysInMonth} dias do mês</span>
                 </div>
                 <div class="sup-kpi-card">
-                    <span class="sup-kpi-label">Observações por Turno</span>
+                    <span class="sup-kpi-label">Registros por Turno</span>
                     <div class="sup-team-chips">${teamChipsHTML}</div>
                 </div>
                 <div class="sup-kpi-card">
-                    <span class="sup-kpi-label">Extras / Atestados / Faltas</span>
+                    <span class="sup-kpi-label">Extras / Atest. / Faltas / Trocas</span>
                     <div class="sup-kpi-val">${data.specialCount}</div>
                     <span class="sup-kpi-sub">${escapeHTML(data.specialSub)}</span>
                 </div>
@@ -1840,9 +2131,7 @@
                 ? 'px-1.5 py-0.5 rounded-full text-[10px] font-black tabular-nums bg-blue-600 text-white'
                 : 'px-1.5 py-0.5 rounded-full text-[10px] font-black tabular-nums bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200';
         }
-        if (sortDateBtn && supData) {
-            sortDateBtn.innerText = `Por Data (1 → ${supData.daysInMonth})`;
-        }
+        if (sortDateBtn && supData) sortDateBtn.innerText = `Por Data (1 → ${supData.daysInMonth})`;
 
         if (pill) {
             pill.innerText = isSup ? 'Fechamento Mensal • Encarregado / Supervisor' : 'Quadro de Avisos • A4 Horizontal';
@@ -1852,7 +2141,7 @@
         }
         if (title) title.innerText = isSup ? 'Relatório de Observações' : 'Exportar & Imprimir Escala';
         if (sub) sub.innerText = isSup
-            ? 'Todas as ocorrências e anotações do mês organizadas para fechamento da britagem.'
+            ? 'Todas as ocorrências e observações da escala geral organizadas para fechamento.'
             : 'Todos os 4 turnos, horários, totais e feriados — sem observações individuais.';
         if (caption) caption.innerText = isSup
             ? 'Prévia do Relatório (A4 Paisagem • Role para conferir)'
@@ -1970,16 +2259,16 @@
         const font = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
         const padX = 58, padTop = 50, contentW = W - padX * 2;
-        const colDateW = 192, colTeamW = 432, colShiftW = 408;
+        const colDateW = 188, colTeamW = 468, colShiftW = 408;
         const colObsW = contentW - colDateW - colTeamW - colShiftW;
 
         const mCanvas = document.createElement('canvas');
         const mCtx = mCanvas.getContext('2d');
         mCtx.font = `600 24px ${font}`;
         const measuredRows = data.entries.map(item => {
-            const lines = wrapCanvasLines(mCtx, item.text, colObsW - 44);
+            const lines = item.text ? wrapCanvasLines(mCtx, item.text, colObsW - 44) : ['—'];
             const textH = lines.length * 34;
-            const minH = item.atWhoLabel ? 128 : 104;
+            const minH = item.personBadge ? 130 : 104;
             const rowH = Math.max(minH, textH + 44);
             return { item, lines, rowH };
         });
@@ -2041,9 +2330,9 @@
 
         /* 2. Faixa de KPIs */
         const gap = 22;
-        const kw1 = Math.round((contentW - gap * 3) * 0.19);
-        const kw2 = Math.round((contentW - gap * 3) * 0.18);
-        const kw3 = Math.round((contentW - gap * 3) * 0.36);
+        const kw1 = Math.round((contentW - gap * 3) * 0.18);
+        const kw2 = Math.round((contentW - gap * 3) * 0.17);
+        const kw3 = Math.round((contentW - gap * 3) * 0.35);
         const kw4 = contentW - gap * 3 - kw1 - kw2 - kw3;
         const kx1 = padX, kx2 = kx1 + kw1 + gap, kx3 = kx2 + kw2 + gap, kx4 = kx3 + kw3 + gap;
 
@@ -2053,20 +2342,20 @@
             ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2.5; ctx.stroke();
             ctx.textAlign = 'left'; ctx.textBaseline = 'top';
             ctx.fillStyle = '#475569'; ctx.font = `900 17px ${font}`;
-            ctx.fillText(label, x + 22, kpiY + 20);
+            ctx.fillText(canvasTruncateText(ctx, label, w - 44), x + 22, kpiY + 20);
             if (val !== null) {
                 ctx.fillStyle = '#0f172a'; ctx.font = `900 44px ${font}`;
                 ctx.fillText(String(val), x + 22, kpiY + 50);
             }
             if (sub) {
-                ctx.fillStyle = '#64748b'; ctx.font = `700 19px ${font}`;
+                ctx.fillStyle = '#64748b'; ctx.font = `700 18px ${font}`;
                 ctx.fillText(canvasTruncateText(ctx, sub, w - 44), x + 22, kpiY + 106);
             }
         };
 
-        drawKpi(kx1, kw1, 'OBSERVAÇÕES NO MÊS', data.totalNotes, data.teamFilter === 'all' ? 'Todos os turnos' : `de ${data.totalAllMonth} no mês`);
+        drawKpi(kx1, kw1, 'REGISTROS NO MÊS', data.totalNotes, data.teamFilter === 'all' ? 'Todos os turnos' : `de ${data.totalAllMonth} no mês`);
         drawKpi(kx2, kw2, 'DIAS COM REGISTRO', data.uniqueDays, `de ${data.daysInMonth} dias do mês`);
-        drawKpi(kx3, kw3, 'OBSERVAÇÕES POR TURNO', null, '');
+        drawKpi(kx3, kw3, 'REGISTROS POR TURNO', null, '');
 
         const chipGap = 14, chipW = Math.floor((kw3 - 44 - chipGap * 3) / 4);
         TEAM_LETTERS.forEach((ltr, idx) => {
@@ -2085,7 +2374,7 @@
             ctx.restore();
         });
 
-        drawKpi(kx4, kw4, 'EXTRAS / ATESTADOS / FALTAS', data.specialCount, data.specialSub);
+        drawKpi(kx4, kw4, 'EXTRAS / ATEST. / FALTAS / TROCAS', data.specialCount, data.specialSub);
 
         /* 3. Tabela de Observações */
         const colX0 = padX;
@@ -2114,7 +2403,7 @@
             ctx.fillRect(padX, curY, contentW, 260);
             ctx.fillStyle = '#64748b'; ctx.font = `700 26px ${font}`;
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('Nenhuma observação registrada para o filtro selecionado neste mês.', padX + contentW / 2, curY + 130);
+            ctx.fillText('Nenhum registro ou observação encontrada para o filtro selecionado neste mês.', padX + contentW / 2, curY + 130);
             curY += 260;
         } else {
             measuredRows.forEach((row, rIdx) => {
@@ -2136,7 +2425,7 @@
                 ctx.fillStyle = isRed ? '#ef4444' : '#64748b'; ctx.font = `800 19px ${font}`;
                 ctx.fillText(item.dowPretty.toUpperCase(), colX0 + 22, curY + 58);
 
-                /* Turno / Equipe + Funcionário em Atestado */
+                /* Turno / Equipe + Selo de Funcionário / Troca */
                 canvasRoundRect(ctx, colX1 + 22, curY + 22, 42, 42, 10);
                 ctx.fillStyle = '#0f172a'; ctx.fill();
                 ctx.fillStyle = '#ffffff'; ctx.font = `900 22px ${font}`;
@@ -2149,18 +2438,18 @@
                 ctx.fillStyle = '#475569'; ctx.font = `700 19px ${font}`;
                 ctx.fillText(canvasTruncateText(ctx, item.teamName, colTeamW - 96), colX1 + 78, curY + 50);
 
-                if (item.atWhoLabel) {
+                if (item.personBadge) {
                     ctx.font = `900 16px ${font}`;
-                    const pillTxt = canvasTruncateText(ctx, `Atestado: ${item.atWhoLabel}`, colTeamW - 116);
+                    const pillTxt = canvasTruncateText(ctx, item.personBadge.text, colTeamW - 116);
                     const pw = ctx.measureText(pillTxt).width + 20;
                     canvasRoundRect(ctx, colX1 + 78, curY + 80, pw, 30, 7);
-                    ctx.fillStyle = '#ffe4e6'; ctx.fill();
-                    ctx.strokeStyle = '#fecdd3'; ctx.lineWidth = 1.5; ctx.stroke();
-                    ctx.fillStyle = '#be123c'; ctx.textBaseline = 'middle';
+                    ctx.fillStyle = item.personBadge.bg; ctx.fill();
+                    ctx.strokeStyle = item.personBadge.bd; ctx.lineWidth = 1.5; ctx.stroke();
+                    ctx.fillStyle = item.personBadge.fg; ctx.textBaseline = 'middle';
                     ctx.fillText(pillTxt, colX1 + 88, curY + 95);
                 }
 
-                /* Escala do Dia (em atestado: somente dias totais + retorno) */
+                /* Escala do Dia */
                 const pal = PALETTE[item.chipPaletteKey] || PALETTE.M;
                 const chipW = item.chipCode.length >= 4 ? 76 : 62;
                 canvasRoundRect(ctx, colX2 + 22, curY + 22, chipW, 42, 10);
@@ -2177,8 +2466,9 @@
                 ctx.fillStyle = '#475569'; ctx.font = `700 18px ${font}`;
                 ctx.fillText(canvasTruncateText(ctx, item.shiftSub, shiftMaxW), shiftTxtX, curY + 50);
 
-                /* Observação Registrada (somente o texto digitado) */
-                ctx.fillStyle = '#0f172a'; ctx.font = `600 24px ${font}`;
+                /* Observação Registrada (somente o que foi digitado) */
+                ctx.fillStyle = item.text ? '#0f172a' : '#94a3b8';
+                ctx.font = `600 24px ${font}`;
                 ctx.textAlign = 'left'; ctx.textBaseline = 'top';
                 lines.forEach((ln, li) => {
                     ctx.fillText(ln, colX3 + 22, curY + 22 + li * 34);
@@ -2259,19 +2549,19 @@
             `Imerys • Britagem ICP 1`,
             `Período: *${data.monthLabel}*`,
             `Escopo: ${data.scopeLabel} | ${data.sortLabel}`,
-            `Resumo: *${data.totalNotes}* observação(ões) em *${data.uniqueDays}* dia(s) | Extras/Atestados/Faltas: *${data.specialCount}* (${data.specialSub})`,
+            `Resumo: *${data.totalNotes}* registro(s) em *${data.uniqueDays}* dia(s) | Ocorrências: *${data.specialCount}* (${data.specialSub})`,
             `Por turno: A (${data.perTeam[0]}) • B (${data.perTeam[1]}) • C (${data.perTeam[2]}) • D (${data.perTeam[3]})`,
             `----------------------------------------`
         ];
 
         if (!data.entries.length) {
-            lines.push('Nenhuma observação registrada para o filtro selecionado neste mês.');
+            lines.push('Nenhum registro ou observação encontrada para o filtro selecionado neste mês.');
         } else {
             data.entries.forEach(item => {
-                const whoStr = item.atWhoLabel ? ` • Atestado: ${item.atWhoLabel}` : '';
+                const detailStr = item.personBadge ? ` • ${item.personBadge.text}` : '';
                 const shiftStr = `${item.shiftLabel} (${item.shiftSub})`;
-                lines.push(`• *${item.dateStr} (${item.dowPretty})* — *Turno ${item.letter}* (${item.teamName}${whoStr}) — ${shiftStr}`);
-                lines.push(`  ${item.text.replace(/\r?\n/g, '\n  ')}`);
+                lines.push(`• *${item.dateStr} (${item.dowPretty})* — *Turno ${item.letter}* (${item.teamName}${detailStr}) — ${shiftStr}`);
+                if (item.text) lines.push(`  ${item.text.replace(/\r?\n/g, '\n  ')}`);
             });
         }
         lines.push(`----------------------------------------`);
@@ -2286,10 +2576,19 @@
         showToast(copied ? 'Relatório copiado! Cole no WhatsApp ou e-mail.' : 'Não foi possível copiar automaticamente.');
     }
 
-    /* 8. BACKUP JSON (v5 — PRESERVA NOVAS OCORRÊNCIAS E FUNCIONÁRIO DO ATESTADO) E .ICS */
+    /* 9. BACKUP JSON (v6 — PRESERVA FUNCIONÁRIO DE HE/FALTA E TROCA DE DIA) E AGENDA .ICS */
     window.exportBackup = function () {
         haptic();
-        const payload = { version: 5, exportedAt: new Date().toISOString(), turma: currentTurma, teams: teamNames, notes: notesDb, overrides: overridesDb, atestados: atestadosDb };
+        const payload = {
+            version: 6,
+            exportedAt: new Date().toISOString(),
+            turma: currentTurma,
+            teams: teamNames,
+            notes: notesDb,
+            overrides: overridesDb,
+            overrideMeta: overrideMetaDb,
+            atestados: atestadosDb
+        };
         const url = window.URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
         const a = document.createElement('a'); a.href = url; a.setAttribute('download', 'Backup_Escala_Imerys.json');
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -2320,6 +2619,19 @@
                 if (data.overrides && typeof data.overrides === 'object' && !Array.isArray(data.overrides)) {
                     Object.entries(data.overrides).forEach(([k, val]) => {
                         if (/^\d{4}-\d{2}-\d{2}_[0-3]$/.test(k) && VALID_OVERRIDES.includes(val)) overridesDb[k] = val;
+                    });
+                }
+                if (data.overrideMeta && typeof data.overrideMeta === 'object' && !Array.isArray(data.overrideMeta)) {
+                    Object.entries(data.overrideMeta).forEach(([k, val]) => {
+                        if (/^\d{4}-\d{2}-\d{2}_[0-3]$/.test(k) && val && typeof val === 'object') {
+                            const wt = ['0', '1', 'both'].includes(String(val.whoType)) ? String(val.whoType) : 'both';
+                            overrideMetaDb[k] = {
+                                whoType: wt,
+                                whoName: typeof val.whoName === 'string' ? val.whoName.trim().slice(0, 40) : '',
+                                swapWith: typeof val.swapWith === 'string' ? val.swapWith.trim().slice(0, 40) : '',
+                                swapWithTeam: typeof val.swapWithTeam === 'string' ? val.swapWithTeam.trim().slice(0, 2) : ''
+                            };
+                        }
                     });
                 }
                 if (Array.isArray(data.atestados)) {
@@ -2364,7 +2676,7 @@
             const dateKey = formatDateKey(year, month, day);
             const atInfo = findAtestadoOnDate(dateKey, currentTurma);
             if (atInfo) {
-                const whoInfo = getAtestadoWhoInfo(atInfo.record, currentTurma);
+                const whoInfo = resolveWhoInfo(atInfo.record, currentTurma);
                 const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day + 1, 12, 0, 0);
                 const reason = getAtestadoReason(atInfo.record);
                 let desc = `${teamLabel} - Atestado Médico (${whoInfo.fullLabel}) • ${atInfo.dayIndex}/${atInfo.totalDays}`;
@@ -2373,12 +2685,14 @@
                 continue;
             }
             const ov = overridesDb[`${dateKey}_${currentTurma}`] || '';
+            const ovMeta = getOverrideMeta(dateKey, currentTurma);
             const dayNote = getNote(dateKey, currentTurma);
             if (ov === 'FA') {
+                const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
                 const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day + 1, 12, 0, 0);
-                let desc = `${teamLabel} - Falta`;
+                let desc = `${teamLabel} - Falta (${who.fullLabel})`;
                 if (dayNote) desc += `\nNota: ${dayNote}`;
-                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-FA-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:Imerys - Falta`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
+                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-FA-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:${sanitizeICS(`Imerys - Falta (${who.label})`)}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
                 continue;
             }
 
@@ -2387,14 +2701,24 @@
             const isTd = ov === 'TD';
             if (sCode === 'F' && !isExtra && !isTd) continue;
 
-            const ovMeta = OVERRIDE_META[ov];
-            const tagSuffix = ovMeta ? ` (${ovMeta.label})` : '';
+            const ovMetaInfo = OVERRIDE_META[ov];
+            let tagSuffix = '';
+            if (ov === 'HE50' || ov === 'HE75' || ov === 'HE110') {
+                const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
+                tagSuffix = ` (${ovMetaInfo.label} - ${who.label})`;
+            } else if (isTd) {
+                const swap = formatSwapDisplay(ovMeta, currentTurma);
+                tagSuffix = ` (Troca: ${swap.fullLabel})`;
+            } else if (ovMetaInfo) {
+                tagSuffix = ` (${ovMetaInfo.label})`;
+            }
+
             let desc = `${teamLabel}${tagSuffix}`;
             if (dayNote) desc += `\nNota: ${dayNote}`;
 
             if (sCode === 'F') {
                 const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day + 1, 12, 0, 0);
-                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:${sanitizeICS(`Imerys - ${ovMeta ? ovMeta.label : 'Folga'}`)}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
+                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:${sanitizeICS(`Imerys - ${ovMetaInfo ? ovMetaInfo.label : 'Folga'}${tagSuffix}`)}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
             } else {
                 const sCfg = SHIFTS_CONFIG[sCode], [startHr, endHr] = sCfg.hours.split('-');
                 const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day, 12, 0, 0);
@@ -2409,7 +2733,7 @@
         setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     };
 
-    /* 9. INTEGRAÇÃO COM EXPORTAÇÃO, IMPRESSÃO E INICIALIZAÇÃO */
+    /* 10. INTEGRAÇÃO COM EXPORTAÇÃO, IMPRESSÃO E INICIALIZAÇÃO */
     window.switchExportMode = function (mode) {
         if (mode !== 'quadro' && mode !== 'supervisor') return;
         haptic();
