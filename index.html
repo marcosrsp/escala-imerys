@@ -7,14 +7,14 @@
     <title>Escala Imerys</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link id="pwa-manifest" rel="manifest">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzI1NjNlYiIvPjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzFkNGVkOCIvPjwvc3ZnPg==">
+    <link id="app-favicon" rel="icon" type="image/png" href="./icon-192.png">
+    <link id="apple-icon" rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Escala Imerys">
     <script>
-        // Configuração de tema Claro/OLED e animações do Tailwind
         if (typeof tailwind !== 'undefined') {
             tailwind.config = {
                 darkMode: 'media',
@@ -41,10 +41,8 @@
         * { -webkit-tap-highlight-color: transparent; }
         body { background-color: #f8fafc; color: #0f172a; overscroll-behavior-y: none; }
         @media (prefers-color-scheme: dark) { body { background-color: #000000; color: #f8fafc; } }
-        /* Bloqueio de seleção/lupa no iOS preservando campos digitáveis */
         .ios-no-callout { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
-        /* Safe Areas iOS (Notch, Dynamic Island e barra inferior) */
         .pt-safe { padding-top: 1rem; }
         .pb-safe { padding-bottom: 1.25rem; }
         @supports (padding-top: env(safe-area-inset-top)) {
@@ -64,15 +62,18 @@
         <!-- Cabeçalho Fixo -->
         <header class="sticky top-0 z-40 w-full bg-slate-50/85 dark:bg-surface/85 glass-header border-b border-slate-200 dark:border-surfaceBorder px-5 pb-3.5 pt-safe">
             <div class="flex justify-between items-center">
-                <div class="flex flex-col">
-                    <h1 class="text-[22px] font-black tracking-tight leading-none text-slate-900 dark:text-white">Escala Geral</h1>
-                    <p class="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400 mt-1">Britagem ICP 1</p>
+                <div class="flex items-center gap-3 min-w-0">
+                    <img id="header-brand-icon" alt="Imerys" class="w-10 h-10 rounded-[11px] bg-white shadow-sm border border-slate-200/80 dark:border-surfaceBorder shrink-0 object-contain">
+                    <div class="flex flex-col min-w-0">
+                        <h1 class="text-[20px] font-black tracking-tight leading-none text-slate-900 dark:text-white truncate">Escala Geral</h1>
+                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400 mt-1 truncate">Imerys • Britagem ICP 1</p>
+                    </div>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex gap-2 shrink-0">
                     <button id="install-btn" type="button" onclick="installApp()" class="hidden p-2.5 rounded-full bg-blue-600 text-white hover:scale-105 active:scale-95 transition-transform animate-bounce-subtle shadow-lg shadow-blue-500/30" aria-label="Adicionar à Tela Inicial">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     </button>
-                    <button type="button" onclick="openInfoModal()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Legenda e Backup">
+                    <button type="button" onclick="openInfoModal()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Legenda, Ícones e Backup">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </button>
                     <button type="button" onclick="exportICS()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Exportar Agenda ICS">
@@ -185,9 +186,10 @@
         <!-- Modal Instalação iOS -->
         <div id="ios-install-modal" onclick="if(event.target===this) closeIosInstallPrompt()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[70] hidden flex-col justify-end items-center transition-opacity duration-300 opacity-0 px-4 pb-8">
             <div id="ios-install-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-sm transform translate-y-full transition-transform duration-300 shadow-2xl text-center">
-                <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-5"></div>
-                <h3 class="text-xl font-black text-slate-800 dark:text-white mb-2">Instalar no iPhone</h3>
-                <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-6">Instale o aplicativo para acesso rápido direto na sua tela inicial.</p>
+                <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+                <img id="ios-modal-icon" alt="Ícone Escala Imerys" class="w-16 h-16 mx-auto mb-3 rounded-[16px] bg-white shadow-md border border-slate-200 dark:border-surfaceBorder object-contain">
+                <h3 class="text-xl font-black text-slate-800 dark:text-white mb-1.5">Instalar no iPhone</h3>
+                <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-5">Adicione à tela inicial com o ícone oficial da Imerys.</p>
                 <div class="flex flex-col gap-4 text-left bg-slate-50 dark:bg-oled border border-slate-100 dark:border-surfaceBorder rounded-xl p-4">
                     <div class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                         <span class="flex items-center justify-center min-w-[32px] h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-black">1</span>
@@ -198,11 +200,11 @@
                         <span class="text-sm">Role e toque em <b>"Adicionar à Tela de Início"</b>.</span>
                     </div>
                 </div>
-                <button type="button" onclick="closeIosInstallPrompt()" class="mt-6 w-full py-3.5 rounded-2xl font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-surfaceBorder active:scale-95 transition-transform">Entendi</button>
+                <button type="button" onclick="closeIosInstallPrompt()" class="mt-5 w-full py-3.5 rounded-2xl font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-surfaceBorder active:scale-95 transition-transform">Entendi</button>
             </div>
         </div>
 
-        <!-- Modal Legenda, Diagnóstico e Backup -->
+        <!-- Modal Legenda, Ícones HD e Backup -->
         <div id="info-modal" onclick="if(event.target===this) closeInfoModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-center items-center transition-opacity duration-300 opacity-0 px-4">
             <div id="info-modal-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-xs transform scale-95 transition-transform duration-300 shadow-2xl max-h-[88dvh] overflow-y-auto no-scrollbar">
                 <div class="flex justify-between items-center mb-4">
@@ -222,7 +224,25 @@
                         <div class="flex items-center gap-2 p-2 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40"><span class="w-3 h-3 rounded-full bg-sky-500 shrink-0"></span><span class="text-[11px] font-bold text-sky-800 dark:text-sky-300 leading-tight">Dia de Volta</span></div>
                     </div>
                 </div>
+
+                <!-- Pacote de Ícones HD (iOS + Android para GitHub Pages) -->
                 <div class="mt-5 pt-4 border-t border-slate-200 dark:border-surfaceBorder">
+                    <div class="flex items-center gap-3 mb-3">
+                        <img id="info-icon-preview" alt="Ícone Imerys HD" class="w-12 h-12 rounded-[13px] bg-white shadow-sm border border-slate-200 dark:border-surfaceBorder shrink-0 object-contain">
+                        <div class="min-w-0">
+                            <span class="block text-xs font-black text-slate-800 dark:text-slate-100 leading-tight">Ícone Oficial HD (PNG)</span>
+                            <span class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Baixe e envie no GitHub para ícone nativo no iOS e Android.</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button type="button" onclick="downloadIconPNG(180, 'apple-touch-icon.png')" class="py-2 px-1.5 rounded-xl font-extrabold text-[10px] bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 active:scale-95 transition-transform">iOS 180px</button>
+                        <button type="button" onclick="downloadIconPNG(192, 'icon-192.png')" class="py-2 px-1.5 rounded-xl font-extrabold text-[10px] bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 active:scale-95 transition-transform">And 192px</button>
+                        <button type="button" onclick="downloadIconPNG(512, 'icon-512.png')" class="py-2 px-1.5 rounded-xl font-extrabold text-[10px] bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 active:scale-95 transition-transform">HD 512px</button>
+                    </div>
+                </div>
+
+                <!-- Diagnóstico e Backup -->
+                <div class="mt-4 pt-4 border-t border-slate-200 dark:border-surfaceBorder">
                     <div class="mb-3 rounded-xl px-3 py-2.5 border border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-oled flex items-center gap-2.5">
                         <span id="storage-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0"></span>
                         <div class="min-w-0 flex-1">
@@ -327,15 +347,125 @@
     </div>
 
     <script>
-        /* 1. PWA E INSTALAÇÃO (Android + iOS) */
-        const manifestData = {
-            name: 'Escala Imerys', short_name: 'Escala',
-            start_url: window.location.protocol.startsWith('http') ? window.location.href : '.',
-            display: 'standalone', background_color: '#000000', theme_color: '#000000',
-            icons: [{ src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzI1NjNlYiIvPjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzFkNGVkOCIvPjwvc3ZnPg==', sizes: '192x192', type: 'image/svg+xml' }]
-        };
-        try { document.getElementById('pwa-manifest').href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData)); } catch (e) {}
+        /* 1. MOTOR DE ÍCONE OFICIAL IMERYS HD (iOS + Android Adaptive/Maskable) */
+        const IMERYS_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+            <defs>
+                <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f2f6fc"/></linearGradient>
+                <radialGradient id="disc" cx="68%" cy="28%" r="72%" fx="74%" fy="22%"><stop offset="0%" stop-color="#ffffff"/><stop offset="18%" stop-color="#a8ccff"/><stop offset="48%" stop-color="#2b64c6"/><stop offset="80%" stop-color="#143d8f"/><stop offset="100%" stop-color="#081b45"/></radialGradient>
+                <radialGradient id="dot" cx="62%" cy="28%" r="72%"><stop offset="0%" stop-color="#ffffff"/><stop offset="28%" stop-color="#93c5fd"/><stop offset="66%" stop-color="#235cc2"/><stop offset="100%" stop-color="#0b2358"/></radialGradient>
+                <linearGradient id="stem" x1="0%" y1="35%" x2="100%" y2="55%"><stop offset="0%" stop-color="#9ca3af"/><stop offset="22%" stop-color="#ffffff"/><stop offset="42%" stop-color="#d1d5db"/><stop offset="56%" stop-color="#1f2937"/><stop offset="70%" stop-color="#000000"/><stop offset="100%" stop-color="#050505"/></linearGradient>
+                <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="-2" dy="6" stdDeviation="5" flood-color="#0a1938" flood-opacity="0.22"/></filter>
+            </defs>
+            <rect width="512" height="512" fill="url(#bg)"/>
+            <g filter="url(#sh)">
+                <ellipse cx="253" cy="245" rx="108" ry="67" transform="rotate(-37 253 245)" fill="#07183b"/>
+                <ellipse cx="256" cy="239" rx="106" ry="65" transform="rotate(-37 256 239)" fill="url(#disc)"/>
+            </g>
+            <path d="M206 177 Q246 149 289 155 Q272 183 238 190 Q214 195 206 177 Z" fill="url(#bg)"/>
+            <path d="M224 185 C216 212 218 242 229 257 C242 271 272 263 281 244 C272 222 270 198 275 170 C260 183 240 190 224 185 Z" fill="url(#stem)"/>
+            <path d="M227 254 C239 269 270 263 281 245" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2.5" stroke-linecap="round"/>
+            <ellipse cx="261" cy="134" rx="35" ry="16" transform="rotate(-34 261 134)" fill="#0a2050"/>
+            <ellipse cx="262" cy="131" rx="34" ry="15" transform="rotate(-34 262 131)" fill="url(#dot)"/>
+            <g fill="#0a0d14" font-family="Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-weight="800" font-size="44" text-anchor="middle">
+                <text x="148" y="398">I</text><text x="188" y="398">M</text><text x="234" y="398">E</text>
+                <text x="276" y="398">R</text><text x="318" y="398">Y</text><text x="360" y="398">S</text>
+            </g>
+        </svg>`;
 
+        const IMERYS_SVG_URI = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(IMERYS_ICON_SVG);
+        const iconPngCache = {};
+
+        function renderIconPNG(size) {
+            if (iconPngCache[size]) return Promise.resolve(iconPngCache[size]);
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const c = document.createElement('canvas');
+                        c.width = size; c.height = size;
+                        const ctx = c.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, size, size);
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(img, 0, 0, size, size);
+                        iconPngCache[size] = c.toDataURL('image/png');
+                        resolve(iconPngCache[size]);
+                    } catch (e) { resolve(IMERYS_SVG_URI); }
+                };
+                img.onerror = () => resolve(IMERYS_SVG_URI);
+                img.src = IMERYS_SVG_URI;
+            });
+        }
+
+        async function checkStaticAsset(path) {
+            if (!window.location.protocol.startsWith('http')) return false;
+            try {
+                const r = await fetch(path, { method: 'HEAD', cache: 'no-store' });
+                return r.ok;
+            } catch (e) { return false; }
+        }
+
+        function setBrandImages(src) {
+            ['header-brand-icon', 'ios-modal-icon', 'info-icon-preview'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.src = src;
+            });
+        }
+
+        async function initAppIcons() {
+            setBrandImages(IMERYS_SVG_URI);
+            const [png180, png192, png512] = await Promise.all([renderIconPNG(180), renderIconPNG(192), renderIconPNG(512)]);
+            setBrandImages(png512);
+
+            const [hasApple, has192, has512] = await Promise.all([
+                checkStaticAsset('./apple-touch-icon.png'),
+                checkStaticAsset('./icon-192.png'),
+                checkStaticAsset('./icon-512.png')
+            ]);
+
+            const baseUrl = window.location.protocol.startsWith('http') ? new URL('./', window.location.href).href : '';
+            const appleHref = hasApple ? `${baseUrl}apple-touch-icon.png` : png180;
+            const icon192Href = has192 ? `${baseUrl}icon-192.png` : png192;
+            const icon512Href = has512 ? `${baseUrl}icon-512.png` : png512;
+
+            const appleLink = document.getElementById('apple-icon');
+            if (appleLink) appleLink.href = appleHref;
+            const favLink = document.getElementById('app-favicon');
+            if (favLink) favLink.href = icon192Href;
+
+            const manifestData = {
+                name: 'Escala Imerys',
+                short_name: 'Escala Imerys',
+                description: 'Escala de Revezamento 3x1 - Britagem ICP 1',
+                start_url: window.location.protocol.startsWith('http') ? window.location.href : '.',
+                display: 'standalone',
+                background_color: '#000000',
+                theme_color: '#000000',
+                icons: [
+                    { src: icon192Href, sizes: '192x192', type: 'image/png', purpose: 'any' },
+                    { src: icon512Href, sizes: '512x512', type: 'image/png', purpose: 'any' },
+                    { src: icon512Href, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+                ]
+            };
+            try {
+                document.getElementById('pwa-manifest').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData));
+            } catch (e) {}
+        }
+
+        async function downloadIconPNG(size, filename) {
+            haptic();
+            const dataUrl = await renderIconPNG(size);
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.setAttribute('download', filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast(`Baixado: ${filename} (${size}x${size})`);
+        }
+
+        /* 2. INSTALAÇÃO PWA (Android + iOS) */
         function isIosDevice() {
             const ua = window.navigator.userAgent.toLowerCase();
             return /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -376,7 +506,7 @@
             setTimeout(() => { md.classList.add('hidden'); md.classList.remove('flex'); }, 300);
         }
 
-        /* 2. PERSISTÊNCIA EM DUPLA CAMADA (localStorage + IndexedDB) */
+        /* 3. PERSISTÊNCIA EM DUPLA CAMADA (localStorage + IndexedDB) */
         const STORAGE_KEYS = ['imerys_turma', 'imerys_notes', 'imerys_overrides', 'imerys_atestados'];
         const IDB_NAME = 'EscalaImerysStorage', IDB_STORE = 'kv';
 
@@ -468,7 +598,7 @@
         };
         DB.testLocalStorage();
 
-        /* 3. MOTOR DE ESCALA, FERIADOS E ATESTADOS */
+        /* 4. MOTOR DE ESCALA, FERIADOS E ATESTADOS */
         const CYCLE = ['M', 'M', 'M', 'F', 'T', 'T', 'T', 'F', 'N', 'N', 'N', 'F'];
         const SHIFTS_CONFIG = {
             M: { name: 'Manhã', hours: '05:00-13:00', style: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-black' },
@@ -589,7 +719,7 @@
             toastTimer = setTimeout(() => { toast.classList.remove('opacity-100', 'translate-y-0'); toast.classList.add('opacity-0', '-translate-y-5'); }, 3400);
         }
 
-        /* 4. DIAGNÓSTICO E SINCRONIZAÇÃO */
+        /* 5. DIAGNÓSTICO E SINCRONIZAÇÃO */
         function updateStorageHealthUI() {
             const dot = document.getElementById('storage-status-dot'), title = document.getElementById('storage-status-title');
             const detail = document.getElementById('storage-status-detail'), banner = document.getElementById('storage-warning-banner');
@@ -637,7 +767,7 @@
         window.addEventListener('pagehide', () => DB.flushAll());
         window.addEventListener('storage', (ev) => { if (ev.key && STORAGE_KEYS.includes(ev.key)) { hydrateStateFromDB(); renderApp(); } });
 
-        /* 5. NAVEGAÇÃO E RENDERIZAÇÃO PRINCIPAL */
+        /* 6. NAVEGAÇÃO E RENDERIZAÇÃO PRINCIPAL */
         function setTurma(index) {
             haptic(); currentTurma = index;
             const saved = DB.set('imerys_turma', index);
@@ -741,7 +871,7 @@
             }
         }
 
-        /* 6. MODAL DE NOTAS, TROCAS E ATESTADOS */
+        /* 7. MODAL DE NOTAS, TROCAS E ATESTADOS */
         function markModalDirty() { modalDirty = true; document.getElementById('unsaved-guard')?.classList.add('hidden'); }
         function requestCloseModal() {
             if (modalDirty) { haptic(); const g = document.getElementById('unsaved-guard'); g.classList.remove('hidden'); g.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return; }
@@ -861,7 +991,7 @@
         }
         function deleteNote() { document.getElementById('note-text').value = ''; currentSelectedOverride = ''; setAtestadoUI(false); saveNote(true); }
 
-        /* 7. MODAL LEGENDA E BACKUP JSON */
+        /* 8. MODAL LEGENDA E BACKUP JSON */
         function openInfoModal() {
             haptic(); updateStorageHealthUI();
             const md = document.getElementById('info-modal'), ct = document.getElementById('info-modal-content');
@@ -910,7 +1040,7 @@
             reader.readAsText(file);
         }
 
-        /* 8. EXPORTAÇÃO AGENDA (.ICS - RFC 5545) */
+        /* 9. EXPORTAÇÃO AGENDA (.ICS - RFC 5545) */
         function formatICSDate(date, timeStr) { return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}T${timeStr.replace(':', '')}00`; }
         function formatICSAllDay(date) { return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`; }
         function sanitizeICS(str) { return String(str).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
@@ -955,7 +1085,7 @@
             else if (!document.getElementById('ios-install-modal').classList.contains('hidden')) closeIosInstallPrompt();
         });
 
-        function bootApp() { renderApp(); initPersistence(); }
+        function bootApp() { initAppIcons(); renderApp(); initPersistence(); }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootApp);
         else bootApp();
     </script>
