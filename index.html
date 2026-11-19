@@ -38,7 +38,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         * { -webkit-tap-highlight-color: transparent; }
-        body { background-color: #f8fafc; color: #0f172a; overscroll-behavior-y: none; }
+        body { background-color: #f1f5f9; color: #0f172a; overscroll-behavior-y: none; }
         @media (prefers-color-scheme: dark) { body { background-color: #000000; color: #f8fafc; } }
         .ios-no-callout { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
@@ -53,39 +53,79 @@
         .glass-header { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .table-scroll { touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
         .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .app-shell { overflow-x: clip; }
+
+        /* Barra de rolagem sutil na tabela apenas em telas de computador quando houver overflow */
+        @media (min-width: 768px) {
+            .table-scroll { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.45) transparent; }
+            .table-scroll::-webkit-scrollbar { display: block; height: 7px; }
+            .table-scroll::-webkit-scrollbar-track { background: transparent; }
+            .table-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
+            .table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.65); }
+            @media (prefers-color-scheme: dark) {
+                .table-scroll { scrollbar-color: rgba(82, 82, 91, 0.6) transparent; }
+                .table-scroll::-webkit-scrollbar-thumb { background: rgba(63, 63, 70, 0.65); }
+                .table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(113, 113, 122, 0.85); }
+            }
+        }
+
+        /* Animação adaptativa dos modais: Bottom-Sheet no celular -> Diálogo Centralizado no PC */
+        .modal-sheet {
+            transform: translateY(100%);
+            transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+        }
+        .modal-sheet.is-open {
+            transform: translateY(0);
+        }
+        @media (min-width: 768px) {
+            .modal-sheet {
+                transform: translateY(14px) scale(0.96);
+                opacity: 0;
+            }
+            .modal-sheet.is-open {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
-<body class="flex justify-center w-full min-h-[100dvh]">
-    <div class="ios-no-callout w-full max-w-md bg-white dark:bg-oled min-h-[100dvh] relative pb-safe shadow-2xl flex flex-col no-scrollbar">
+<body class="flex justify-center w-full min-h-[100dvh] md:py-5 md:px-5 lg:py-6 lg:px-6">
+    <div class="ios-no-callout app-shell w-full max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-[1400px] bg-white dark:bg-oled min-h-[100dvh] md:min-h-[calc(100dvh-2.5rem)] lg:min-h-[calc(100dvh-3rem)] md:rounded-[2rem] md:border md:border-slate-200/90 dark:md:border-surfaceBorder relative pb-safe md:pb-6 shadow-2xl flex flex-col">
 
         <!-- Cabeçalho Fixo -->
-        <header class="sticky top-0 z-40 w-full bg-slate-50/85 dark:bg-surface/85 glass-header border-b border-slate-200 dark:border-surfaceBorder px-5 pb-3.5 pt-safe">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3 min-w-0">
-                    <img id="header-brand-icon" alt="Imerys" class="w-10 h-10 rounded-[11px] bg-white shadow-sm border border-slate-200/80 dark:border-surfaceBorder shrink-0 object-contain">
+        <header class="sticky top-0 z-40 w-full bg-slate-50/90 dark:bg-surface/90 glass-header border-b border-slate-200 dark:border-surfaceBorder px-5 md:px-7 pb-3.5 pt-safe md:py-4 md:rounded-t-[2rem]">
+            <div class="flex justify-between items-center gap-3">
+                <div class="flex items-center gap-3 md:gap-3.5 min-w-0">
+                    <img id="header-brand-icon" alt="Imerys" class="w-10 h-10 md:w-11 md:h-11 rounded-[11px] md:rounded-xl bg-white shadow-sm border border-slate-200/80 dark:border-surfaceBorder shrink-0 object-contain">
                     <div class="flex flex-col min-w-0">
-                        <h1 class="text-[20px] font-black tracking-tight leading-none text-slate-900 dark:text-white truncate">Escala Geral</h1>
-                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400 mt-1 truncate">Imerys • Britagem ICP 1</p>
+                        <div class="flex items-center gap-2.5">
+                            <h1 class="text-[20px] md:text-[22px] font-black tracking-tight leading-none text-slate-900 dark:text-white truncate">Escala Geral</h1>
+                            <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200/70 dark:border-blue-900/50">Revezamento 3×1</span>
+                        </div>
+                        <p class="text-[10px] md:text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400 mt-1 truncate">Imerys • Britagem ICP 1</p>
                     </div>
                 </div>
-                <div class="flex gap-2 shrink-0">
-                    <button id="install-btn" type="button" onclick="installApp()" class="hidden p-2.5 rounded-full bg-blue-600 text-white hover:scale-105 active:scale-95 transition-transform animate-bounce-subtle shadow-lg shadow-blue-500/30" aria-label="Adicionar à Tela Inicial">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                <div class="flex items-center gap-2 md:gap-2.5 shrink-0">
+                    <button id="install-btn" type="button" onclick="installApp()" title="Instalar aplicativo" class="hidden p-2.5 md:px-3.5 md:py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all animate-bounce-subtle shadow-lg shadow-blue-500/30 flex items-center gap-1.5 cursor-pointer" aria-label="Adicionar à Tela Inicial">
+                        <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        <span class="hidden md:inline text-xs font-extrabold">Instalar</span>
                     </button>
-                    <button type="button" onclick="openInfoModal()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Legenda e Backup">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <button type="button" onclick="openInfoModal()" title="Legenda de horários e Backup" class="p-2.5 md:px-3.5 md:py-2 rounded-full bg-slate-200/90 hover:bg-slate-300/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer" aria-label="Legenda e Backup">
+                        <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="hidden md:inline text-xs font-bold">Legenda &amp; Backup</span>
                     </button>
-                    <button type="button" onclick="exportICS()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Exportar Agenda ICS">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <button type="button" onclick="exportICS()" title="Exportar escala do mês para agenda (.ics)" class="p-2.5 md:px-3.5 md:py-2 rounded-full bg-slate-200/90 hover:bg-slate-300/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer" aria-label="Exportar Agenda ICS">
+                        <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span class="hidden md:inline text-xs font-bold">Exportar Agenda</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="flex-grow p-3 space-y-5 overflow-x-hidden animate-fade-in">
+        <main class="flex-grow p-3 md:p-6 lg:p-7 space-y-5 md:space-y-6 animate-fade-in">
             <!-- Alerta de Ambiente Temporário -->
-            <div id="storage-warning-banner" class="hidden rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-800/60 p-3.5 text-left shadow-sm">
-                <div class="flex items-start justify-between gap-2">
+            <div id="storage-warning-banner" class="hidden rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-800/60 p-3.5 md:p-4 text-left shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div class="flex items-start gap-2.5 min-w-0">
                         <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path></svg>
                         <div class="min-w-0">
@@ -93,146 +133,194 @@
                             <p id="storage-warning-text" class="text-[11px] font-medium text-amber-700/90 dark:text-amber-200/80 mt-1 leading-snug"></p>
                         </div>
                     </div>
-                    <button type="button" onclick="dismissStorageWarning()" class="p-1 rounded-lg text-amber-600 dark:text-amber-400 shrink-0" aria-label="Fechar aviso">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                <div class="flex gap-2 mt-2.5 pl-7">
-                    <button type="button" onclick="exportBackup()" class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-amber-600 text-white active:scale-95 transition-transform">Salvar Backup</button>
-                    <button type="button" onclick="document.getElementById('backup-file-input').click()" class="px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 active:scale-95 transition-transform">Restaurar</button>
-                </div>
-            </div>
-
-            <!-- Navegação de Mês e Atalho Hoje -->
-            <div class="flex items-center justify-between bg-slate-100 dark:bg-surface p-2 rounded-2xl border border-slate-200 dark:border-surfaceBorder shadow-sm">
-                <button type="button" onclick="changeMonth(-1)" class="p-2.5 bg-white dark:bg-oled rounded-xl shadow-sm border border-slate-100 dark:border-surfaceBorder active:scale-90 text-slate-600 dark:text-slate-400 transition-transform" aria-label="Mês anterior">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
-                <div class="flex flex-col items-center justify-center min-w-[150px]">
-                    <button type="button" onclick="goToToday()" class="font-black text-base uppercase tracking-wide text-slate-800 dark:text-slate-100 active:scale-95 transition-transform" id="current-month-display"></button>
-                    <button type="button" id="btn-today" onclick="goToToday()" class="hidden mt-0.5 px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider active:scale-95 transition-transform shadow-sm">Ir para Hoje</button>
-                </div>
-                <button type="button" onclick="changeMonth(1)" class="p-2.5 bg-white dark:bg-oled rounded-xl shadow-sm border border-slate-100 dark:border-surfaceBorder active:scale-90 text-slate-600 dark:text-slate-400 transition-transform" aria-label="Próximo mês">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                </button>
-            </div>
-
-            <!-- Seletor de Turno + Edição de Equipes -->
-            <section>
-                <div class="flex items-center justify-between gap-2 mb-2 px-1">
-                    <div class="flex items-center gap-1.5 min-w-0">
-                        <svg class="w-4 h-4 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path></svg>
-                        <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 truncate">Destacar Turno na Tabela</h2>
+                    <div class="flex items-center gap-2 pl-7 md:pl-0 shrink-0">
+                        <button type="button" onclick="exportBackup()" class="px-3 py-1.5 rounded-lg text-[11px] font-extrabold bg-amber-600 hover:bg-amber-700 text-white active:scale-95 transition-all cursor-pointer">Salvar Backup</button>
+                        <button type="button" onclick="document.getElementById('backup-file-input').click()" class="px-3 py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 hover:bg-amber-100/60 dark:hover:bg-amber-950/50 active:scale-95 transition-all cursor-pointer">Restaurar</button>
+                        <button type="button" onclick="dismissStorageWarning()" class="p-1.5 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-200/40 dark:hover:bg-amber-900/30 shrink-0 cursor-pointer" aria-label="Fechar aviso">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
                     </div>
-                    <button type="button" onclick="openTeamsModal()" class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-surface border border-slate-200 dark:border-surfaceBorder text-[10px] font-extrabold text-blue-600 dark:text-blue-400 active:scale-95 transition-transform shrink-0" aria-label="Editar nomes dos turnos">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        <span>Editar nomes</span>
-                    </button>
                 </div>
-                <div class="grid grid-cols-2 gap-2" id="team-selector">
-                    <button type="button" onclick="setTurma(0)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0"><span class="font-extrabold text-base leading-tight">Turno A</span><span id="team-desc-0" class="text-[10px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Rolly e Aníbal</span></button>
-                    <button type="button" onclick="setTurma(1)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0"><span class="font-extrabold text-base leading-tight">Turno B</span><span id="team-desc-1" class="text-[10px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Marquinho e Matozo</span></button>
-                    <button type="button" onclick="setTurma(2)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0"><span class="font-extrabold text-base leading-tight">Turno C</span><span id="team-desc-2" class="text-[10px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Marcos e Socó</span></button>
-                    <button type="button" onclick="setTurma(3)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0"><span class="font-extrabold text-base leading-tight">Turno D</span><span id="team-desc-3" class="text-[10px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Alex e Tita</span></button>
+            </div>
+
+            <!-- Painel Superior Responsivo: Navegação de Mês + Seletor de Turnos -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-end">
+                <!-- Navegação de Mês e Atalho Hoje -->
+                <div class="lg:col-span-4 flex flex-col">
+                    <div class="hidden lg:flex items-center justify-between mb-2 px-1">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Período de Consulta</span>
+                        <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Teclas ← →</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-100 dark:bg-surface p-2 md:p-2.5 rounded-2xl border border-slate-200 dark:border-surfaceBorder shadow-sm lg:min-h-[64px]">
+                        <button type="button" onclick="changeMonth(-1)" title="Mês anterior (Seta Esquerda)" class="p-2.5 bg-white dark:bg-oled hover:bg-slate-50 dark:hover:bg-zinc-900 rounded-xl shadow-sm border border-slate-100 dark:border-surfaceBorder active:scale-90 text-slate-600 dark:text-slate-400 transition-all cursor-pointer" aria-label="Mês anterior">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <div class="flex flex-col items-center justify-center min-w-[150px] px-2">
+                            <button type="button" onclick="goToToday()" title="Voltar para o mês atual (Tecla T)" class="font-black text-base md:text-[17px] uppercase tracking-wide text-slate-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 active:scale-95 transition-all cursor-pointer" id="current-month-display"></button>
+                            <button type="button" id="btn-today" onclick="goToToday()" class="hidden mt-0.5 px-2.5 py-0.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-sm cursor-pointer">Ir para Hoje</button>
+                        </div>
+                        <button type="button" onclick="changeMonth(1)" title="Próximo mês (Seta Direita)" class="p-2.5 bg-white dark:bg-oled hover:bg-slate-50 dark:hover:bg-zinc-900 rounded-xl shadow-sm border border-slate-100 dark:border-surfaceBorder active:scale-90 text-slate-600 dark:text-slate-400 transition-all cursor-pointer" aria-label="Próximo mês">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
                 </div>
-            </section>
+
+                <!-- Seletor de Turno + Edição de Equipes -->
+                <section class="lg:col-span-8">
+                    <div class="flex items-center justify-between gap-2 mb-2 px-1">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <svg class="w-4 h-4 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path></svg>
+                            <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 truncate">Destacar Turno na Tabela</h2>
+                        </div>
+                        <button type="button" onclick="openTeamsModal()" class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200/80 dark:bg-surface dark:hover:bg-surfaceBorder border border-slate-200 dark:border-surfaceBorder text-[10px] font-extrabold text-blue-600 dark:text-blue-400 active:scale-95 transition-all shrink-0 cursor-pointer" aria-label="Editar nomes dos turnos">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <span>Editar nomes</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-2.5" id="team-selector">
+                        <button type="button" onclick="setTurma(0)" class="team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px]"><span class="font-extrabold text-base leading-tight">Turno A</span><span id="team-desc-0" class="text-[10px] md:text-[11px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Rolly e Aníbal</span></button>
+                        <button type="button" onclick="setTurma(1)" class="team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px]"><span class="font-extrabold text-base leading-tight">Turno B</span><span id="team-desc-1" class="text-[10px] md:text-[11px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Marquinho e Matozo</span></button>
+                        <button type="button" onclick="setTurma(2)" class="team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px]"><span class="font-extrabold text-base leading-tight">Turno C</span><span id="team-desc-2" class="text-[10px] md:text-[11px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Marcos e Socó</span></button>
+                        <button type="button" onclick="setTurma(3)" class="team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px]"><span class="font-extrabold text-base leading-tight">Turno D</span><span id="team-desc-3" class="text-[10px] md:text-[11px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Alex e Tita</span></button>
+                    </div>
+                </section>
+            </div>
 
             <!-- Tabela Geral Unificada -->
             <section class="relative">
-                <div class="flex items-center justify-between px-1 mb-2">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Visão do Mês</span>
-                    <span class="text-[10px] font-bold text-blue-500 animate-pulse">← Deslize →</span>
+                <div class="flex items-center justify-between gap-2 px-1 mb-2">
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Visão Completa do Mês</span>
+                        <div class="hidden md:flex items-center gap-3 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>Manhã</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-500"></span>Tarde</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-500"></span>Noite</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span>Folga</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Atestado</span>
+                        </div>
+                    </div>
+                    <span id="table-scroll-hint" class="text-[10px] font-bold text-blue-500 animate-pulse">← Deslize →</span>
                 </div>
-                <div class="overflow-x-auto table-scroll no-scrollbar rounded-2xl border border-slate-200 dark:border-surfaceBorder shadow-sm bg-white dark:bg-surface">
+                <div class="overflow-x-auto table-scroll rounded-2xl border border-slate-200 dark:border-surfaceBorder shadow-sm bg-white dark:bg-surface">
                     <table class="w-full text-center border-collapse whitespace-nowrap" id="main-table"></table>
                 </div>
-                <p class="text-[10px] font-medium text-slate-400 dark:text-slate-500 text-center mt-2">Dica: Toque num dia do seu turno para notas, extras ou atestado.</p>
+                <p class="text-[10px] md:text-[11px] font-medium text-slate-400 dark:text-slate-500 text-center md:text-left md:px-1 mt-2">
+                    <span class="md:hidden">Dica: Toque num dia do seu turno para notas, extras ou atestado.</span>
+                    <span class="hidden md:inline">Dica: Clique em qualquer dia do seu turno destacado para registrar observações, trocas/extras ou atestado médico. Passe o mouse sobre um dia para ver detalhes.</span>
+                </p>
             </section>
 
             <!-- Resumo Mensal -->
-            <section class="grid grid-cols-4 gap-2 pt-1">
-                <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-xl p-2.5 text-center">
-                    <div class="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase">Manhãs</div>
-                    <div id="count-M" class="text-xl font-black text-blue-800 dark:text-blue-300">0</div>
+            <section class="grid grid-cols-4 gap-2 md:gap-4 pt-1">
+                <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:flex md:items-center md:justify-between md:text-left transition-colors">
+                    <div>
+                        <div class="text-[10px] md:text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide">Manhãs</div>
+                        <div class="hidden md:block text-[11px] font-semibold text-blue-600/70 dark:text-blue-300/60 mt-0.5">05:00 – 13:00</div>
+                    </div>
+                    <div id="count-M" class="text-xl md:text-3xl font-black text-blue-800 dark:text-blue-300">0</div>
                 </div>
-                <div class="bg-orange-50 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900/50 rounded-xl p-2.5 text-center">
-                    <div class="text-[10px] font-bold text-orange-700 dark:text-orange-400 uppercase">Tardes</div>
-                    <div id="count-T" class="text-xl font-black text-orange-800 dark:text-orange-300">0</div>
+                <div class="bg-orange-50 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900/50 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:flex md:items-center md:justify-between md:text-left transition-colors">
+                    <div>
+                        <div class="text-[10px] md:text-xs font-bold text-orange-700 dark:text-orange-400 uppercase tracking-wide">Tardes</div>
+                        <div class="hidden md:block text-[11px] font-semibold text-orange-600/70 dark:text-orange-300/60 mt-0.5">13:00 – 21:00</div>
+                    </div>
+                    <div id="count-T" class="text-xl md:text-3xl font-black text-orange-800 dark:text-orange-300">0</div>
                 </div>
-                <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-xl p-2.5 text-center">
-                    <div class="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase">Noites</div>
-                    <div id="count-N" class="text-xl font-black text-indigo-800 dark:text-indigo-300">0</div>
+                <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:flex md:items-center md:justify-between md:text-left transition-colors">
+                    <div>
+                        <div class="text-[10px] md:text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wide">Noites</div>
+                        <div class="hidden md:block text-[11px] font-semibold text-indigo-600/70 dark:text-indigo-300/60 mt-0.5">21:00 – 05:00</div>
+                    </div>
+                    <div id="count-N" class="text-xl md:text-3xl font-black text-indigo-800 dark:text-indigo-300">0</div>
                 </div>
-                <div class="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900/50 rounded-xl p-2.5 text-center">
-                    <div class="text-[10px] font-bold text-green-700 dark:text-green-400 uppercase">Folgas</div>
-                    <div id="count-F" class="text-xl font-black text-green-800 dark:text-green-300">0</div>
+                <div class="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900/50 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:flex md:items-center md:justify-between md:text-left transition-colors">
+                    <div>
+                        <div class="text-[10px] md:text-xs font-bold text-green-700 dark:text-green-400 uppercase tracking-wide">Folgas</div>
+                        <div class="hidden md:block text-[11px] font-semibold text-green-600/70 dark:text-green-300/60 mt-0.5">Descanso</div>
+                    </div>
+                    <div id="count-F" class="text-xl md:text-3xl font-black text-green-800 dark:text-green-300">0</div>
                 </div>
             </section>
 
-            <!-- Resumo de Atestados Médicos & Retorno -->
-            <section id="atestado-summary-section" class="hidden bg-rose-50/80 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4">
-                <div class="flex items-center justify-between gap-2 mb-3">
-                    <h3 class="text-[11px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 flex items-center gap-2">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                        Atestado Médico &amp; Retorno
+            <!-- Grade Inferior Responsiva: Atestados & Feriados lado a lado no PC -->
+            <div id="bottom-cards-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 items-start">
+                <!-- Resumo de Atestados Médicos & Retorno -->
+                <section id="atestado-summary-section" class="hidden bg-rose-50/80 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4 md:p-5">
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <h3 class="text-[11px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            Atestado Médico &amp; Retorno
+                        </h3>
+                        <span id="atestado-summary-badge" class="px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-[10px] font-black"></span>
+                    </div>
+                    <div id="atestado-summary-container" class="space-y-2.5"></div>
+                </section>
+
+                <!-- Feriados do Mês -->
+                <section id="holidays-list" class="bg-slate-50 dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-2xl p-4 md:p-5 hidden">
+                    <h3 class="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Feriados do Mês
                     </h3>
-                    <span id="atestado-summary-badge" class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-[10px] font-black"></span>
-                </div>
-                <div id="atestado-summary-container" class="space-y-2.5"></div>
-            </section>
-
-            <!-- Feriados do Mês -->
-            <section id="holidays-list" class="bg-slate-50 dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-2xl p-4 hidden">
-                <h3 class="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Feriados do Mês
-                </h3>
-                <div id="holidays-container" class="space-y-2"></div>
-            </section>
+                    <div id="holidays-container" class="space-y-2"></div>
+                </section>
+            </div>
         </main>
 
+        <!-- Rodapé Discreto Exclusivo para PC -->
+        <footer class="hidden md:flex items-center justify-between px-7 pt-3 mt-auto border-t border-slate-100 dark:border-surfaceBorder text-[11px] font-medium text-slate-400 dark:text-slate-500">
+            <span>Escala Imerys • Britagem ICP 1 • Funcionamento 100% Offline</span>
+            <div class="flex items-center gap-3">
+                <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">→</kbd> Meses</span>
+                <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">T</kbd> Hoje</span>
+                <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">Esc</kbd> Fechar</span>
+            </div>
+        </footer>
+
         <!-- Modal Editar Nomes das Equipes -->
-        <div id="teams-modal" role="dialog" aria-modal="true" aria-labelledby="teams-modal-title" onclick="if(event.target===this) closeTeamsModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end transition-opacity duration-300 opacity-0">
-            <div id="teams-modal-content" class="bg-white dark:bg-surface border-t border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] p-6 w-full max-w-md mx-auto transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe max-h-[90dvh] overflow-y-auto no-scrollbar">
-                <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+        <div id="teams-modal" role="dialog" aria-modal="true" aria-labelledby="teams-modal-title" onclick="if(event.target===this) closeTeamsModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end md:justify-center md:items-center md:p-6 transition-opacity duration-300 opacity-0">
+            <div id="teams-modal-content" class="modal-sheet bg-white dark:bg-surface border-t md:border border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] md:rounded-[2rem] p-6 w-full max-w-md md:max-w-lg mx-auto shadow-2xl pb-safe md:pb-6 max-h-[90dvh] overflow-y-auto no-scrollbar">
+                <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
                 <div class="flex justify-between items-center mb-1.5">
                     <h3 id="teams-modal-title" class="text-lg font-black text-slate-800 dark:text-white leading-tight">Editar Equipes dos Turnos</h3>
-                    <button type="button" onclick="closeTeamsModal()" class="p-2 bg-slate-100 dark:bg-surfaceBorder rounded-full text-slate-500 dark:text-slate-300" aria-label="Fechar editor de equipes">
+                    <button type="button" onclick="closeTeamsModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer transition-colors" aria-label="Fechar editor de equipes">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-4">Atualize os nomes em casos de férias, substituições ou trocas de turno.</p>
 
                 <form onsubmit="event.preventDefault(); saveTeamNames();" class="space-y-3">
-                    <div>
-                        <label for="team-input-0" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno A</label>
-                        <input id="team-input-0" type="text" maxlength="40" autocomplete="off" placeholder="Rolly e Aníbal" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
-                    </div>
-                    <div>
-                        <label for="team-input-1" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno B</label>
-                        <input id="team-input-1" type="text" maxlength="40" autocomplete="off" placeholder="Marquinho e Matozo" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
-                    </div>
-                    <div>
-                        <label for="team-input-2" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno C</label>
-                        <input id="team-input-2" type="text" maxlength="40" autocomplete="off" placeholder="Marcos e Socó" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
-                    </div>
-                    <div>
-                        <label for="team-input-3" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno D</label>
-                        <input id="team-input-3" type="text" maxlength="40" autocomplete="off" placeholder="Alex e Tita" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label for="team-input-0" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno A</label>
+                            <input id="team-input-0" type="text" maxlength="40" autocomplete="off" placeholder="Rolly e Aníbal" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                        </div>
+                        <div>
+                            <label for="team-input-1" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno B</label>
+                            <input id="team-input-1" type="text" maxlength="40" autocomplete="off" placeholder="Marquinho e Matozo" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                        </div>
+                        <div>
+                            <label for="team-input-2" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno C</label>
+                            <input id="team-input-2" type="text" maxlength="40" autocomplete="off" placeholder="Marcos e Socó" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                        </div>
+                        <div>
+                            <label for="team-input-3" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno D</label>
+                            <input id="team-input-3" type="text" maxlength="40" autocomplete="off" placeholder="Alex e Tita" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                        </div>
                     </div>
 
-                    <div class="flex gap-3 pt-3 pb-2">
-                        <button type="button" onclick="resetTeamNames()" class="w-2/5 py-3.5 rounded-2xl font-bold text-xs text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-surfaceBorder border border-slate-200 dark:border-surfaceBorder active:scale-95 transition-transform">Padrão</button>
-                        <button type="submit" class="w-3/5 py-3.5 rounded-2xl font-bold text-white bg-blue-600 shadow-lg shadow-blue-500/30 active:scale-95 transition-transform">Salvar Equipes</button>
+                    <div class="flex gap-3 pt-3 pb-2 md:pb-0">
+                        <button type="button" onclick="resetTeamNames()" class="w-2/5 py-3.5 rounded-2xl font-bold text-xs text-slate-700 dark:text-slate-300 bg-slate-100 hover:bg-slate-200/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 border border-slate-200 dark:border-surfaceBorder active:scale-95 transition-all cursor-pointer">Padrão</button>
+                        <button type="submit" class="w-3/5 py-3.5 rounded-2xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 active:scale-95 transition-all cursor-pointer">Salvar Equipes</button>
                     </div>
                 </form>
             </div>
         </div>
 
         <!-- Modal Instalação iOS -->
-        <div id="ios-install-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) closeIosInstallPrompt()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[70] hidden flex-col justify-end items-center transition-opacity duration-300 opacity-0 px-4 pb-8">
-            <div id="ios-install-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-sm transform translate-y-full transition-transform duration-300 shadow-2xl text-center">
-                <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+        <div id="ios-install-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) closeIosInstallPrompt()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[70] hidden flex-col justify-end md:justify-center items-center transition-opacity duration-300 opacity-0 px-4 pb-8 md:pb-4">
+            <div id="ios-install-content" class="modal-sheet bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-sm shadow-2xl text-center">
+                <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
                 <img id="ios-modal-icon" alt="Ícone Escala Imerys" class="w-16 h-16 mx-auto mb-3 rounded-[16px] bg-white shadow-md border border-slate-200 dark:border-surfaceBorder object-contain">
                 <h3 class="text-xl font-black text-slate-800 dark:text-white mb-1.5">Instalar no iPhone</h3>
                 <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-5">Adicione à tela inicial com o ícone oficial da Imerys.</p>
@@ -246,16 +334,16 @@
                         <span class="text-sm">Role e toque em <b>"Adicionar à Tela de Início"</b>.</span>
                     </div>
                 </div>
-                <button type="button" onclick="closeIosInstallPrompt()" class="mt-5 w-full py-3.5 rounded-2xl font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-surfaceBorder active:scale-95 transition-transform">Entendi</button>
+                <button type="button" onclick="closeIosInstallPrompt()" class="mt-5 w-full py-3.5 rounded-2xl font-bold text-slate-700 dark:text-slate-200 bg-slate-200 hover:bg-slate-300/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 active:scale-95 transition-all cursor-pointer">Entendi</button>
             </div>
         </div>
 
         <!-- Modal Legenda e Backup -->
         <div id="info-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) closeInfoModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-center items-center transition-opacity duration-300 opacity-0 px-4">
-            <div id="info-modal-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-xs transform scale-95 transition-transform duration-300 shadow-2xl max-h-[88dvh] overflow-y-auto no-scrollbar">
+            <div id="info-modal-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-xs md:max-w-md transform scale-95 transition-transform duration-300 shadow-2xl max-h-[88dvh] overflow-y-auto no-scrollbar">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-black text-slate-800 dark:text-white leading-tight">Legenda de Horários</h3>
-                    <button type="button" onclick="closeInfoModal()" class="p-2 bg-slate-100 dark:bg-surfaceBorder rounded-full text-slate-500 dark:text-slate-300" aria-label="Fechar legenda">
+                    <button type="button" onclick="closeInfoModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer transition-colors" aria-label="Fechar legenda">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -282,8 +370,8 @@
                     </div>
                     <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2.5 text-center">Backup de Equipes, Notas e Atestados</span>
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="exportBackup()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">Exportar</button>
-                        <button type="button" onclick="document.getElementById('backup-file-input').click()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">Importar</button>
+                        <button type="button" onclick="exportBackup()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer">Exportar</button>
+                        <button type="button" onclick="document.getElementById('backup-file-input').click()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer">Importar</button>
                         <input type="file" id="backup-file-input" accept=".json" class="hidden" onchange="importBackup(event)">
                     </div>
                 </div>
@@ -291,12 +379,12 @@
         </div>
 
         <!-- Modal Notas, Trocas e Atestado -->
-        <div id="note-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) requestCloseModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end transition-opacity duration-300 opacity-0">
-            <div id="modal-content" class="bg-white dark:bg-surface border-t border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] p-6 w-full max-w-md mx-auto transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe max-h-[90dvh] overflow-y-auto no-scrollbar">
-                <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+        <div id="note-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) requestCloseModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end md:justify-center md:items-center md:p-6 transition-opacity duration-300 opacity-0">
+            <div id="modal-content" class="modal-sheet bg-white dark:bg-surface border-t md:border border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] md:rounded-[2rem] p-6 w-full max-w-md md:max-w-lg mx-auto shadow-2xl pb-safe md:pb-6 max-h-[90dvh] overflow-y-auto no-scrollbar">
+                <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
                 <div class="flex justify-between items-center mb-4">
                     <h3 id="modal-date-title" class="text-lg font-black text-slate-800 dark:text-white leading-tight"></h3>
-                    <button type="button" onclick="requestCloseModal()" class="p-2 bg-slate-100 dark:bg-surfaceBorder rounded-full text-slate-500 dark:text-slate-300" aria-label="Fechar janela">
+                    <button type="button" onclick="requestCloseModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer transition-colors" aria-label="Fechar janela">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -305,11 +393,11 @@
                 <div class="mb-4">
                     <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Troca / Hora Extra</span>
                     <div class="grid grid-cols-5 gap-1.5">
-                        <button type="button" data-ov="" onclick="selectOverride('')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95">Normal</button>
-                        <button type="button" data-ov="M" onclick="selectOverride('M')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95">Extra M</button>
-                        <button type="button" data-ov="T" onclick="selectOverride('T')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95">Extra T</button>
-                        <button type="button" data-ov="N" onclick="selectOverride('N')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95">Extra N</button>
-                        <button type="button" data-ov="F" onclick="selectOverride('F')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95">Folga</button>
+                        <button type="button" data-ov="" onclick="selectOverride('')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 cursor-pointer">Normal</button>
+                        <button type="button" data-ov="M" onclick="selectOverride('M')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 cursor-pointer">Extra M</button>
+                        <button type="button" data-ov="T" onclick="selectOverride('T')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 cursor-pointer">Extra T</button>
+                        <button type="button" data-ov="N" onclick="selectOverride('N')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 cursor-pointer">Extra N</button>
+                        <button type="button" data-ov="F" onclick="selectOverride('F')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 cursor-pointer">Folga</button>
                     </div>
                 </div>
 
@@ -325,7 +413,7 @@
                                 <span id="atestado-subtitle" class="block text-[10px] font-semibold text-rose-600/80 dark:text-rose-300/80 mt-0.5 truncate">Marcar dias e calcular retorno</span>
                             </div>
                         </div>
-                        <button type="button" id="atestado-toggle-btn" onclick="toggleAtestadoMode()" role="switch" aria-checked="false" class="w-12 h-7 rounded-full bg-slate-300 dark:bg-surfaceBorder p-1 transition-colors shrink-0 flex items-center">
+                        <button type="button" id="atestado-toggle-btn" onclick="toggleAtestadoMode()" role="switch" aria-checked="false" class="w-12 h-7 rounded-full bg-slate-300 dark:bg-surfaceBorder p-1 transition-colors shrink-0 flex items-center cursor-pointer">
                             <span id="atestado-toggle-knob" class="w-5 h-5 rounded-full bg-white shadow-sm transform translate-x-0 transition-transform"></span>
                         </button>
                     </div>
@@ -334,37 +422,37 @@
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-[11px] font-extrabold text-rose-900 dark:text-rose-200">Quantidade de dias:</span>
                             <div class="flex items-center gap-1.5">
-                                <button type="button" onclick="adjustAtestadoDays(-1)" aria-label="Diminuir dias" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90">−</button>
+                                <button type="button" onclick="adjustAtestadoDays(-1)" aria-label="Diminuir dias" class="w-9 h-9 rounded-xl bg-white hover:bg-rose-50 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90 cursor-pointer">−</button>
                                 <input type="number" id="atestado-days-input" inputmode="numeric" pattern="[0-9]*" min="1" max="180" value="1" oninput="onAtestadoDaysInput()" class="w-14 h-9 text-center text-base font-black text-rose-800 dark:text-rose-200 bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 rounded-xl outline-none focus:ring-2 focus:ring-rose-500">
-                                <button type="button" onclick="adjustAtestadoDays(1)" aria-label="Aumentar dias" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90">+</button>
+                                <button type="button" onclick="adjustAtestadoDays(1)" aria-label="Aumentar dias" class="w-9 h-9 rounded-xl bg-white hover:bg-rose-50 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90 cursor-pointer">+</button>
                             </div>
                         </div>
                         <div class="grid grid-cols-5 gap-1.5">
-                            <button type="button" onclick="setAtestadoDays(1)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">1d</button>
-                            <button type="button" onclick="setAtestadoDays(3)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">3d</button>
-                            <button type="button" onclick="setAtestadoDays(5)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">5d</button>
-                            <button type="button" onclick="setAtestadoDays(7)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">7d</button>
-                            <button type="button" onclick="setAtestadoDays(15)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">15d</button>
+                            <button type="button" onclick="setAtestadoDays(1)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white hover:bg-rose-100/60 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 cursor-pointer">1d</button>
+                            <button type="button" onclick="setAtestadoDays(3)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white hover:bg-rose-100/60 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 cursor-pointer">3d</button>
+                            <button type="button" onclick="setAtestadoDays(5)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white hover:bg-rose-100/60 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 cursor-pointer">5d</button>
+                            <button type="button" onclick="setAtestadoDays(7)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white hover:bg-rose-100/60 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 cursor-pointer">7d</button>
+                            <button type="button" onclick="setAtestadoDays(15)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white hover:bg-rose-100/60 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 cursor-pointer">15d</button>
                         </div>
                         <div id="atestado-preview-box" class="rounded-xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200 dark:border-sky-900/60 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-200 leading-snug"></div>
                     </div>
                 </div>
 
                 <!-- Observação -->
-                <textarea id="note-text" oninput="markModalDirty()" class="w-full h-24 p-3.5 text-base font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600" placeholder="Observações para este dia..."></textarea>
+                <textarea id="note-text" oninput="markModalDirty()" class="w-full h-24 md:h-28 p-3.5 text-base font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600" placeholder="Observações para este dia..."></textarea>
 
                 <!-- Aviso de alterações não salvas -->
                 <div id="unsaved-guard" class="hidden mt-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 px-3 py-2.5 flex items-center justify-between gap-2">
                     <span class="text-xs font-extrabold text-amber-800 dark:text-amber-300">Alterações não salvas</span>
                     <div class="flex items-center gap-1.5 shrink-0">
-                        <button type="button" onclick="closeModal()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder active:scale-95">Descartar</button>
-                        <button type="button" onclick="saveNote()" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-white bg-blue-600 active:scale-95">Salvar</button>
+                        <button type="button" onclick="closeModal()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder active:scale-95 cursor-pointer">Descartar</button>
+                        <button type="button" onclick="saveNote()" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 cursor-pointer">Salvar</button>
                     </div>
                 </div>
 
-                <div class="flex gap-3 mt-4 pb-2">
-                    <button type="button" onclick="deleteNote()" class="w-1/3 py-3.5 rounded-2xl font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 active:scale-95 transition-transform">Limpar</button>
-                    <button type="button" onclick="saveNote()" class="w-2/3 py-3.5 rounded-2xl font-bold text-white bg-blue-600 shadow-lg shadow-blue-500/30 active:scale-95 transition-transform">Salvar</button>
+                <div class="flex gap-3 mt-4 pb-2 md:pb-0">
+                    <button type="button" onclick="deleteNote()" class="w-1/3 py-3.5 rounded-2xl font-bold text-red-600 dark:text-red-400 bg-red-50 hover:bg-red-100/80 dark:bg-red-900/20 dark:hover:bg-red-900/35 border border-red-100 dark:border-red-900/30 active:scale-95 transition-all cursor-pointer">Limpar</button>
+                    <button type="button" onclick="saveNote()" class="w-2/3 py-3.5 rounded-2xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 active:scale-95 transition-all cursor-pointer">Salvar</button>
                 </div>
             </div>
         </div>
@@ -377,7 +465,7 @@
     </div>
 
     <script>
-        /* 1. MOTOR DE ÍCONE OFICIAL IMERYS HD (iOS + Android Adaptive/Maskable) */
+        /* 1. MOTOR DE ÍCONE OFICIAL IMERYS HD (iOS + Android + Desktop) */
         const IMERYS_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
             <defs>
                 <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f2f6fc"/></linearGradient>
@@ -492,16 +580,17 @@
 
         /* 2. CONTROLE CENTRAL DE MODAIS (Scroll-Lock + Proteção contra Race Condition) */
         const modalTimers = { note: null, info: null, ios: null, teams: null };
-        function syncBodyScrollLock() {
-            const ids = ['note-modal', 'info-modal', 'ios-install-modal', 'teams-modal'];
-            const anyOpen = ids.some(id => {
+        function isAnyModalOpen() {
+            return ['note-modal', 'info-modal', 'ios-install-modal', 'teams-modal'].some(id => {
                 const el = document.getElementById(id);
                 return el && !el.classList.contains('hidden');
             });
-            document.body.classList.toggle('overflow-hidden', anyOpen);
+        }
+        function syncBodyScrollLock() {
+            document.body.classList.toggle('overflow-hidden', isAnyModalOpen());
         }
 
-        /* 3. INSTALAÇÃO PWA (Android + iOS) */
+        /* 3. INSTALAÇÃO PWA (Android + iOS + Desktop) */
         function isIosDevice() {
             const ua = window.navigator.userAgent.toLowerCase();
             return /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -534,13 +623,13 @@
             if (modalTimers.ios) { clearTimeout(modalTimers.ios); modalTimers.ios = null; }
             const md = document.getElementById('ios-install-modal'), ct = document.getElementById('ios-install-content');
             md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
-            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.remove('translate-y-full');
+            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.add('is-open');
             syncBodyScrollLock();
         }
         function closeIosInstallPrompt() {
             haptic();
             const md = document.getElementById('ios-install-modal'), ct = document.getElementById('ios-install-content');
-            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.add('translate-y-full');
+            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.remove('is-open');
             if (modalTimers.ios) clearTimeout(modalTimers.ios);
             modalTimers.ios = setTimeout(() => {
                 md.classList.add('hidden'); md.classList.remove('flex');
@@ -836,7 +925,7 @@
             if (banner && bannerText) {
                 if (isEphemeral && !DB.warningDismissed) {
                     bannerText.innerText = (proto === 'file:' || proto === 'content:')
-                        ? 'Você abriu o arquivo direto do celular. Para manter salvo sempre, use o link do GitHub Pages ou salve um Backup.'
+                        ? 'Você abriu o arquivo direto do aparelho. Para manter salvo sempre, use o link do GitHub Pages ou salve um Backup.'
                         : 'Ambiente de pré-visualização temporário. Use o link publicado ou salve um Backup antes de fechar.';
                     banner.classList.remove('hidden');
                 } else { banner.classList.add('hidden'); }
@@ -882,13 +971,13 @@
             }
             const md = document.getElementById('teams-modal'), ct = document.getElementById('teams-modal-content');
             md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
-            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.remove('translate-y-full');
+            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.add('is-open');
             syncBodyScrollLock();
         }
         function closeTeamsModal() {
             haptic();
             const md = document.getElementById('teams-modal'), ct = document.getElementById('teams-modal-content');
-            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.add('translate-y-full');
+            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.remove('is-open');
             if (modalTimers.teams) clearTimeout(modalTimers.teams);
             modalTimers.teams = setTimeout(() => {
                 md.classList.add('hidden'); md.classList.remove('flex');
@@ -919,7 +1008,7 @@
             showToast(ok ? 'Nomes das equipes atualizados!' : 'Aviso: salvamento bloqueado! Use o Backup em (i).');
         }
 
-        /* 8. NAVEGAÇÃO E RENDERIZAÇÃO PRINCIPAL */
+        /* 8. NAVEGAÇÃO, LAYOUT ADAPTATIVO E RENDERIZAÇÃO PRINCIPAL */
         function setTurma(index) {
             haptic(); currentTurma = index;
             const saved = DB.set('imerys_turma', index);
@@ -939,8 +1028,25 @@
         function scrollToTodayColumn() {
             setTimeout(() => {
                 const colToday = document.getElementById('col-today'), sc = document.querySelector('.table-scroll');
-                if (colToday && sc) sc.scrollLeft = Math.max(0, colToday.offsetLeft - Math.max(124, Math.floor((sc.clientWidth - colToday.offsetWidth) / 2)));
+                if (colToday && sc && sc.scrollWidth > sc.clientWidth + 2) {
+                    sc.scrollLeft = Math.max(0, colToday.offsetLeft - Math.max(124, Math.floor((sc.clientWidth - colToday.offsetWidth) / 2)));
+                }
             }, 90);
+        }
+        function updateTableScrollHint() {
+            const sc = document.querySelector('.table-scroll'), hint = document.getElementById('table-scroll-hint');
+            if (!sc || !hint) return;
+            const overflows = sc.scrollWidth > sc.clientWidth + 4;
+            hint.classList.toggle('hidden', !overflows);
+        }
+        function syncBottomCardsLayout(hasAtestados, hasHolidays) {
+            const atSec = document.getElementById('atestado-summary-section');
+            const hEl = document.getElementById('holidays-list');
+            const grid = document.getElementById('bottom-cards-grid');
+            if (!atSec || !hEl || !grid) return;
+            atSec.classList.toggle('lg:col-span-2', hasAtestados && !hasHolidays);
+            hEl.classList.toggle('lg:col-span-2', hasHolidays && !hasAtestados);
+            grid.classList.toggle('hidden', !hasAtestados && !hasHolidays);
         }
 
         function renderApp(shouldScrollToday = false) {
@@ -956,7 +1062,7 @@
 
                 document.querySelectorAll('.team-btn').forEach((btn, i) => {
                     const act = i === currentTurma;
-                    btn.className = `team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0 ${act ? 'bg-slate-900 border-slate-900 text-white dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-md' : 'border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-surface text-slate-800 dark:text-slate-100'}`;
+                    btn.className = `team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px] ${act ? 'bg-slate-900 border-slate-900 text-white dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-md' : 'border-slate-200 dark:border-surfaceBorder bg-slate-50 hover:bg-slate-100 dark:bg-surface dark:hover:bg-zinc-900 text-slate-800 dark:text-slate-100'}`;
                     const descEl = document.getElementById(`team-desc-${i}`);
                     if (descEl) descEl.innerText = teamNames[i];
                 });
@@ -976,37 +1082,50 @@
                 const counts = { M: 0, T: 0, N: 0, F: 0 };
                 let monthAtDaysCount = 0;
 
-                let tableHTML = '<thead><tr class="bg-slate-100 dark:bg-surfaceBorder/40 border-b border-slate-200 dark:border-surfaceBorder"><th class="sticky left-0 z-20 bg-slate-100 dark:bg-surface p-2 border-r border-slate-200 dark:border-surfaceBorder min-w-[126px] max-w-[144px] text-left pl-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] text-xs font-black uppercase text-slate-600 dark:text-slate-300">Turnos</th>';
+                let tableHTML = '<thead><tr class="bg-slate-100 dark:bg-surfaceBorder/40 border-b border-slate-200 dark:border-surfaceBorder"><th class="sticky left-0 z-20 bg-slate-100 dark:bg-surface p-2 md:px-4 md:py-2.5 border-r border-slate-200 dark:border-surfaceBorder min-w-[126px] max-w-[144px] md:min-w-[162px] md:max-w-[180px] text-left pl-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] text-xs font-black uppercase text-slate-600 dark:text-slate-300">Turnos</th>';
                 for (let day = 1; day <= daysInMonth; day++) {
                     const isToday = isCMonth && day === today.getDate(), holi = holidays[day];
                     const dow = new Date(year, month, day, 12, 0, 0).getDay(), isSunday = dow === 0;
                     const dayColor = holi ? 'text-red-600 dark:text-red-400' : (isToday ? 'text-blue-600 dark:text-blue-400' : (isSunday ? 'text-red-500 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'));
                     if (holi) hListHTML += `<div class="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-surfaceBorder last:border-0 last:pb-0"><span class="font-black text-red-500 dark:text-red-400 text-sm min-w-[22px] text-right">${day}</span><span class="text-slate-700 dark:text-slate-300 font-medium text-sm leading-tight">${escapeHTML(holi)}</span></div>`;
                     const todayHeaderStyle = isToday ? 'bg-blue-100/75 dark:bg-blue-950/60 border-b-2 border-b-blue-500' : '';
-                    tableHTML += `<th ${isToday ? 'id="col-today"' : ''} class="p-1.5 min-w-[40px] border-r border-slate-200 dark:border-surfaceBorder ${todayHeaderStyle}"><div class="flex flex-col items-center"><span class="text-[13px] font-black leading-tight ${dayColor}">${day}</span><span class="text-[9px] font-bold ${isSunday || holi || isToday ? 'opacity-95' : 'opacity-60'} ${dayColor}">${DOW_NAMES[dow]}</span></div></th>`;
+                    const holiTitle = holi ? ` title="${escapeHTML(`Dia ${day}/${String(month + 1).padStart(2, '0')} • Feriado: ${holi}`)}"` : '';
+                    tableHTML += `<th ${isToday ? 'id="col-today"' : ''}${holiTitle} class="p-1.5 md:py-2 md:px-0.5 min-w-[40px] xl:min-w-[34px] border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 ${todayHeaderStyle}"><div class="flex flex-col items-center"><span class="text-[13px] font-black leading-tight ${dayColor}">${day}</span><span class="text-[9px] font-bold ${isSunday || holi || isToday ? 'opacity-95' : 'opacity-60'} ${dayColor}">${DOW_NAMES[dow]}</span></div></th>`;
                 }
                 tableHTML += '</tr></thead><tbody>';
 
                 TEAM_LETTERS.forEach((teamLtr, idx) => {
                     const isSel = idx === currentTurma, rowBg = isSel ? 'bg-white dark:bg-oled' : 'bg-slate-50 dark:bg-surface';
                     const safeName = escapeHTML(teamNames[idx]);
-                    tableHTML += `<tr class="${rowBg} border-b border-slate-200 dark:border-surfaceBorder last:border-b-0"><td onclick="setTurma(${idx})" class="sticky left-0 z-20 p-2 pl-3 border-r border-slate-200 dark:border-surfaceBorder align-middle text-left max-w-[144px] ${rowBg} cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)]"><div class="flex flex-col items-start justify-center min-w-0"><span class="font-black text-sm leading-tight ${isSel ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}">Turno ${teamLtr}</span><span class="text-[9px] font-semibold truncate w-full max-w-[116px] ${isSel ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}" title="${safeName}">${safeName}</span></div></td>`;
+                    tableHTML += `<tr class="${rowBg} border-b border-slate-200 dark:border-surfaceBorder last:border-b-0"><td onclick="setTurma(${idx})" class="sticky left-0 z-20 p-2 pl-3 md:px-4 md:py-2.5 border-r border-slate-200 dark:border-surfaceBorder align-middle text-left max-w-[144px] md:max-w-[180px] ${rowBg} cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] hover:bg-slate-100/70 dark:hover:bg-zinc-900/60 transition-colors"><div class="flex flex-col items-start justify-center min-w-0"><span class="font-black text-sm leading-tight ${isSel ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}">Turno ${teamLtr}</span><span class="text-[9px] md:text-[10px] font-semibold truncate w-full max-w-[116px] md:max-w-[148px] ${isSel ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}" title="${safeName}">${safeName}</span></div></td>`;
                     for (let day = 1; day <= daysInMonth; day++) {
                         const dateKey = formatDateKey(year, month, day), baseShift = getShift(year, month, day, idx);
                         const ovShift = overridesDb[`${dateKey}_${idx}`], effShift = ovShift || baseShift;
                         const isToday = isCMonth && day === today.getDate();
+                        const holi = holidays[day];
                         if (isSel) {
                             const atInfo = findAtestadoOnDate(dateKey, idx), isRet = Boolean(returnDateMap[dateKey]) && !atInfo;
                             let code = effShift, style = SHIFTS_CONFIG[effShift].style;
                             if (atInfo) { code = 'AT'; style = SHIFTS_CONFIG.AT.style; monthAtDaysCount++; } else { counts[effShift]++; }
                             const ring = (!atInfo && ovShift) ? ' ring-2 ring-inset ring-amber-400 dark:ring-amber-500' : (isRet ? ' ring-2 ring-inset ring-sky-500 dark:ring-sky-400' : '');
                             const sub = atInfo ? `<span class="text-[8px] font-black leading-none opacity-85 mt-0.5">${atInfo.dayIndex}/${atInfo.totalDays}</span>` : (isRet ? '<span class="text-[7px] font-black uppercase tracking-tight text-sky-700 dark:text-sky-300 leading-none mt-0.5">Volta</span>' : '');
-                            const noteDot = getNote(dateKey, idx) ? '<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-slate-900 dark:bg-white rounded-full"></span>' : '';
+                            const dayNote = getNote(dateKey, idx);
+                            const noteDot = dayNote ? '<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-slate-900 dark:bg-white rounded-full"></span>' : '';
                             const ovDot = (!atInfo && ovShift) ? '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>' : '';
-                            tableHTML += `<td class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder relative text-center text-sm ${style}${ring} cursor-pointer active:scale-95 transition-transform" onclick="openModal('${dateKey}','${day}')"><div class="w-full h-full flex flex-col items-center justify-center min-h-[38px] px-0.5"><span class="leading-none">${code}</span>${sub}${ovDot}${noteDot}</div></td>`;
+
+                            const shCfg = SHIFTS_CONFIG[atInfo ? 'AT' : effShift];
+                            const tipParts = [`Dia ${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')} • Turno ${teamLtr} (${teamNames[idx]})`];
+                            tipParts.push(atInfo ? `Atestado Médico (${atInfo.dayIndex}/${atInfo.totalDays})` : `${shCfg.name}${shCfg.hours ? ` (${shCfg.hours})` : ''}${ovShift ? ' • Extra/Troca' : ''}`);
+                            if (isRet) tipParts.push('Dia de retorno ao trabalho');
+                            if (holi) tipParts.push(`Feriado: ${holi}`);
+                            if (dayNote) tipParts.push(`Obs: ${dayNote}`);
+
+                            tableHTML += `<td title="${escapeHTML(tipParts.join('\n'))}" class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 relative text-center text-sm ${style}${ring} cursor-pointer hover:brightness-95 dark:hover:brightness-125 active:scale-95 transition-all" onclick="openModal('${dateKey}','${day}')"><div class="w-full h-full flex flex-col items-center justify-center min-h-[38px] md:min-h-[46px] px-0.5"><span class="leading-none">${code}</span>${sub}${ovDot}${noteDot}</div></td>`;
                         } else {
                             const dim = baseShift === 'F' ? 'text-green-600/65 dark:text-green-400/60 font-bold' : 'text-slate-400 dark:text-slate-500 font-medium opacity-55';
-                            tableHTML += `<td class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder relative text-center text-sm cursor-pointer ${isToday ? 'bg-blue-50/50 dark:bg-blue-900/20 ' : ''}${dim}" onclick="setTurma(${idx})"><div class="w-full h-full flex items-center justify-center min-h-[38px]">${baseShift}</div></td>`;
+                            const shCfg = SHIFTS_CONFIG[baseShift];
+                            const tip = `Dia ${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')} • Turno ${teamLtr} (${teamNames[idx]}) • ${shCfg.name}${shCfg.hours ? ` (${shCfg.hours})` : ''} • Clique para destacar`;
+                            tableHTML += `<td title="${escapeHTML(tip)}" class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 relative text-center text-sm cursor-pointer hover:opacity-90 transition-opacity ${isToday ? 'bg-blue-50/50 dark:bg-blue-900/20 ' : ''}${dim}" onclick="setTurma(${idx})"><div class="w-full h-full flex items-center justify-center min-h-[38px] md:min-h-[46px]">${baseShift}</div></td>`;
                         }
                     }
                     tableHTML += '</tr>';
@@ -1018,7 +1137,8 @@
                 const atSec = document.getElementById('atestado-summary-section');
                 const atCont = document.getElementById('atestado-summary-container');
                 const atBadge = document.getElementById('atestado-summary-badge');
-                if (monthAtestados.length > 0) {
+                const hasAtestados = monthAtestados.length > 0;
+                if (hasAtestados) {
                     if (atBadge) atBadge.innerText = monthAtDaysCount > 0 ? `${monthAtDaysCount} ${monthAtDaysCount === 1 ? 'dia no mês' : 'dias no mês'}` : 'Retorno no mês';
                     atCont.innerHTML = monthAtestados.map(({ rec, retInfo }) => {
                         const sh = SHIFTS_CONFIG[retInfo.returnShiftCode];
@@ -1026,16 +1146,20 @@
                         const rStr = `${formatReturnDateLabel(retInfo.returnDateKey)} • ${sh.name}${sh.hours ? ` (${sh.hours})` : ''}`;
                         const reason = getAtestadoReason(rec);
                         const reasonHTML = reason ? `<div class="mt-2 rounded-xl bg-white/80 dark:bg-oled/65 border border-rose-200/70 dark:border-rose-900/40 px-3 py-2 flex items-start gap-2"><svg class="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><div class="min-w-0 flex-1"><span class="block text-[9px] font-black uppercase tracking-wider text-rose-600/80 dark:text-rose-400/80 leading-none mb-1">Motivo / Observação</span><p class="text-xs font-medium text-slate-700 dark:text-slate-200 leading-snug break-words line-clamp-3">${escapeHTML(reason)}</p></div></div>` : '';
-                        return `<div class="rounded-2xl bg-white/75 dark:bg-oled/75 border border-rose-200/80 dark:border-rose-900/40 p-3 shadow-sm"><div class="flex items-center justify-between gap-2 mb-2"><span class="text-xs font-black text-rose-700 dark:text-rose-300">Período: ${pLbl}</span><button type="button" onclick="openAtestadoEdit('${rec.startDate}')" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0">Editar &gt;</button></div><div class="rounded-xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200/80 dark:border-sky-900/50 px-3 py-2 flex items-center gap-1.5 flex-wrap text-xs"><span class="font-black text-sky-600 dark:text-sky-400">↳ Retorno:</span><span class="font-bold text-slate-800 dark:text-slate-100">${rStr}</span></div>${reasonHTML}</div>`;
+                        return `<div class="rounded-2xl bg-white/75 dark:bg-oled/75 border border-rose-200/80 dark:border-rose-900/40 p-3 shadow-sm"><div class="flex items-center justify-between gap-2 mb-2"><span class="text-xs font-black text-rose-700 dark:text-rose-300">Período: ${pLbl}</span><button type="button" onclick="openAtestadoEdit('${rec.startDate}')" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0 cursor-pointer">Editar &gt;</button></div><div class="rounded-xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200/80 dark:border-sky-900/50 px-3 py-2 flex items-center gap-1.5 flex-wrap text-xs"><span class="font-black text-sky-600 dark:text-sky-400">↳ Retorno:</span><span class="font-bold text-slate-800 dark:text-slate-100">${rStr}</span></div>${reasonHTML}</div>`;
                     }).join('');
                     atSec.classList.remove('hidden');
                 } else { atCont.innerHTML = ''; atSec.classList.add('hidden'); }
 
                 const hEl = document.getElementById('holidays-list');
-                if (hListHTML) { document.getElementById('holidays-container').innerHTML = hListHTML; hEl.classList.remove('hidden'); }
+                const hasHolidays = Boolean(hListHTML);
+                if (hasHolidays) { document.getElementById('holidays-container').innerHTML = hListHTML; hEl.classList.remove('hidden'); }
                 else { hEl.classList.add('hidden'); }
+
+                syncBottomCardsLayout(hasAtestados, hasHolidays);
                 if (shouldScrollToday && isCMonth) scrollToTodayColumn();
                 else if (sc) sc.scrollLeft = prevScroll;
+                requestAnimationFrame(updateTableScrollHint);
             } catch (err) {
                 console.error('Erro ao renderizar:', err);
                 showToast('Erro ao carregar a visualização.');
@@ -1054,7 +1178,7 @@
             if (code && modalAtestadoEnabled) setAtestadoUI(false);
             document.querySelectorAll('.ov-btn').forEach(btn => {
                 const act = btn.getAttribute('data-ov') === code;
-                btn.className = `ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 ${act ? 'bg-amber-500 border-amber-500 text-white shadow-sm' : 'bg-slate-50 dark:bg-oled border-slate-200 dark:border-surfaceBorder text-slate-600 dark:text-slate-400'}`;
+                btn.className = `ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 cursor-pointer ${act ? 'bg-amber-500 border-amber-500 text-white shadow-sm' : 'bg-slate-50 hover:bg-slate-100 dark:bg-oled dark:hover:bg-zinc-900 border-slate-200 dark:border-surfaceBorder text-slate-600 dark:text-slate-400'}`;
             });
         }
         function setAtestadoUI(enabled) {
@@ -1062,14 +1186,14 @@
             const btn = document.getElementById('atestado-toggle-btn'), knob = document.getElementById('atestado-toggle-knob');
             const ctrl = document.getElementById('atestado-controls'), noteEl = document.getElementById('note-text');
             if (modalAtestadoEnabled) {
-                btn.className = 'w-12 h-7 rounded-full bg-rose-600 p-1 transition-colors shrink-0 flex items-center';
+                btn.className = 'w-12 h-7 rounded-full bg-rose-600 p-1 transition-colors shrink-0 flex items-center cursor-pointer';
                 btn.setAttribute('aria-checked', 'true');
                 knob.className = 'w-5 h-5 rounded-full bg-white shadow-sm transform translate-x-5 transition-transform';
                 ctrl.classList.remove('hidden');
                 if (noteEl) noteEl.placeholder = 'Motivo do atestado (aparecerá no resumo)...';
                 updateAtestadoPreview();
             } else {
-                btn.className = 'w-12 h-7 rounded-full bg-slate-300 dark:bg-surfaceBorder p-1 transition-colors shrink-0 flex items-center';
+                btn.className = 'w-12 h-7 rounded-full bg-slate-300 dark:bg-surfaceBorder p-1 transition-colors shrink-0 flex items-center cursor-pointer';
                 btn.setAttribute('aria-checked', 'false');
                 knob.className = 'w-5 h-5 rounded-full bg-white shadow-sm transform translate-x-0 transition-transform';
                 ctrl.classList.add('hidden');
@@ -1132,13 +1256,13 @@
             modalDirty = false; document.getElementById('unsaved-guard')?.classList.add('hidden');
             const md = document.getElementById('note-modal'), ct = document.getElementById('modal-content');
             md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
-            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.remove('translate-y-full');
+            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.add('is-open');
             syncBodyScrollLock();
         }
         function closeModal() {
             haptic(); modalDirty = false; document.getElementById('unsaved-guard')?.classList.add('hidden');
             const md = document.getElementById('note-modal'), ct = document.getElementById('modal-content');
-            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.add('translate-y-full');
+            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.remove('is-open');
             if (modalTimers.note) clearTimeout(modalTimers.note);
             modalTimers.note = setTimeout(() => {
                 md.classList.add('hidden'); md.classList.remove('flex');
@@ -1288,13 +1412,30 @@
             setTimeout(() => window.URL.revokeObjectURL(url), 1000);
         }
 
+        /* 12. ATALHOS DE TECLADO E RESPONSIVIDADE DESKTOP */
         document.addEventListener('keydown', (e) => {
-            if (e.key !== 'Escape') return;
-            if (!document.getElementById('note-modal').classList.contains('hidden')) requestCloseModal();
-            else if (!document.getElementById('teams-modal').classList.contains('hidden')) closeTeamsModal();
-            else if (!document.getElementById('info-modal').classList.contains('hidden')) closeInfoModal();
-            else if (!document.getElementById('ios-install-modal').classList.contains('hidden')) closeIosInstallPrompt();
+            const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+            const isTyping = tag === 'input' || tag === 'textarea' || e.target?.isContentEditable;
+
+            if (e.key === 'Escape') {
+                if (!document.getElementById('note-modal').classList.contains('hidden')) requestCloseModal();
+                else if (!document.getElementById('teams-modal').classList.contains('hidden')) closeTeamsModal();
+                else if (!document.getElementById('info-modal').classList.contains('hidden')) closeInfoModal();
+                else if (!document.getElementById('ios-install-modal').classList.contains('hidden')) closeIosInstallPrompt();
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                if (!document.getElementById('note-modal').classList.contains('hidden')) { e.preventDefault(); saveNote(); }
+                else if (!document.getElementById('teams-modal').classList.contains('hidden')) { e.preventDefault(); saveTeamNames(); }
+                return;
+            }
+            if (isTyping || isAnyModalOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
+            if (e.key === 'ArrowLeft') { e.preventDefault(); changeMonth(-1); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); changeMonth(1); }
+            else if (e.key.toLowerCase() === 't' || e.key === 'Home') { e.preventDefault(); goToToday(); }
         });
+
+        window.addEventListener('resize', () => requestAnimationFrame(updateTableScrollHint));
 
         function bootApp() { initAppIcons(); renderApp(true); initPersistence(); }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootApp);
