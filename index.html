@@ -62,7 +62,7 @@
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* Foco acessível limpo para navegação por teclado no PC sem poluir toque/mouse */
+        /* Foco acessível limpo para navegação por teclado no PC */
         :focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
         input:focus-visible, textarea:focus-visible { outline: none; }
 
@@ -74,7 +74,7 @@
             .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1.25rem); }
         }
 
-        /* Isolamento de layout para manter budget de quadro < 6.9ms em telas de 120Hz/144Hz */
+        /* Isolamento de layout para telas de 60Hz/90Hz/120Hz/144Hz */
         .contain-section { contain: layout style; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -95,7 +95,7 @@
         .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .app-shell { overflow-x: clip; }
 
-        /* Coluna fixa promovida à GPU para zero tremor em 60Hz/120Hz/144Hz no Safari iOS, Android e PC */
+        /* Coluna fixa promovida à GPU */
         .sticky-col {
             position: sticky;
             left: 0;
@@ -106,7 +106,7 @@
             -webkit-backface-visibility: hidden;
         }
 
-        /* Barra fina e discreta na tabela em telas de PC quando houver rolagem */
+        /* Barra fina e discreta na tabela em telas de PC */
         @media (min-width: 768px) {
             .table-scroll { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.45) transparent; }
             .table-scroll::-webkit-scrollbar { display: block; height: 7px; }
@@ -120,7 +120,7 @@
             }
         }
 
-        /* Modais acelerados 100% no compositor GPU (acompanham 60Hz, 120Hz ProMotion e 144Hz nativamente) */
+        /* Modais acelerados 100% no compositor GPU */
         .modal-backdrop {
             transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1);
             overscroll-behavior: contain;
@@ -158,15 +158,13 @@
             opacity: 1;
         }
 
-        /* Transições direcionadas sem repaint de sombra (máxima fluidez em 120Hz/144Hz) */
+        /* Transições direcionadas sem repaint de sombra */
         .btn-smooth {
             transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease;
         }
         .cell-smooth {
             transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease;
         }
-
-        /* Realce de hover na tabela 100% via compositor (opacity em pseudo-elemento = zero reflow/repaint em 144Hz) */
         .cell-active { isolation: isolate; }
         .cell-active::after {
             content: '';
@@ -184,7 +182,404 @@
             .cell-active:hover::after { opacity: 1; }
         }
 
-        /* Respeito total à acessibilidade de movimento reduzido (iOS/Android/Windows/macOS) */
+        /* =========================================================
+           FOLHA A4 HORIZONTAL (PRÉVIA EM TELA + IMPRESSÃO NATIVA)
+           ========================================================= */
+        #print-sheet { display: none; }
+        .a4-preview-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 297 / 210;
+            background: #ffffff;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.18);
+        }
+        @media (prefers-color-scheme: dark) {
+            .a4-preview-frame { border-color: #27272a; box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.7); }
+        }
+        .a4-preview-scaler {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1122px;
+            height: 793px;
+            transform-origin: top left;
+            pointer-events: none;
+        }
+
+        .a4-sheet {
+            width: 1122px;
+            height: 793px;
+            box-sizing: border-box;
+            background: #ffffff;
+            color: #0f172a;
+            padding: 26px 28px 22px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .a4-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2.5px solid #0f172a;
+        }
+        .a4-brand { display: flex; align-items: center; gap: 14px; }
+        .a4-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            background: #ffffff;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .a4-title {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            color: #0f172a;
+            line-height: 1.05;
+            margin: 0;
+        }
+        .a4-subtitle {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #475569;
+            margin-top: 4px;
+        }
+        .a4-period-box {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .a4-month-pill {
+            display: inline-block;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 6px 18px;
+            border-radius: 10px;
+            line-height: 1.1;
+        }
+        .a4-cycle-note {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .a4-table-wrap {
+            margin-top: 12px;
+            border: 1.5px solid #334155;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .a4-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .a4-table th, .a4-table td {
+            border-right: 1px solid #cbd5e1;
+            border-bottom: 1px solid #cbd5e1;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+        .a4-table tr > *:last-child { border-right: none; }
+        .a4-table tbody tr:last-child > * { border-bottom: none; }
+
+        .a4-th-team {
+            width: 158px;
+            background: #f1f5f9;
+            color: #0f172a;
+            text-align: left !important;
+            padding: 8px 12px !important;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-right: 2px solid #475569 !important;
+            border-bottom: 2px solid #475569 !important;
+        }
+        .a4-th-day {
+            background: #f8fafc;
+            border-bottom: 2px solid #475569 !important;
+            padding: 6px 1px !important;
+            height: 44px;
+            position: relative;
+        }
+        .a4-th-day.is-sun { background: #fef2f2; }
+        .a4-th-day.is-holi { background: #fee2e2; box-shadow: inset 0 3px 0 #dc2626; }
+        .a4-day-num {
+            display: block;
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #0f172a;
+            font-variant-numeric: tabular-nums;
+        }
+        .a4-day-dow {
+            display: block;
+            font-size: 8px;
+            font-weight: 800;
+            line-height: 1.1;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .a4-th-day.is-sun .a4-day-num, .a4-th-day.is-sun .a4-day-dow { color: #dc2626; }
+        .a4-th-day.is-holi .a4-day-num, .a4-th-day.is-holi .a4-day-dow { color: #b91c1c; }
+
+        .a4-td-team {
+            text-align: left !important;
+            padding: 8px 12px !important;
+            background: #ffffff;
+            border-right: 2px solid #475569 !important;
+            height: 66px;
+        }
+        .a4-team-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1.15;
+        }
+        .a4-team-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+        .a4-team-names {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #475569;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 134px;
+        }
+
+        .a4-cell {
+            height: 66px;
+            font-size: 15px;
+            font-weight: 900;
+            position: relative;
+        }
+        .a4-cell-M { background: #dbeafe; color: #1e40af; }
+        .a4-cell-T { background: #ffedd5; color: #9a3412; }
+        .a4-cell-N { background: #e0e7ff; color: #3730a3; }
+        .a4-cell-F { background: #dcfce7; color: #15803d; }
+        .a4-cell-AT { background: #ffe4e6; color: #be123c; box-shadow: inset 0 0 0 2px #f43f5e; }
+        .a4-cell-ov { box-shadow: inset 0 0 0 2.5px #d97706; }
+        .a4-cell-sub {
+            display: block;
+            font-size: 7.5px;
+            font-weight: 900;
+            line-height: 1;
+            margin-top: 2px;
+            letter-spacing: -0.02em;
+        }
+
+        .a4-bottom-grid {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 1.05fr 1.25fr 1.1fr;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+        }
+        .a4-card {
+            border: 1.2px solid #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+            padding: 11px 13px;
+            display: flex;
+            flex-direction: column;
+        }
+        .a4-card-title {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #334155;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .a4-legend-list { display: flex; flex-direction: column; gap: 6px; }
+        .a4-legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            padding: 5px 8px;
+        }
+        .a4-legend-left { display: flex; align-items: center; gap: 8px; }
+        .a4-legend-chip {
+            width: 24px;
+            height: 22px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .a4-legend-name { font-size: 11.5px; font-weight: 800; color: #0f172a; }
+        .a4-legend-hours { font-size: 11px; font-weight: 800; color: #334155; font-variant-numeric: tabular-nums; }
+        .a4-legend-extra {
+            margin-top: auto;
+            padding-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .a4-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            overflow: hidden;
+        }
+        .a4-summary-table th {
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 9.5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 6px 6px;
+            text-align: center;
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .a4-summary-table th:first-child { text-align: left; padding-left: 9px; }
+        .a4-summary-table td {
+            padding: 7px 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            font-variant-numeric: tabular-nums;
+        }
+        .a4-summary-table tr:last-child td { border-bottom: none; }
+        .a4-summary-table td:first-child { text-align: left; padding-left: 9px; color: #0f172a; }
+        .a4-sum-sub { display: block; font-size: 9px; font-weight: 600; color: #64748b; max-width: 155px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .a4-holi-list { display: flex; flex-direction: column; gap: 6px; }
+        .a4-holi-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #fecaca;
+            border-left: 3.5px solid #dc2626;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 11px;
+        }
+        .a4-holi-date { font-weight: 900; color: #b91c1c; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .a4-holi-name { font-weight: 700; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .a4-holi-empty {
+            margin: auto 0;
+            text-align: center;
+            padding: 18px 10px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #64748b;
+            background: #ffffff;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+        }
+
+        .a4-footer {
+            margin-top: 10px;
+            padding-top: 7px;
+            border-top: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        /* Regras de Impressão A4 Horizontal (Chrome, Edge, Firefox, Safari macOS/iOS e Android) */
+        @page {
+            size: A4 landscape;
+            margin: 6mm;
+        }
+        @media print {
+            html, body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                display: block !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .app-shell { display: none !important; }
+            #print-sheet {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #print-sheet .a4-sheet {
+                width: 100% !important;
+                height: 196mm !important;
+                max-height: 196mm !important;
+                padding: 3mm 4mm 2mm 4mm !important;
+                margin: 0 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+            #print-sheet .a4-td-team,
+            #print-sheet .a4-cell {
+                height: 15.5mm !important;
+            }
+        }
+
+        /* Acessibilidade de movimento reduzido */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -195,6 +590,9 @@
     </style>
 </head>
 <body class="flex justify-center w-full min-h-[100dvh] md:py-5 md:px-5 lg:py-6 lg:px-6">
+    <!-- Folha Exclusiva de Impressão A4 Horizontal (Invisível na tela, ativa no Ctrl+P e no botão Imprimir A4) -->
+    <div id="print-sheet" aria-hidden="true"></div>
+
     <div class="ios-no-callout app-shell w-full max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-[1400px] bg-white dark:bg-oled min-h-[100dvh] md:min-h-[calc(100dvh-2.5rem)] lg:min-h-[calc(100dvh-3rem)] md:rounded-[2rem] md:border md:border-slate-200/90 dark:md:border-surfaceBorder relative pb-safe md:pb-6 shadow-2xl flex flex-col">
 
         <!-- Cabeçalho Fixo -->
@@ -219,9 +617,9 @@
                         <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span class="hidden md:inline text-xs font-bold">Legenda &amp; Backup</span>
                     </button>
-                    <button type="button" onclick="exportICS()" title="Exportar escala do mês para agenda (.ics)" class="p-2.5 md:px-3.5 md:py-2 rounded-full bg-slate-200/90 hover:bg-slate-300/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 active:scale-95 btn-smooth flex items-center gap-1.5 cursor-pointer" aria-label="Exportar Agenda ICS">
-                        <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span class="hidden md:inline text-xs font-bold">Exportar Agenda</span>
+                    <button type="button" onclick="openExportModal()" title="Imprimir Quadro A4 Horizontal, baixar PNG ou Agenda (.ics)" class="p-2.5 md:px-3.5 md:py-2 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white active:scale-95 btn-smooth flex items-center gap-1.5 shadow-sm cursor-pointer" aria-label="Exportar e Imprimir A4">
+                        <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <span class="hidden md:inline text-xs font-extrabold">Exportar / A4</span>
                     </button>
                 </div>
             </div>
@@ -311,7 +709,7 @@
                 </div>
                 <p class="text-[10px] md:text-[11px] font-medium text-slate-400 dark:text-slate-500 text-center md:text-left md:px-1 mt-2">
                     <span class="md:hidden">Dica: Toque num dia do seu turno para notas, extras ou atestado.</span>
-                    <span class="hidden md:inline">Dica: Clique em qualquer dia do seu turno destacado para registrar observações, trocas/extras ou atestado médico. Passe o mouse sobre um dia para ver detalhes.</span>
+                    <span class="hidden md:inline">Dica: Clique em qualquer dia do seu turno destacado para registrar observações, trocas/extras ou atestado médico. Pressione Ctrl+P para imprimir o quadro A4.</span>
                 </p>
             </section>
 
@@ -347,9 +745,8 @@
                 </div>
             </section>
 
-            <!-- Grade Inferior Responsiva: Atestados & Feriados lado a lado no PC -->
+            <!-- Grade Inferior Responsiva: Atestados & Feriados -->
             <div id="bottom-cards-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 items-start contain-section">
-                <!-- Resumo de Atestados Médicos & Retorno -->
                 <section id="atestado-summary-section" class="hidden bg-rose-50/80 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4 md:p-5">
                     <div class="flex items-center justify-between gap-2 mb-3">
                         <h3 class="text-[11px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 flex items-center gap-2">
@@ -361,7 +758,6 @@
                     <div id="atestado-summary-container" class="space-y-2.5"></div>
                 </section>
 
-                <!-- Feriados do Mês -->
                 <section id="holidays-list" class="bg-slate-50 dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-2xl p-4 md:p-5 hidden">
                     <h3 class="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -378,9 +774,70 @@
             <div class="flex items-center gap-3">
                 <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">→</kbd> Meses</span>
                 <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">T</kbd> Hoje</span>
-                <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">Esc</kbd> Fechar</span>
+                <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">Ctrl+P</kbd> Quadro A4</span>
             </div>
         </footer>
+
+        <!-- Modal Central de Exportação & Impressão A4 Horizontal -->
+        <div id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title" onclick="if(event.target===this) closeExportModal()" class="modal-backdrop fixed inset-0 bg-slate-900/65 dark:bg-black/85 backdrop-blur-sm z-50 hidden flex-col justify-end md:justify-center md:items-center md:p-5 opacity-0">
+            <div id="export-modal-content" class="modal-sheet bg-white dark:bg-surface border-t md:border border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] md:rounded-[2rem] p-5 md:p-6 w-full max-w-md md:max-w-3xl mx-auto shadow-2xl pb-safe md:pb-6 max-h-[92dvh] overflow-y-auto no-scrollbar">
+                <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+                <div class="flex justify-between items-start gap-3 mb-4">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-[10px] font-black uppercase tracking-wider border border-blue-200/70 dark:border-blue-900/50 mb-1.5">Quadro de Avisos • A4 Horizontal</span>
+                        <h3 id="export-modal-title" class="text-lg md:text-xl font-black text-slate-900 dark:text-white leading-tight">Exportar &amp; Imprimir Escala</h3>
+                        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">Todos os 4 turnos, horários, totais e feriados — sem observações individuais.</p>
+                    </div>
+                    <button type="button" onclick="closeExportModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer btn-smooth shrink-0" aria-label="Fechar exportação">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Pré-visualização Real A4 Horizontal -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Prévia da Folha A4 (Paisagem • 1 Página)</span>
+                        <span id="export-month-badge" class="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 uppercase"></span>
+                    </div>
+                    <div id="a4-preview-frame" class="a4-preview-frame">
+                        <div id="a4-preview-scaler" class="a4-preview-scaler"></div>
+                    </div>
+                </div>
+
+                <!-- Opção para incluir ou não trocas/atestados no quadro -->
+                <label class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder mb-4 cursor-pointer">
+                    <div class="min-w-0">
+                        <span class="block text-xs font-extrabold text-slate-800 dark:text-slate-100">Incluir trocas/extras e atestados no quadro</span>
+                        <span class="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Desligado imprime a escala oficial limpa de todos os turnos. Observações nunca aparecem.</span>
+                    </div>
+                    <input type="checkbox" id="a4-include-changes" onchange="onA4OptionsChange()" class="w-5 h-5 rounded accent-blue-600 shrink-0 cursor-pointer">
+                </label>
+
+                <!-- Botões Principais A4 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+                    <button type="button" onclick="printA4Schedule()" class="py-3.5 px-4 rounded-2xl font-extrabold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 active:scale-95 btn-smooth cursor-pointer">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <span>Imprimir / Salvar PDF (A4)</span>
+                    </button>
+                    <button type="button" onclick="downloadA4PNG()" class="py-3.5 px-4 rounded-2xl font-extrabold text-sm text-slate-800 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center gap-2 active:scale-95 btn-smooth cursor-pointer">
+                        <svg class="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Baixar Imagem A4 HD (.PNG)</span>
+                    </button>
+                </div>
+
+                <!-- Opção Secundária: Agenda Pessoal (.ICS) -->
+                <div class="pt-3.5 border-t border-slate-200 dark:border-surfaceBorder flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div class="min-w-0">
+                        <span class="block text-xs font-extrabold text-slate-700 dark:text-slate-200">Agenda Pessoal do Celular (.ICS)</span>
+                        <span id="export-ics-subtitle" class="block text-[11px] font-medium text-slate-500 dark:text-slate-400">Importe apenas o turno selecionado no Google ou Apple Calendar.</span>
+                    </div>
+                    <button type="button" onclick="exportICS()" class="py-2.5 px-4 rounded-xl font-bold text-xs text-blue-700 dark:text-blue-300 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-900/60 flex items-center justify-center gap-1.5 active:scale-95 btn-smooth shrink-0 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Baixar .ICS</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal Editar Nomes das Equipes -->
         <div id="teams-modal" role="dialog" aria-modal="true" aria-labelledby="teams-modal-title" onclick="if(event.target===this) closeTeamsModal()" class="modal-backdrop fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end md:justify-center md:items-center md:p-6 opacity-0">
@@ -570,11 +1027,11 @@
     </div>
 
     <script>
-        /* 0. UTILITÁRIOS DE FLUIDEZ ADAPTATIVA (60Hz / 90Hz / 120Hz / 144Hz+ NATIVO DO SISTEMA) */
+        /* 0. UTILITÁRIOS DE FLUIDEZ ADAPTATIVA (60Hz / 90Hz / 120Hz / 144Hz+ NATIVO) */
         const reducedMotionMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
         function prefersReducedMotion() { return Boolean(reducedMotionMQ && reducedMotionMQ.matches); }
 
-        /* 1. MOTOR DE ÍCONE OFICIAL IMERYS HD (Carregamento Leve & Lazy Canvas Fallback) */
+        /* 1. MOTOR DE ÍCONE OFICIAL IMERYS HD */
         const IMERYS_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
             <defs>
                 <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f2f6fc"/></linearGradient>
@@ -685,8 +1142,8 @@
         }
 
         /* 2. CONTROLE CENTRAL DE MODAIS (Double-rAF para 120Hz/144Hz + will-change Dinâmico) */
-        const modalTimers = { note: null, info: null, ios: null, teams: null };
-        const modalRafs = { note: [0, 0], info: [0, 0], ios: [0, 0], teams: [0, 0] };
+        const modalTimers = { note: null, info: null, ios: null, teams: null, export: null };
+        const modalRafs = { note: [0, 0], info: [0, 0], ios: [0, 0], teams: [0, 0], export: [0, 0] };
 
         function cancelModalFrames(key) {
             if (modalTimers[key]) { clearTimeout(modalTimers[key]); modalTimers[key] = null; }
@@ -694,7 +1151,7 @@
             if (modalRafs[key][1]) { cancelAnimationFrame(modalRafs[key][1]); modalRafs[key][1] = 0; }
         }
         function isAnyModalOpen() {
-            return ['note-modal', 'info-modal', 'ios-install-modal', 'teams-modal'].some(id => {
+            return ['note-modal', 'info-modal', 'ios-install-modal', 'teams-modal', 'export-modal'].some(id => {
                 const el = document.getElementById(id);
                 return el && !el.classList.contains('hidden');
             });
@@ -711,15 +1168,15 @@
                 document.body.style.paddingRight = '';
             }
         }
-        function openAnimatedModal(key, backdropId, panelId) {
+        function openAnimatedModal(key, backdropId, panelId, onReady) {
             cancelModalFrames(key);
             const md = document.getElementById(backdropId), ct = document.getElementById(panelId);
             ct.style.willChange = 'transform, opacity';
             md.classList.remove('hidden'); md.classList.add('flex');
             syncBodyScrollLock();
-            /* Double-rAF garante commit do 1º quadro em telas 120Hz/144Hz antes da transição */
             modalRafs[key][0] = requestAnimationFrame(() => {
                 modalRafs[key][0] = 0;
+                if (typeof onReady === 'function') onReady();
                 modalRafs[key][1] = requestAnimationFrame(() => {
                     modalRafs[key][1] = 0;
                     md.classList.replace('opacity-0', 'opacity-100');
@@ -893,6 +1350,7 @@
         let modalAtestadoStartDate = null, modalEditingAtestadoId = null, modalDirty = false, toastTimer = null;
         let lastCounts = { M: null, T: null, N: null, F: null };
         let wheelTargetX = null, wheelRaf = 0, wheelLastTs = 0;
+        let a4IncludeChanges = false;
         const holidaysYearCache = {};
 
         function stopSmoothWheel() {
@@ -1136,7 +1594,7 @@
             showToast(ok ? 'Nomes das equipes atualizados!' : 'Aviso: salvamento bloqueado! Use o Backup em (i).');
         }
 
-        /* 8. NAVEGAÇÃO, ANIMAÇÕES COMPOSITOR WAAPI (120Hz/144Hz) E RENDERIZAÇÃO O(1) */
+        /* 8. NAVEGAÇÃO, ANIMAÇÕES COMPOSITOR WAAPI (120Hz/144Hz) E RENDERIZAÇÃO */
         function setTurma(index) {
             if (index === currentTurma) return;
             haptic(); currentTurma = index;
@@ -1186,15 +1644,11 @@
             hEl.classList.toggle('lg:col-span-2', hasHolidays && !hasAtestados);
             grid.classList.toggle('hidden', !hasAtestados && !hasHolidays);
         }
-        /* WAAPI roda direto na thread do compositor (60/90/120/144Hz) sem forçar reflow */
         function animateTableSwap(el, dir) {
             if (!el || !dir || prefersReducedMotion() || typeof el.animate !== 'function') return;
             const offset = dir > 0 ? 16 : -16;
             el.animate(
-                [
-                    { opacity: 0.45, transform: `translate3d(${offset}px, 0, 0)` },
-                    { opacity: 1, transform: 'translate3d(0, 0, 0)' }
-                ],
+                [{ opacity: 0.45, transform: `translate3d(${offset}px, 0, 0)` }, { opacity: 1, transform: 'translate3d(0, 0, 0)' }],
                 { duration: 240, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
             );
         }
@@ -1346,7 +1800,557 @@
             }
         }
 
-        /* 9. MODAL DE NOTAS, TROCAS E ATESTADOS */
+        /* 9. MOTOR DE EXPORTAÇÃO A4 HORIZONTAL (QUADRO DE AVISOS — TODOS OS TURNOS, SEM OBSERVAÇÕES) */
+        function buildA4Dataset(includeChanges) {
+            const year = currentDate.getFullYear(), month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthLabel = currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+            const mmStr = String(month + 1).padStart(2, '0');
+            const holidaysMap = getHolidays(year, month);
+
+            const days = [];
+            const holidaysList = [];
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dow = new Date(year, month, day, 12, 0, 0).getDay();
+                const holi = holidaysMap[day] || '';
+                const dateKey = `${year}-${mmStr}-${String(day).padStart(2, '0')}`;
+                days.push({ day, dow, dowLabel: DOW_NAMES[dow], isSunday: dow === 0, holiday: holi, dateKey });
+                if (holi) holidaysList.push({ day, dateStr: `${String(day).padStart(2, '0')}/${mmStr}`, dowPretty: DOW_PRETTY[dow], name: holi });
+            }
+
+            let hasAnyOv = false, hasAnyAt = false;
+            const teams = TEAM_LETTERS.map((letter, idx) => {
+                const counts = { M: 0, T: 0, N: 0, F: 0, AT: 0 };
+                const atMap = {};
+                if (includeChanges) {
+                    atestadosDb.filter(r => r.turma === idx).forEach(rec => {
+                        const dates = getAtestadoDates(rec);
+                        dates.forEach((d, pos) => { atMap[d] = { dayIndex: pos + 1, totalDays: dates.length }; });
+                    });
+                }
+                const cells = days.map(({ day, dateKey }) => {
+                    const base = getShift(year, month, day, idx);
+                    if (includeChanges) {
+                        const atInfo = atMap[dateKey];
+                        if (atInfo) {
+                            counts.AT++;
+                            hasAnyAt = true;
+                            return { code: 'AT', sub: `${atInfo.dayIndex}/${atInfo.totalDays}`, isOv: false };
+                        }
+                        const ov = overridesDb[`${dateKey}_${idx}`];
+                        if (ov) {
+                            counts[ov]++;
+                            hasAnyOv = true;
+                            return { code: ov, sub: 'EX', isOv: true };
+                        }
+                    }
+                    counts[base]++;
+                    return { code: base, sub: '', isOv: false };
+                });
+                return { letter, idx, name: teamNames[idx], cells, counts };
+            });
+
+            const issued = new Date();
+            const issuedStr = `${String(issued.getDate()).padStart(2, '0')}/${String(issued.getMonth() + 1).padStart(2, '0')}/${issued.getFullYear()} às ${String(issued.getHours()).padStart(2, '0')}:${String(issued.getMinutes()).padStart(2, '0')}`;
+            return { year, month, mmStr, daysInMonth, monthLabel, days, holidaysList, teams, hasAnyOv, hasAnyAt, issuedStr, includeChanges };
+        }
+
+        function buildA4SheetHTML(data) {
+            const headDaysHTML = data.days.map(d => {
+                const cls = d.holiday ? ' is-holi' : (d.isSunday ? ' is-sun' : '');
+                return `<th class="a4-th-day${cls}"><span class="a4-day-num">${String(d.day).padStart(2, '0')}</span><span class="a4-day-dow">${d.dowLabel}</span></th>`;
+            }).join('');
+
+            const rowsHTML = data.teams.map(t => {
+                const cellsHTML = t.cells.map(c => {
+                    const ovCls = c.isOv ? ' a4-cell-ov' : '';
+                    const subHTML = c.sub ? `<span class="a4-cell-sub">${c.sub}</span>` : '';
+                    return `<td class="a4-cell a4-cell-${c.code}${ovCls}"><span>${c.code}</span>${subHTML}</td>`;
+                }).join('');
+                return `<tr><td class="a4-td-team"><div class="a4-team-title"><span class="a4-team-badge">${t.letter}</span><span>Turno ${t.letter}</span></div><span class="a4-team-names">${escapeHTML(t.name)}</span></td>${cellsHTML}</tr>`;
+            }).join('');
+
+            const summaryRowsHTML = data.teams.map(t => {
+                const atCell = data.hasAnyAt ? `<td style="color:#be123c">${t.counts.AT}</td>` : '';
+                return `<tr><td><strong>Turno ${t.letter}</strong><span class="a4-sum-sub">${escapeHTML(t.name)}</span></td><td style="color:#1e40af">${t.counts.M}</td><td style="color:#9a3412">${t.counts.T}</td><td style="color:#3730a3">${t.counts.N}</td><td style="color:#15803d">${t.counts.F}</td>${atCell}</tr>`;
+            }).join('');
+
+            const holidaysHTML = data.holidaysList.length
+                ? `<div class="a4-holi-list">${data.holidaysList.map(h => `<div class="a4-holi-row"><span class="a4-holi-date">${h.dateStr} (${h.dowPretty})</span><span class="a4-holi-name">${escapeHTML(h.name)}</span></div>`).join('')}</div>`
+                : `<div class="a4-holi-empty">Nenhum feriado nacional, estadual ou municipal neste mês.</div>`;
+
+            const extraLegendItems = [
+                '<span><strong style="color:#dc2626">■</strong> Domingos / Feriados</span>'
+            ];
+            if (data.hasAnyOv) extraLegendItems.push('<span><strong style="color:#d97706">□</strong> Borda âmbar = Extra/Troca</span>');
+            if (data.hasAnyAt) extraLegendItems.push('<span><strong style="color:#be123c">AT</strong> = Atestado Médico</span>');
+
+            return `<div class="a4-sheet">
+                <div class="a4-header">
+                    <div class="a4-brand">
+                        <img class="a4-logo" src="${IMERYS_SVG_URI}" alt="Imerys">
+                        <div>
+                            <h2 class="a4-title">ESCALA GERAL DE REVEZAMENTO 3×1</h2>
+                            <div class="a4-subtitle">IMERYS • BRITAGEM ICP 1 • QUADRO DE AVISOS DOS TURNOS</div>
+                        </div>
+                    </div>
+                    <div class="a4-period-box">
+                        <span class="a4-month-pill">${escapeHTML(data.monthLabel)}</span>
+                        <span class="a4-cycle-note">Revezamento Contínuo • 4 Equipes (A, B, C e D) • ${data.daysInMonth} dias</span>
+                    </div>
+                </div>
+
+                <div class="a4-table-wrap">
+                    <table class="a4-table">
+                        <thead><tr><th class="a4-th-team">Turnos / Equipes</th>${headDaysHTML}</tr></thead>
+                        <tbody>${rowsHTML}</tbody>
+                    </table>
+                </div>
+
+                <div class="a4-bottom-grid">
+                    <div class="a4-card">
+                        <div class="a4-card-title">Horários &amp; Legenda dos Turnos</div>
+                        <div class="a4-legend-list">
+                            <div class="a4-legend-item"><div class="a4-legend-left"><span class="a4-legend-chip a4-cell-M">M</span><span class="a4-legend-name">Manhã</span></div><span class="a4-legend-hours">05:00 às 13:00</span></div>
+                            <div class="a4-legend-item"><div class="a4-legend-left"><span class="a4-legend-chip a4-cell-T">T</span><span class="a4-legend-name">Tarde</span></div><span class="a4-legend-hours">13:00 às 21:00</span></div>
+                            <div class="a4-legend-item"><div class="a4-legend-left"><span class="a4-legend-chip a4-cell-N">N</span><span class="a4-legend-name">Noite</span></div><span class="a4-legend-hours">21:00 às 05:00</span></div>
+                            <div class="a4-legend-item"><div class="a4-legend-left"><span class="a4-legend-chip a4-cell-F">F</span><span class="a4-legend-name">Folga</span></div><span class="a4-legend-hours">Descanso</span></div>
+                        </div>
+                        <div class="a4-legend-extra">${extraLegendItems.join('')}</div>
+                    </div>
+
+                    <div class="a4-card">
+                        <div class="a4-card-title">Resumo Mensal por Turno</div>
+                        <table class="a4-summary-table">
+                            <thead><tr><th>Turno / Equipe</th><th>M</th><th>T</th><th>N</th><th>F</th>${data.hasAnyAt ? '<th>AT</th>' : ''}</tr></thead>
+                            <tbody>${summaryRowsHTML}</tbody>
+                        </table>
+                    </div>
+
+                    <div class="a4-card">
+                        <div class="a4-card-title">Feriados do Mês (Nacional / ES / Cachoeiro)</div>
+                        ${holidaysHTML}
+                    </div>
+                </div>
+
+                <div class="a4-footer">
+                    <span>Imerys • Britagem ICP 1 • Escala Oficial para Quadro dos Operadores</span>
+                    <span>Emitido em ${data.issuedStr} • Formato A4 Horizontal</span>
+                </div>
+            </div>`;
+        }
+
+        function scaleA4Preview() {
+            const frame = document.getElementById('a4-preview-frame');
+            const scaler = document.getElementById('a4-preview-scaler');
+            if (!frame || !scaler) return;
+            const w = frame.clientWidth;
+            if (w > 0) scaler.style.transform = `scale(${w / 1122})`;
+        }
+
+        function refreshA4Outputs() {
+            const data = buildA4Dataset(a4IncludeChanges);
+            const html = buildA4SheetHTML(data);
+            const printEl = document.getElementById('print-sheet');
+            if (printEl) printEl.innerHTML = html;
+            const scaler = document.getElementById('a4-preview-scaler');
+            if (scaler) scaler.innerHTML = html;
+            const badge = document.getElementById('export-month-badge');
+            if (badge) badge.innerText = data.monthLabel;
+            const icsSub = document.getElementById('export-ics-subtitle');
+            if (icsSub) icsSub.innerText = `Exporta apenas o Turno ${TEAM_LETTERS[currentTurma]} (${teamNames[currentTurma]}) para Google ou Apple Calendar.`;
+            scaleA4Preview();
+            return data;
+        }
+
+        function openExportModal() {
+            haptic();
+            const cb = document.getElementById('a4-include-changes');
+            if (cb) cb.checked = a4IncludeChanges;
+            refreshA4Outputs();
+            openAnimatedModal('export', 'export-modal', 'export-modal-content', () => scaleA4Preview());
+        }
+        function closeExportModal() { haptic(); closeAnimatedModal('export', 'export-modal', 'export-modal-content'); }
+        function onA4OptionsChange() {
+            haptic();
+            const cb = document.getElementById('a4-include-changes');
+            a4IncludeChanges = Boolean(cb && cb.checked);
+            refreshA4Outputs();
+        }
+
+        function printA4Schedule() {
+            haptic();
+            const data = refreshA4Outputs();
+            const originalTitle = document.title;
+            document.title = `Escala_Imerys_Quadro_A4_${data.mmStr}_${data.year}`;
+            const restoreTitle = () => { document.title = originalTitle; };
+            window.addEventListener('afterprint', restoreTitle, { once: true });
+            setTimeout(() => {
+                window.print();
+                setTimeout(restoreTitle, 1500);
+            }, 60);
+        }
+
+        /* Renderizador Canvas HD (2338×1654 — A4 Horizontal 200 DPI) para Baixar PNG limpo em iOS/Android/PC */
+        function canvasRoundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+        }
+        function canvasTruncateText(ctx, text, maxW) {
+            if (ctx.measureText(text).width <= maxW) return text;
+            let s = text;
+            while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+            return s + '…';
+        }
+        function loadLogoImage() {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = IMERYS_SVG_URI;
+            });
+        }
+        async function downloadA4PNG() {
+            haptic();
+            showToast('Gerando imagem A4 HD...');
+            const data = buildA4Dataset(a4IncludeChanges);
+            const W = 2338, H = 1654;
+            const c = document.createElement('canvas');
+            c.width = W; c.height = H;
+            const ctx = c.getContext('2d');
+            const font = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+            const PALETTE = {
+                M: { bg: '#dbeafe', fg: '#1e40af' },
+                T: { bg: '#ffedd5', fg: '#9a3412' },
+                N: { bg: '#e0e7ff', fg: '#3730a3' },
+                F: { bg: '#dcfce7', fg: '#15803d' },
+                AT: { bg: '#ffe4e6', fg: '#be123c' }
+            };
+
+            /* Fundo branco A4 */
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
+
+            const padX = 58, padTop = 50;
+            const contentW = W - padX * 2;
+
+            /* 1. Cabeçalho */
+            const logoImg = await loadLogoImage();
+            const logoSize = 114;
+            canvasRoundRect(ctx, padX, padTop, logoSize, logoSize, 22);
+            ctx.fillStyle = '#ffffff'; ctx.fill();
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3; ctx.stroke();
+            if (logoImg) {
+                ctx.save();
+                canvasRoundRect(ctx, padX + 3, padTop + 3, logoSize - 6, logoSize - 6, 19);
+                ctx.clip();
+                ctx.drawImage(logoImg, padX + 3, padTop + 3, logoSize - 6, logoSize - 6);
+                ctx.restore();
+            }
+
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#0f172a';
+            ctx.font = `900 48px ${font}`;
+            ctx.fillText('ESCALA GERAL DE REVEZAMENTO 3×1', padX + logoSize + 28, padTop + 12);
+            ctx.fillStyle = '#475569';
+            ctx.font = `800 22px ${font}`;
+            ctx.fillText('IMERYS • BRITAGEM ICP 1 • QUADRO DE AVISOS DOS TURNOS', padX + logoSize + 28, padTop + 74);
+
+            /* Badge do mês à direita */
+            ctx.font = `900 40px ${font}`;
+            const mTxtW = ctx.measureText(data.monthLabel).width;
+            const pillW = Math.max(360, mTxtW + 76), pillH = 68;
+            const pillX = W - padX - pillW, pillY = padTop + 4;
+            canvasRoundRect(ctx, pillX, pillY, pillW, pillH, 18);
+            ctx.fillStyle = '#0f172a'; ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(data.monthLabel, pillX + pillW / 2, pillY + pillH / 2 + 1);
+
+            ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+            ctx.fillStyle = '#475569'; ctx.font = `700 21px ${font}`;
+            ctx.fillText(`Revezamento Contínuo • 4 Equipes (A, B, C e D) • ${data.daysInMonth} dias`, W - padX, pillY + pillH + 14);
+
+            const headerBottomY = padTop + logoSize + 24;
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(padX, headerBottomY, contentW, 5);
+
+            /* 2. Tabela Principal (Todos os 4 Turnos) */
+            const tblX = padX, tblY = headerBottomY + 26;
+            const teamColW = 330;
+            const dayColW = (contentW - teamColW) / data.daysInMonth;
+            const headRowH = 92, teamRowH = 142;
+            const tblH = headRowH + teamRowH * 4;
+
+            ctx.save();
+            canvasRoundRect(ctx, tblX, tblY, contentW, tblH, 18);
+            ctx.clip();
+
+            /* Cabeçalho Turnos */
+            ctx.fillStyle = '#f1f5f9';
+            ctx.fillRect(tblX, tblY, teamColW, headRowH);
+            ctx.fillStyle = '#0f172a';
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.font = `900 22px ${font}`;
+            ctx.fillText('TURNOS / EQUIPES', tblX + 22, tblY + headRowH / 2);
+
+            /* Cabeçalhos dos dias */
+            data.days.forEach((d, i) => {
+                const x = tblX + teamColW + i * dayColW;
+                ctx.fillStyle = d.holiday ? '#fee2e2' : (d.isSunday ? '#fef2f2' : '#f8fafc');
+                ctx.fillRect(x, tblY, dayColW, headRowH);
+                if (d.holiday) {
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fillRect(x, tblY, dayColW, 7);
+                }
+                const txtColor = d.holiday ? '#b91c1c' : (d.isSunday ? '#dc2626' : '#0f172a');
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = txtColor;
+                ctx.font = `900 27px ${font}`;
+                ctx.fillText(String(d.day).padStart(2, '0'), x + dayColW / 2, tblY + 34);
+                ctx.fillStyle = (d.holiday || d.isSunday) ? txtColor : '#64748b';
+                ctx.font = `800 16px ${font}`;
+                ctx.fillText(d.dowLabel, x + dayColW / 2, tblY + 67);
+            });
+
+            /* Linhas dos 4 Turnos */
+            data.teams.forEach((t, rowIdx) => {
+                const y = tblY + headRowH + rowIdx * teamRowH;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(tblX, y, teamColW, teamRowH);
+
+                /* Badge letra */
+                canvasRoundRect(ctx, tblX + 22, y + 32, 42, 42, 11);
+                ctx.fillStyle = '#0f172a'; ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.font = `900 23px ${font}`;
+                ctx.fillText(t.letter, tblX + 43, y + 54);
+
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#0f172a'; ctx.font = `900 30px ${font}`;
+                ctx.fillText(`Turno ${t.letter}`, tblX + 76, y + 54);
+
+                ctx.fillStyle = '#475569'; ctx.font = `700 21px ${font}`;
+                ctx.fillText(canvasTruncateText(ctx, t.name, teamColW - 44), tblX + 22, y + 102);
+
+                t.cells.forEach((cell, cIdx) => {
+                    const x = tblX + teamColW + cIdx * dayColW;
+                    const p = PALETTE[cell.code] || PALETTE.F;
+                    ctx.fillStyle = p.bg;
+                    ctx.fillRect(x, y, dayColW, teamRowH);
+
+                    if (cell.code === 'AT') {
+                        ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 4;
+                        ctx.strokeRect(x + 2, y + 2, dayColW - 4, teamRowH - 4);
+                    } else if (cell.isOv) {
+                        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 5;
+                        ctx.strokeRect(x + 2.5, y + 2.5, dayColW - 5, teamRowH - 5);
+                    }
+
+                    ctx.fillStyle = p.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.font = `900 31px ${font}`;
+                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2 - (cell.sub ? 12 : 0));
+                    if (cell.sub) {
+                        ctx.font = `900 15px ${font}`;
+                        ctx.fillText(cell.sub, x + dayColW / 2, y + teamRowH / 2 + 24);
+                    }
+                });
+            });
+
+            /* Grade interna */
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2;
+            for (let i = 1; i < data.daysInMonth; i++) {
+                const x = tblX + teamColW + i * dayColW;
+                ctx.beginPath(); ctx.moveTo(x, tblY); ctx.lineTo(x, tblY + tblH); ctx.stroke();
+            }
+            for (let r = 1; r < 4; r++) {
+                const y = tblY + headRowH + r * teamRowH;
+                ctx.beginPath(); ctx.moveTo(tblX, y); ctx.lineTo(tblX + contentW, y); ctx.stroke();
+            }
+            /* Divisórias fortes */
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(tblX + teamColW, tblY); ctx.lineTo(tblX + teamColW, tblY + tblH); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(tblX, tblY + headRowH); ctx.lineTo(tblX + contentW, tblY + headRowH); ctx.stroke();
+            ctx.restore();
+
+            /* Borda externa arredondada da tabela */
+            canvasRoundRect(ctx, tblX, tblY, contentW, tblH, 18);
+            ctx.strokeStyle = '#334155'; ctx.lineWidth = 3.5; ctx.stroke();
+
+            /* 3. Painel Inferior de 3 Colunas (Legenda + Resumo + Feriados) */
+            const cardsY = tblY + tblH + 30;
+            const footerH = 54;
+            const cardsH = H - cardsY - footerH - 36;
+            const gap = 28;
+            const w1 = Math.round((contentW - gap * 2) * 0.305);
+            const w2 = Math.round((contentW - gap * 2) * 0.375);
+            const w3 = contentW - gap * 2 - w1 - w2;
+            const x1 = padX, x2 = x1 + w1 + gap, x3 = x2 + w2 + gap;
+
+            const drawCardBox = (x, w, title) => {
+                canvasRoundRect(ctx, x, cardsY, w, cardsH, 18);
+                ctx.fillStyle = '#f8fafc'; ctx.fill();
+                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2.5; ctx.stroke();
+                ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+                ctx.fillStyle = '#334155'; ctx.font = `900 20px ${font}`;
+                ctx.fillText(title, x + 26, cardsY + 22);
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillRect(x + 26, cardsY + 56, w - 52, 2);
+            };
+
+            /* Card 1: Legenda */
+            drawCardBox(x1, w1, 'HORÁRIOS & LEGENDA DOS TURNOS');
+            const legendRows = [
+                { code: 'M', name: 'Manhã', hrs: '05:00 às 13:00' },
+                { code: 'T', name: 'Tarde', hrs: '13:00 às 21:00' },
+                { code: 'N', name: 'Noite', hrs: '21:00 às 05:00' },
+                { code: 'F', name: 'Folga', hrs: 'Descanso' }
+            ];
+            legendRows.forEach((lr, idx) => {
+                const ry = cardsY + 74 + idx * 80;
+                const p = PALETTE[lr.code];
+                canvasRoundRect(ctx, x1 + 26, ry, w1 - 52, 66, 13);
+                ctx.fillStyle = '#ffffff'; ctx.fill();
+                ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.stroke();
+
+                canvasRoundRect(ctx, x1 + 40, ry + 11, 48, 44, 10);
+                ctx.fillStyle = p.bg; ctx.fill();
+                ctx.fillStyle = p.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.font = `900 23px ${font}`;
+                ctx.fillText(lr.code, x1 + 64, ry + 34);
+
+                ctx.textAlign = 'left'; ctx.fillStyle = '#0f172a'; ctx.font = `800 24px ${font}`;
+                ctx.fillText(lr.name, x1 + 104, ry + 34);
+
+                ctx.textAlign = 'right'; ctx.fillStyle = '#334155'; ctx.font = `800 22px ${font}`;
+                ctx.fillText(lr.hrs, x1 + w1 - 44, ry + 34);
+            });
+            ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+            ctx.fillStyle = '#dc2626'; ctx.font = `800 18px ${font}`;
+            let extraFooter = '■ Vermelho: Domingos e Feriados';
+            if (data.hasAnyOv) extraFooter += '   □ Âmbar: Extra/Troca';
+            if (data.hasAnyAt) extraFooter += '   AT: Atestado';
+            ctx.fillText(canvasTruncateText(ctx, extraFooter, w1 - 52), x1 + 26, cardsY + cardsH - 18);
+
+            /* Card 2: Resumo Mensal por Turno */
+            drawCardBox(x2, w2, 'RESUMO MENSAL POR TURNO');
+            const stX = x2 + 26, stY = cardsY + 74, stW = w2 - 52, stH = cardsH - 96;
+            const stHeadH = 54, stRowH = (stH - stHeadH) / 4;
+            const numCols = data.hasAnyAt ? 5 : 4;
+            const numColW = 78;
+            const nameColW = stW - numCols * numColW;
+
+            ctx.save();
+            canvasRoundRect(ctx, stX, stY, stW, stH, 13);
+            ctx.clip();
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillRect(stX, stY, stW, stHeadH);
+            ctx.fillStyle = '#334155'; ctx.font = `900 19px ${font}`; ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
+            ctx.fillText('TURNO / EQUIPE', stX + 18, stY + stHeadH / 2);
+            const sumHeaders = data.hasAnyAt ? ['M', 'T', 'N', 'F', 'AT'] : ['M', 'T', 'N', 'F'];
+            ctx.textAlign = 'center';
+            sumHeaders.forEach((sh, si) => {
+                ctx.fillText(sh, stX + nameColW + si * numColW + numColW / 2, stY + stHeadH / 2);
+            });
+
+            data.teams.forEach((t, ti) => {
+                const ry = stY + stHeadH + ti * stRowH;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(stX, ry, stW, stRowH);
+                if (ti > 0) {
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.fillRect(stX, ry, stW, 2);
+                }
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#0f172a'; ctx.font = `900 23px ${font}`;
+                ctx.fillText(`Turno ${t.letter}`, stX + 18, ry + stRowH * 0.34);
+                ctx.fillStyle = '#64748b'; ctx.font = `600 18px ${font}`;
+                ctx.fillText(canvasTruncateText(ctx, t.name, nameColW - 26), stX + 18, ry + stRowH * 0.72);
+
+                const vals = [
+                    { v: t.counts.M, c: '#1e40af' },
+                    { v: t.counts.T, c: '#9a3412' },
+                    { v: t.counts.N, c: '#3730a3' },
+                    { v: t.counts.F, c: '#15803d' }
+                ];
+                if (data.hasAnyAt) vals.push({ v: t.counts.AT, c: '#be123c' });
+                ctx.textAlign = 'center'; ctx.font = `900 25px ${font}`;
+                vals.forEach((item, vi) => {
+                    ctx.fillStyle = item.c;
+                    ctx.fillText(String(item.v), stX + nameColW + vi * numColW + numColW / 2, ry + stRowH / 2);
+                });
+            });
+            ctx.restore();
+            canvasRoundRect(ctx, stX, stY, stW, stH, 13);
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
+
+            /* Card 3: Feriados do Mês */
+            drawCardBox(x3, w3, 'FERIADOS DO MÊS (NACIONAL / ES / CACHOEIRO)');
+            if (data.holidaysList.length === 0) {
+                canvasRoundRect(ctx, x3 + 26, cardsY + 130, w3 - 52, 120, 14);
+                ctx.fillStyle = '#ffffff'; ctx.fill();
+                ctx.setLineDash([8, 6]); ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2.5; ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#64748b'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.font = `700 22px ${font}`;
+                ctx.fillText('Nenhum feriado previsto neste mês.', x3 + w3 / 2, cardsY + 190);
+            } else {
+                const maxShow = Math.min(data.holidaysList.length, 6);
+                const rowStep = Math.min(68, Math.floor((cardsH - 96) / Math.max(1, maxShow)));
+                const itemH = Math.max(46, rowStep - 10);
+                for (let hi = 0; hi < maxShow; hi++) {
+                    const h = data.holidaysList[hi];
+                    const ry = cardsY + 74 + hi * rowStep;
+                    canvasRoundRect(ctx, x3 + 26, ry, w3 - 52, itemH, 10);
+                    ctx.fillStyle = '#ffffff'; ctx.fill();
+                    ctx.strokeStyle = '#fecaca'; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fillRect(x3 + 26, ry + 3, 7, itemH - 6);
+
+                    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#b91c1c'; ctx.font = `900 21px ${font}`;
+                    const dLbl = `${h.dateStr} (${h.dowPretty})`;
+                    ctx.fillText(dLbl, x3 + 46, ry + itemH / 2);
+                    const dW = ctx.measureText(dLbl).width;
+                    ctx.fillStyle = '#1e293b'; ctx.font = `700 21px ${font}`;
+                    ctx.fillText(canvasTruncateText(ctx, h.name, w3 - 106 - dW), x3 + 60 + dW, ry + itemH / 2);
+                }
+            }
+
+            /* 4. Rodapé */
+            const footY = H - 54;
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(padX, footY - 14, contentW, 2);
+            ctx.textBaseline = 'top'; ctx.fillStyle = '#64748b'; ctx.font = `700 19px ${font}`;
+            ctx.textAlign = 'left';
+            ctx.fillText('Imerys • Britagem ICP 1 • Escala Oficial para Quadro dos Operadores', padX, footY);
+            ctx.textAlign = 'right';
+            ctx.fillText(`Emitido em ${data.issuedStr} • Formato A4 Horizontal (HD)`, W - padX, footY);
+
+            /* Download PNG */
+            const fileName = `Escala_Imerys_A4_${data.mmStr}_${data.year}.png`;
+            c.toBlob((blob) => {
+                if (!blob) { showToast('Não foi possível gerar a imagem.'); return; }
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.setAttribute('download', fileName);
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => window.URL.revokeObjectURL(url), 1500);
+                showToast('Imagem A4 HD baixada com sucesso!');
+            }, 'image/png');
+        }
+
+        /* 10. MODAL DE NOTAS, TROCAS E ATESTADOS */
         function markModalDirty() { modalDirty = true; document.getElementById('unsaved-guard')?.classList.add('hidden'); }
         function requestCloseModal() {
             if (modalDirty) { haptic(); const g = document.getElementById('unsaved-guard'); g.classList.remove('hidden'); g.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'nearest' }); return; }
@@ -1467,7 +2471,7 @@
         }
         function deleteNote() { document.getElementById('note-text').value = ''; currentSelectedOverride = ''; setAtestadoUI(false); saveNote(true); }
 
-        /* 10. MODAL LEGENDA E BACKUP JSON */
+        /* 11. MODAL LEGENDA E BACKUP JSON */
         function openInfoModal() { haptic(); updateStorageHealthUI(); openAnimatedModal('info', 'info-modal', 'info-modal-content'); }
         function closeInfoModal() { haptic(); closeAnimatedModal('info', 'info-modal', 'info-modal-content'); }
         function exportBackup() {
@@ -1526,7 +2530,7 @@
             reader.readAsText(file);
         }
 
-        /* 11. EXPORTAÇÃO AGENDA (.ICS - RFC 5545) */
+        /* 12. EXPORTAÇÃO AGENDA (.ICS - RFC 5545) */
         function formatICSDate(date, timeStr) { return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}T${timeStr.replace(':', '')}00`; }
         function formatICSAllDay(date) { return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`; }
         function sanitizeICS(str) { return String(str).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
@@ -1534,7 +2538,7 @@
             haptic();
             const year = currentDate.getFullYear(), month = currentDate.getMonth(), daysInMonth = new Date(year, month + 1, 0).getDate();
             const turmaLtr = TEAM_LETTERS[currentTurma], teamLabel = `Turno ${turmaLtr} (${teamNames[currentTurma]})`;
-            showToast(`Exportando escala do Turno ${turmaLtr}...`);
+            showToast(`Exportando agenda do Turno ${turmaLtr}...`);
             const dtStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
             const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Escala Imerys Britagem ICP1//PT-BR', 'CALSCALE:GREGORIAN'];
             for (let day = 1; day <= daysInMonth; day++) {
@@ -1565,7 +2569,7 @@
             setTimeout(() => window.URL.revokeObjectURL(url), 1000);
         }
 
-        /* 12. DELEGAÇÃO DE EVENTOS, SCROLL DELTA-TIME (60/120/144Hz+) E TECLADO */
+        /* 13. DELEGAÇÃO DE EVENTOS, SCROLL DELTA-TIME, BEFOREPRINT E TECLADO */
         function bindInteractions() {
             const tableEl = document.getElementById('main-table');
             tableEl?.addEventListener('click', (e) => {
@@ -1575,7 +2579,6 @@
                 else if (td.dataset.action === 'team') setTurma(parseInt(td.dataset.team, 10));
             });
 
-            /* Rolagem horizontal suave via Shift + Rodinha com interpolação independente de Hz (60/90/120/144/240Hz) */
             const sc = document.getElementById('table-scroll-wrap');
             sc?.addEventListener('pointerdown', stopSmoothWheel, { passive: true });
             sc?.addEventListener('touchstart', stopSmoothWheel, { passive: true });
@@ -1607,6 +2610,12 @@
                     wheelRaf = requestAnimationFrame(step);
                 }
             }, { passive: false });
+
+            /* Garante folha A4 sempre pronta se o usuário apertar Ctrl+P / Cmd+P direto no PC */
+            window.addEventListener('beforeprint', () => {
+                const printEl = document.getElementById('print-sheet');
+                if (printEl) printEl.innerHTML = buildA4SheetHTML(buildA4Dataset(a4IncludeChanges));
+            });
         }
 
         document.addEventListener('keydown', (e) => {
@@ -1615,6 +2624,7 @@
 
             if (e.key === 'Escape') {
                 if (!document.getElementById('note-modal').classList.contains('hidden')) requestCloseModal();
+                else if (!document.getElementById('export-modal').classList.contains('hidden')) closeExportModal();
                 else if (!document.getElementById('teams-modal').classList.contains('hidden')) closeTeamsModal();
                 else if (!document.getElementById('info-modal').classList.contains('hidden')) closeInfoModal();
                 else if (!document.getElementById('ios-install-modal').classList.contains('hidden')) closeIosInstallPrompt();
@@ -1634,7 +2644,11 @@
         let resizeRaf = 0;
         window.addEventListener('resize', () => {
             if (resizeRaf) return;
-            resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; updateTableScrollHint(); });
+            resizeRaf = requestAnimationFrame(() => {
+                resizeRaf = 0;
+                updateTableScrollHint();
+                if (!document.getElementById('export-modal').classList.contains('hidden')) scaleA4Preview();
+            });
         }, { passive: true });
 
         function bootApp() { bindInteractions(); initAppIcons(); renderApp(true); initPersistence(); }
