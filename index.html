@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="pt-BR" class="antialiased">
 <head>
@@ -13,81 +13,55 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Escala Imerys">
-
     <script>
-        tailwind.config = {
-            darkMode: 'media',
-            theme: {
-                extend: {
-                    colors: {
-                        oled: '#000000',
-                        surface: '#0a0a0a',
-                        surfaceBorder: '#1a1a1a',
-                    },
-                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
-                    animation: {
-                        'pulse-slow': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'fade-in': 'fadeIn 0.28s ease-out forwards',
-                        'bounce-subtle': 'bounceSubtle 2s infinite'
-                    },
-                    keyframes: {
-                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        bounceSubtle: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-3px)' } }
+        // Configuração de tema Claro/OLED e animações do Tailwind
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                darkMode: 'media',
+                theme: {
+                    extend: {
+                        colors: { oled: '#000000', surface: '#0a0a0a', surfaceBorder: '#1a1a1a' },
+                        fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+                        animation: {
+                            'pulse-slow': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                            'fade-in': 'fadeIn 0.25s ease-out forwards',
+                            'bounce-subtle': 'bounceSubtle 2s infinite'
+                        },
+                        keyframes: {
+                            fadeIn: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                            bounceSubtle: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-3px)' } }
+                        }
                     }
                 }
-            }
+            };
         }
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         * { -webkit-tap-highlight-color: transparent; }
-
-        body {
-            background-color: #f8fafc;
-            color: #0f172a;
-            overscroll-behavior-y: none;
-        }
-        @media (prefers-color-scheme: dark) {
-            body { background-color: #000000; color: #f8fafc; }
-        }
-
-        /* Bloqueio de seleção/lupa nativa no iOS preservando campos digitáveis */
-        .ios-no-callout {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        input, textarea {
-            -webkit-user-select: text;
-            user-select: text;
-            -webkit-touch-callout: default;
-        }
-
-        /* Safe Areas iOS (Notch, Dynamic Island e Home Indicator) */
+        body { background-color: #f8fafc; color: #0f172a; overscroll-behavior-y: none; }
+        @media (prefers-color-scheme: dark) { body { background-color: #000000; color: #f8fafc; } }
+        /* Bloqueio de seleção/lupa no iOS preservando campos digitáveis */
+        .ios-no-callout { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+        /* Safe Areas iOS (Notch, Dynamic Island e barra inferior) */
         .pt-safe { padding-top: 1rem; }
         .pb-safe { padding-bottom: 1.25rem; }
         @supports (padding-top: env(safe-area-inset-top)) {
             .pt-safe { padding-top: calc(env(safe-area-inset-top) + 0.85rem); }
             .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1.25rem); }
         }
-
         ::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .glass-header { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .table-scroll { touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
-        .line-clamp-3 {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body class="flex justify-center w-full min-h-[100dvh]">
-
     <div class="ios-no-callout w-full max-w-md bg-white dark:bg-oled min-h-[100dvh] relative pb-safe shadow-2xl flex flex-col no-scrollbar">
 
-        <!-- Cabeçalho Fixo com Safe Area -->
+        <!-- Cabeçalho Fixo -->
         <header class="sticky top-0 z-40 w-full bg-slate-50/85 dark:bg-surface/85 glass-header border-b border-slate-200 dark:border-surfaceBorder px-5 pb-3.5 pt-safe">
             <div class="flex justify-between items-center">
                 <div class="flex flex-col">
@@ -95,15 +69,12 @@
                     <p class="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400 mt-1">Britagem ICP 1</p>
                 </div>
                 <div class="flex gap-2">
-                    <!-- Botão de Instalar (PWA Android/iOS) -->
                     <button id="install-btn" type="button" onclick="installApp()" class="hidden p-2.5 rounded-full bg-blue-600 text-white hover:scale-105 active:scale-95 transition-transform animate-bounce-subtle shadow-lg shadow-blue-500/30" aria-label="Adicionar à Tela Inicial">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     </button>
-                    <!-- Botão de Info (Legenda e Backup) -->
-                    <button type="button" onclick="openInfoModal()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Legenda de Horários e Backup">
+                    <button type="button" onclick="openInfoModal()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Legenda e Backup">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </button>
-                    <!-- Botão de Exportar Agenda (.ics) -->
                     <button type="button" onclick="exportICS()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Exportar Agenda ICS">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </button>
@@ -112,8 +83,7 @@
         </header>
 
         <main class="flex-grow p-3 space-y-5 overflow-x-hidden animate-fade-in">
-
-            <!-- Alerta de Armazenamento Temporário (exibido apenas se o ambiente restringir salvamento) -->
+            <!-- Alerta de Ambiente Temporário -->
             <div id="storage-warning-banner" class="hidden rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-800/60 p-3.5 text-left shadow-sm">
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex items-start gap-2.5 min-w-0">
@@ -123,7 +93,7 @@
                             <p id="storage-warning-text" class="text-[11px] font-medium text-amber-700/90 dark:text-amber-200/80 mt-1 leading-snug"></p>
                         </div>
                     </div>
-                    <button type="button" onclick="dismissStorageWarning()" class="p-1 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 shrink-0" aria-label="Fechar aviso">
+                    <button type="button" onclick="dismissStorageWarning()" class="p-1 rounded-lg text-amber-600 dark:text-amber-400 shrink-0" aria-label="Fechar aviso">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -133,7 +103,7 @@
                 </div>
             </div>
 
-            <!-- Controle de Mês com Atalho "Ir para Hoje" -->
+            <!-- Navegação de Mês e Atalho Hoje -->
             <div class="flex items-center justify-between bg-slate-100 dark:bg-surface p-2 rounded-2xl border border-slate-200 dark:border-surfaceBorder shadow-sm">
                 <button type="button" onclick="changeMonth(-1)" class="p-2.5 bg-white dark:bg-oled rounded-xl shadow-sm border border-slate-100 dark:border-surfaceBorder active:scale-90 text-slate-600 dark:text-slate-400 transition-transform" aria-label="Mês anterior">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
@@ -147,7 +117,7 @@
                 </button>
             </div>
 
-            <!-- Seletor de Turnos -->
+            <!-- Seletor de Turno -->
             <section>
                 <div class="flex items-center gap-2 mb-2 px-1">
                     <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path></svg>
@@ -161,7 +131,7 @@
                 </div>
             </section>
 
-            <!-- Tabela Matricial Unificada -->
+            <!-- Tabela Geral Unificada -->
             <section class="relative">
                 <div class="flex items-center justify-between px-1 mb-2">
                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Visão do Mês</span>
@@ -173,7 +143,7 @@
                 <p class="text-[10px] font-medium text-slate-400 dark:text-slate-500 text-center mt-2">Dica: Toque num dia do seu turno para notas, extras ou atestado.</p>
             </section>
 
-            <!-- Resumo Mensal do Turno Destacado (Plural + Folgas em Verde) -->
+            <!-- Resumo Mensal -->
             <section class="grid grid-cols-4 gap-2 pt-1">
                 <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-xl p-2.5 text-center">
                     <div class="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase">Manhãs</div>
@@ -193,7 +163,7 @@
                 </div>
             </section>
 
-            <!-- Card Resumo de Atestados Médicos & Retorno (com Motivo/Observação) -->
+            <!-- Resumo de Atestados Médicos & Retorno -->
             <section id="atestado-summary-section" class="hidden bg-rose-50/80 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4">
                 <h3 class="text-[11px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 mb-3 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -202,7 +172,7 @@
                 <div id="atestado-summary-container" class="space-y-2.5"></div>
             </section>
 
-            <!-- Lista de Feriados do Mês -->
+            <!-- Feriados do Mês -->
             <section id="holidays-list" class="bg-slate-50 dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-2xl p-4 hidden">
                 <h3 class="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -212,125 +182,77 @@
             </section>
         </main>
 
-        <!-- Modal de Instrução de Instalação iOS -->
+        <!-- Modal Instalação iOS -->
         <div id="ios-install-modal" onclick="if(event.target===this) closeIosInstallPrompt()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[70] hidden flex-col justify-end items-center transition-opacity duration-300 opacity-0 px-4 pb-8">
             <div id="ios-install-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-sm transform translate-y-full transition-transform duration-300 shadow-2xl text-center">
                 <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-5"></div>
                 <h3 class="text-xl font-black text-slate-800 dark:text-white mb-2">Instalar no iPhone</h3>
                 <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-6">Instale o aplicativo para acesso rápido direto na sua tela inicial.</p>
-
                 <div class="flex flex-col gap-4 text-left bg-slate-50 dark:bg-oled border border-slate-100 dark:border-surfaceBorder rounded-xl p-4">
                     <div class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                         <span class="flex items-center justify-center min-w-[32px] h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-black">1</span>
-                        <span class="text-sm">Toque no ícone de <b>Compartilhar</b> <svg class="w-5 h-5 inline-block mx-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> na barra do Safari.</span>
+                        <span class="text-sm">Toque em <b>Compartilhar</b> <svg class="w-5 h-5 inline-block mx-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> na barra do Safari.</span>
                     </div>
                     <div class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                         <span class="flex items-center justify-center min-w-[32px] h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-black">2</span>
-                        <span class="text-sm">Role para baixo e toque em <br><b>"Adicionar à Tela de Início"</b> <svg class="w-5 h-5 inline-block mx-0.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>.</span>
+                        <span class="text-sm">Role e toque em <b>"Adicionar à Tela de Início"</b>.</span>
                     </div>
                 </div>
-
                 <button type="button" onclick="closeIosInstallPrompt()" class="mt-6 w-full py-3.5 rounded-2xl font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-surfaceBorder active:scale-95 transition-transform">Entendi</button>
             </div>
         </div>
 
-        <!-- Modal de Legenda, Diagnóstico e Backup -->
+        <!-- Modal Legenda, Diagnóstico e Backup -->
         <div id="info-modal" onclick="if(event.target===this) closeInfoModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-center items-center transition-opacity duration-300 opacity-0 px-4">
             <div id="info-modal-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-xs transform scale-95 transition-transform duration-300 shadow-2xl max-h-[88dvh] overflow-y-auto no-scrollbar">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-black text-slate-800 dark:text-white leading-tight">Legenda de Horários</h3>
-                    <button type="button" onclick="closeInfoModal()" class="p-2 bg-slate-100 dark:bg-surfaceBorder rounded-full text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors" aria-label="Fechar legenda">
+                    <button type="button" onclick="closeInfoModal()" class="p-2 bg-slate-100 dark:bg-surfaceBorder rounded-full text-slate-500 dark:text-slate-300" aria-label="Fechar legenda">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-
                 <div class="space-y-2.5">
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300 font-black text-xs">M</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Manhã</span>
-                        </div>
-                        <span class="font-black text-blue-700 dark:text-blue-400 text-xs">05:00 - 13:00</span>
-                    </div>
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 flex items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300 font-black text-xs">T</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Tarde</span>
-                        </div>
-                        <span class="font-black text-orange-700 dark:text-orange-400 text-xs">13:00 - 21:00</span>
-                    </div>
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 font-black text-xs">N</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Noite</span>
-                        </div>
-                        <span class="font-black text-indigo-700 dark:text-indigo-400 text-xs">21:00 - 05:00</span>
-                    </div>
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 flex items-center justify-center rounded-lg bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300 font-black text-xs">F</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Folga</span>
-                        </div>
-                        <span class="font-black text-green-700 dark:text-green-400 text-xs uppercase">Descanso</span>
-                    </div>
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-black text-[11px]">AT</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Atestado</span>
-                        </div>
-                        <span class="font-black text-rose-700 dark:text-rose-400 text-xs uppercase">Afastamento</span>
-                    </div>
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300 font-black text-xs">M</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Manhã</span></div><span class="font-black text-blue-700 dark:text-blue-400 text-xs">05:00 - 13:00</span></div>
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300 font-black text-xs">T</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Tarde</span></div><span class="font-black text-orange-700 dark:text-orange-400 text-xs">13:00 - 21:00</span></div>
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 font-black text-xs">N</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Noite</span></div><span class="font-black text-indigo-700 dark:text-indigo-400 text-xs">21:00 - 05:00</span></div>
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300 font-black text-xs">F</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Folga</span></div><span class="font-black text-green-700 dark:text-green-400 text-xs uppercase">Descanso</span></div>
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-black text-[11px]">AT</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Atestado</span></div><span class="font-black text-rose-700 dark:text-rose-400 text-xs uppercase">Afastamento</span></div>
                     <div class="grid grid-cols-2 gap-2 pt-0.5">
-                        <div class="flex items-center gap-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40">
-                            <span class="w-3 h-3 rounded-full bg-amber-500 shrink-0"></span>
-                            <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300 leading-tight">Extra / Troca</span>
-                        </div>
-                        <div class="flex items-center gap-2 p-2 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40">
-                            <span class="w-3 h-3 rounded-full bg-sky-500 shrink-0"></span>
-                            <span class="text-[11px] font-bold text-sky-800 dark:text-sky-300 leading-tight">Dia de Volta</span>
-                        </div>
+                        <div class="flex items-center gap-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40"><span class="w-3 h-3 rounded-full bg-amber-500 shrink-0"></span><span class="text-[11px] font-bold text-amber-800 dark:text-amber-300 leading-tight">Extra / Troca</span></div>
+                        <div class="flex items-center gap-2 p-2 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40"><span class="w-3 h-3 rounded-full bg-sky-500 shrink-0"></span><span class="text-[11px] font-bold text-sky-800 dark:text-sky-300 leading-tight">Dia de Volta</span></div>
                     </div>
                 </div>
-
-                <!-- Seção de Diagnóstico de Armazenamento e Backup -->
                 <div class="mt-5 pt-4 border-t border-slate-200 dark:border-surfaceBorder">
-                    <div id="storage-status-card" class="mb-3 rounded-xl px-3 py-2.5 border border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-oled flex items-center gap-2.5">
+                    <div class="mb-3 rounded-xl px-3 py-2.5 border border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-oled flex items-center gap-2.5">
                         <span id="storage-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0"></span>
                         <div class="min-w-0 flex-1">
                             <span id="storage-status-title" class="block text-[11px] font-black text-slate-700 dark:text-slate-200 leading-tight">Verificando salvamento...</span>
                             <span id="storage-status-detail" class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 leading-tight"></span>
                         </div>
                     </div>
-
                     <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2.5 text-center">Backup de Notas, Trocas e Atestados</span>
                     <div class="grid grid-cols-2 gap-2">
-                        <button type="button" onclick="exportBackup()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            Exportar
-                        </button>
-                        <button type="button" onclick="document.getElementById('backup-file-input').click()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                            Importar
-                        </button>
+                        <button type="button" onclick="exportBackup()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">Exportar</button>
+                        <button type="button" onclick="document.getElementById('backup-file-input').click()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">Importar</button>
                         <input type="file" id="backup-file-input" accept=".json" class="hidden" onchange="importBackup(event)">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal de Notas, Trocas e Atestado Médico -->
+        <!-- Modal Notas, Trocas e Atestado -->
         <div id="note-modal" onclick="if(event.target===this) requestCloseModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end transition-opacity duration-300 opacity-0">
             <div id="modal-content" class="bg-white dark:bg-surface border-t border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] p-6 w-full max-w-md mx-auto transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe max-h-[90dvh] overflow-y-auto no-scrollbar">
                 <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
                 <div class="flex justify-between items-center mb-4">
                     <h3 id="modal-date-title" class="text-lg font-black text-slate-800 dark:text-white leading-tight"></h3>
-                    <button type="button" onclick="requestCloseModal()" class="p-2 bg-slate-100 dark:bg-surfaceBorder rounded-full text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors" aria-label="Fechar janela">
+                    <button type="button" onclick="requestCloseModal()" class="p-2 bg-slate-100 dark:bg-surfaceBorder rounded-full text-slate-500 dark:text-slate-300" aria-label="Fechar janela">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
-                <!-- Seletor Rápido de Troca / Hora Extra -->
-                <div id="override-section" class="mb-4">
+                <!-- Troca / Hora Extra -->
+                <div class="mb-4">
                     <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Troca / Hora Extra</span>
                     <div class="grid grid-cols-5 gap-1.5">
                         <button type="button" data-ov="" onclick="selectOverride('')" class="ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95">Normal</button>
@@ -341,7 +263,7 @@
                     </div>
                 </div>
 
-                <!-- Bloco de Atestado Médico -->
+                <!-- Atestado Médico -->
                 <div class="mb-4 rounded-2xl border border-rose-200/80 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/20 p-3.5">
                     <div class="flex items-center justify-between gap-3">
                         <div class="flex items-center gap-2.5 min-w-0">
@@ -357,38 +279,33 @@
                             <span id="atestado-toggle-knob" class="w-5 h-5 rounded-full bg-white shadow-sm transform translate-x-0 transition-transform"></span>
                         </button>
                     </div>
-
-                    <!-- Controles do Atestado (visíveis quando ativado) -->
                     <div id="atestado-controls" class="hidden mt-3.5 pt-3.5 border-t border-rose-200/70 dark:border-rose-900/40 space-y-3">
                         <p id="atestado-origin-notice" class="hidden text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-white/70 dark:bg-oled/60 border border-rose-200 dark:border-rose-900/40 rounded-xl px-3 py-2 leading-snug"></p>
-
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-[11px] font-extrabold text-rose-900 dark:text-rose-200">Quantidade de dias:</span>
                             <div class="flex items-center gap-1.5">
-                                <button type="button" onclick="adjustAtestadoDays(-1)" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90 transition-transform">−</button>
+                                <button type="button" onclick="adjustAtestadoDays(-1)" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90">−</button>
                                 <input type="number" id="atestado-days-input" min="1" max="180" value="1" oninput="onAtestadoDaysInput()" class="w-14 h-9 text-center text-base font-black text-rose-800 dark:text-rose-200 bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 rounded-xl outline-none focus:ring-2 focus:ring-rose-500">
-                                <button type="button" onclick="adjustAtestadoDays(1)" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90 transition-transform">+</button>
+                                <button type="button" onclick="adjustAtestadoDays(1)" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90">+</button>
                             </div>
                         </div>
-
                         <div class="grid grid-cols-5 gap-1.5">
-                            <button type="button" onclick="setAtestadoDays(1)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 transition-transform">1d</button>
-                            <button type="button" onclick="setAtestadoDays(3)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 transition-transform">3d</button>
-                            <button type="button" onclick="setAtestadoDays(5)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 transition-transform">5d</button>
-                            <button type="button" onclick="setAtestadoDays(7)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 transition-transform">7d</button>
-                            <button type="button" onclick="setAtestadoDays(15)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 transition-transform">15d</button>
+                            <button type="button" onclick="setAtestadoDays(1)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">1d</button>
+                            <button type="button" onclick="setAtestadoDays(3)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">3d</button>
+                            <button type="button" onclick="setAtestadoDays(5)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">5d</button>
+                            <button type="button" onclick="setAtestadoDays(7)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">7d</button>
+                            <button type="button" onclick="setAtestadoDays(15)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95">15d</button>
                         </div>
-
                         <div id="atestado-preview-box" class="rounded-xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200 dark:border-sky-900/60 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-200 leading-snug"></div>
                     </div>
                 </div>
 
-                <!-- Campo de Observação (text-base = 16px evita auto-zoom no Safari iOS) -->
-                <textarea id="note-text" oninput="markModalDirty()" class="w-full h-24 p-3.5 text-base font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600" placeholder="Observações para este dia (ex: CID, dentista, troca...)"></textarea>
+                <!-- Observação -->
+                <textarea id="note-text" oninput="markModalDirty()" class="w-full h-24 p-3.5 text-base font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600" placeholder="Observações para este dia..."></textarea>
 
-                <!-- Proteção contra fechamento acidental com alterações não salvas -->
+                <!-- Aviso de alterações não salvas -->
                 <div id="unsaved-guard" class="hidden mt-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 px-3 py-2.5 flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-amber-800 dark:text-amber-300">Você tem alterações não salvas</span>
+                    <span class="text-xs font-extrabold text-amber-800 dark:text-amber-300">Alterações não salvas</span>
                     <div class="flex items-center gap-1.5 shrink-0">
                         <button type="button" onclick="closeModal()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder active:scale-95">Descartar</button>
                         <button type="button" onclick="saveNote()" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-white bg-blue-600 active:scale-95">Salvar</button>
@@ -402,7 +319,7 @@
             </div>
         </div>
 
-        <!-- Toast de Notificação -->
+        <!-- Toast -->
         <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 px-5 py-3 rounded-full shadow-2xl z-[80] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-5 max-w-[90vw]">
             <svg class="w-5 h-5 text-blue-400 dark:text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
             <span id="toast-msg" class="font-bold text-xs sm:text-sm tracking-wide truncate"></span>
@@ -410,171 +327,93 @@
     </div>
 
     <script>
-        /* =========================================================================
-           1. MOTOR PWA & INSTALAÇÃO MULTIPLATAFORMA (Android + iOS/iPadOS)
-           ========================================================================= */
-        const manifestStartUrl = window.location.protocol.startsWith('http') ? window.location.href : '.';
+        /* 1. PWA E INSTALAÇÃO (Android + iOS) */
         const manifestData = {
-            "name": "Escala Imerys",
-            "short_name": "Escala",
-            "start_url": manifestStartUrl,
-            "display": "standalone",
-            "background_color": "#000000",
-            "theme_color": "#000000",
-            "icons": [{
-                "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzI1NjNlYiIvPjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzFkNGVkOCIvPjwvc3ZnPg==",
-                "sizes": "192x192",
-                "type": "image/svg+xml"
-            }]
+            name: 'Escala Imerys', short_name: 'Escala',
+            start_url: window.location.protocol.startsWith('http') ? window.location.href : '.',
+            display: 'standalone', background_color: '#000000', theme_color: '#000000',
+            icons: [{ src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzI1NjNlYiIvPjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzFkNGVkOCIvPjwvc3ZnPg==', sizes: '192x192', type: 'image/svg+xml' }]
         };
-        try {
-            const manifestEl = document.getElementById('pwa-manifest');
-            if (manifestEl) {
-                manifestEl.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData));
-            }
-        } catch (e) {}
+        try { document.getElementById('pwa-manifest').href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData)); } catch (e) {}
 
         function isIosDevice() {
             const ua = window.navigator.userAgent.toLowerCase();
-            const isClassicIos = /iphone|ipad|ipod/.test(ua);
-            const isModernIpad = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-            return isClassicIos || isModernIpad;
+            return /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         }
-
         function isInStandaloneMode() {
-            return (('standalone' in window.navigator) && window.navigator.standalone) ||
-                   window.matchMedia('(display-mode: standalone)').matches;
+            return (('standalone' in window.navigator) && window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
         }
-
         let deferredPrompt = null;
-
         window.addEventListener('DOMContentLoaded', () => {
-            if (isIosDevice() && !isInStandaloneMode()) {
-                const btn = document.getElementById('install-btn');
-                if (btn) btn.classList.remove('hidden');
-            }
+            if (isIosDevice() && !isInStandaloneMode()) document.getElementById('install-btn')?.classList.remove('hidden');
         });
-
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const btn = document.getElementById('install-btn');
-            if (btn) btn.classList.remove('hidden');
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-btn')?.classList.remove('hidden');
         });
-
         async function installApp() {
             haptic();
-            if (isIosDevice() && !isInStandaloneMode()) {
-                openIosInstallPrompt();
-            } else if (deferredPrompt) {
+            if (isIosDevice() && !isInStandaloneMode()) { openIosInstallPrompt(); }
+            else if (deferredPrompt) {
                 try {
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        document.getElementById('install-btn').classList.add('hidden');
-                    }
+                    if (outcome === 'accepted') document.getElementById('install-btn').classList.add('hidden');
                 } catch (e) {}
                 deferredPrompt = null;
-            } else {
-                showToast('App já instalado ou use o menu do navegador.');
-            }
+            } else { showToast('App já instalado ou use o menu do navegador.'); }
         }
-
         function openIosInstallPrompt() {
             haptic();
-            const md = document.getElementById('ios-install-modal');
-            const ct = document.getElementById('ios-install-content');
-            md.classList.remove('hidden');
-            md.classList.add('flex');
-            void md.offsetWidth;
-            md.classList.replace('opacity-0', 'opacity-100');
-            ct.classList.remove('translate-y-full');
+            const md = document.getElementById('ios-install-modal'), ct = document.getElementById('ios-install-content');
+            md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
+            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.remove('translate-y-full');
         }
-
         function closeIosInstallPrompt() {
             haptic();
-            const md = document.getElementById('ios-install-modal');
-            const ct = document.getElementById('ios-install-content');
-            md.classList.replace('opacity-100', 'opacity-0');
-            ct.classList.add('translate-y-full');
-            setTimeout(() => {
-                md.classList.add('hidden');
-                md.classList.remove('flex');
-            }, 300);
+            const md = document.getElementById('ios-install-modal'), ct = document.getElementById('ios-install-content');
+            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.add('translate-y-full');
+            setTimeout(() => { md.classList.add('hidden'); md.classList.remove('flex'); }, 300);
         }
 
-        /* =========================================================================
-           2. MOTOR DE PERSISTÊNCIA EM DUPLA CAMADA (localStorage + IndexedDB)
-           ========================================================================= */
+        /* 2. PERSISTÊNCIA EM DUPLA CAMADA (localStorage + IndexedDB) */
         const STORAGE_KEYS = ['imerys_turma', 'imerys_notes', 'imerys_overrides', 'imerys_atestados'];
-        const IDB_NAME = 'EscalaImerysStorage';
-        const IDB_STORE = 'kv';
+        const IDB_NAME = 'EscalaImerysStorage', IDB_STORE = 'kv';
 
         function safeParseJSON(raw, fallback, expectedType) {
-            if (raw === null || raw === undefined || raw === '') return fallback;
+            if (!raw) return fallback;
             try {
                 const parsed = JSON.parse(raw);
                 if (expectedType === 'array') return Array.isArray(parsed) ? parsed : fallback;
                 if (expectedType === 'object') return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : fallback;
                 return parsed;
-            } catch (e) {
-                return fallback;
-            }
+            } catch (e) { return fallback; }
         }
 
         const DB = {
-            memory: {},
-            lsAvailable: false,
-            idbAvailable: false,
-            idbInstance: null,
-            persistedGranted: false,
-            warningDismissed: false,
-
+            memory: {}, lsAvailable: false, idbAvailable: false, idbInstance: null, persistedGranted: false, warningDismissed: false,
             testLocalStorage() {
                 try {
-                    const testKey = '__imerys_storage_probe__';
-                    localStorage.setItem(testKey, '1');
-                    const ok = localStorage.getItem(testKey) === '1';
-                    localStorage.removeItem(testKey);
-                    this.lsAvailable = ok;
-                    return ok;
-                } catch (e) {
-                    this.lsAvailable = false;
-                    return false;
-                }
+                    localStorage.setItem('__imerys_probe__', '1');
+                    this.lsAvailable = localStorage.getItem('__imerys_probe__') === '1';
+                    localStorage.removeItem('__imerys_probe__');
+                } catch (e) { this.lsAvailable = false; }
+                return this.lsAvailable;
             },
-
             openIDB() {
                 return new Promise((resolve) => {
-                    if (typeof indexedDB === 'undefined') {
-                        this.idbAvailable = false;
-                        resolve(null);
-                        return;
-                    }
+                    if (typeof indexedDB === 'undefined') { this.idbAvailable = false; return resolve(null); }
                     try {
                         const req = indexedDB.open(IDB_NAME, 1);
                         req.onupgradeneeded = (ev) => {
                             const db = ev.target.result;
-                            if (!db.objectStoreNames.contains(IDB_STORE)) {
-                                db.createObjectStore(IDB_STORE);
-                            }
+                            if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
                         };
-                        req.onsuccess = (ev) => {
-                            this.idbInstance = ev.target.result;
-                            this.idbAvailable = true;
-                            resolve(this.idbInstance);
-                        };
-                        req.onerror = () => {
-                            this.idbAvailable = false;
-                            resolve(null);
-                        };
-                    } catch (e) {
-                        this.idbAvailable = false;
-                        resolve(null);
-                    }
+                        req.onsuccess = (ev) => { this.idbInstance = ev.target.result; this.idbAvailable = true; resolve(this.idbInstance); };
+                        req.onerror = () => { this.idbAvailable = false; resolve(null); };
+                    } catch (e) { this.idbAvailable = false; resolve(null); }
                 });
             },
-
             idbSet(k, v) {
                 if (!this.idbInstance) return Promise.resolve(false);
                 return new Promise((resolve) => {
@@ -583,121 +422,74 @@
                         tx.objectStore(IDB_STORE).put(String(v), k);
                         tx.oncomplete = () => resolve(true);
                         tx.onerror = () => resolve(false);
-                    } catch (e) {
-                        resolve(false);
-                    }
+                    } catch (e) { resolve(false); }
                 });
             },
-
             idbGetAll() {
                 if (!this.idbInstance) return Promise.resolve({});
                 return new Promise((resolve) => {
                     try {
                         const tx = this.idbInstance.transaction(IDB_STORE, 'readonly');
-                        const store = tx.objectStore(IDB_STORE);
-                        const result = {};
+                        const store = tx.objectStore(IDB_STORE), result = {};
                         let pending = STORAGE_KEYS.length;
                         STORAGE_KEYS.forEach((k) => {
                             const req = store.get(k);
-                            req.onsuccess = () => {
-                                if (req.result !== undefined && req.result !== null) {
-                                    result[k] = String(req.result);
-                                }
-                                if (--pending === 0) resolve(result);
-                            };
-                            req.onerror = () => {
-                                if (--pending === 0) resolve(result);
-                            };
+                            req.onsuccess = () => { if (req.result !== undefined && req.result !== null) result[k] = String(req.result); if (--pending === 0) resolve(result); };
+                            req.onerror = () => { if (--pending === 0) resolve(result); };
                         });
-                    } catch (e) {
-                        resolve({});
-                    }
+                    } catch (e) { resolve({}); }
                 });
             },
-
             get(k) {
                 if (this.lsAvailable) {
-                    try {
-                        const val = localStorage.getItem(k);
-                        if (val !== null) {
-                            this.memory[k] = val;
-                            return val;
-                        }
-                    } catch (e) {}
+                    try { const val = localStorage.getItem(k); if (val !== null) { this.memory[k] = val; return val; } } catch (e) {}
                 }
                 return Object.prototype.hasOwnProperty.call(this.memory, k) ? this.memory[k] : null;
             },
-
             set(k, v) {
                 const strVal = String(v);
                 this.memory[k] = strVal;
                 let lsSaved = false;
-
-                try {
-                    localStorage.setItem(k, strVal);
-                    lsSaved = localStorage.getItem(k) === strVal;
-                    this.lsAvailable = lsSaved;
-                } catch (e) {
-                    this.lsAvailable = false;
-                }
-
-                if (this.idbAvailable && this.idbInstance) {
-                    this.idbSet(k, strVal);
-                }
-
+                try { localStorage.setItem(k, strVal); lsSaved = localStorage.getItem(k) === strVal; this.lsAvailable = lsSaved; }
+                catch (e) { this.lsAvailable = false; }
+                if (this.idbAvailable && this.idbInstance) this.idbSet(k, strVal);
                 return lsSaved || this.idbAvailable;
             },
-
             flushAll() {
                 this.set('imerys_turma', currentTurma);
                 this.set('imerys_notes', JSON.stringify(notesDb));
                 this.set('imerys_overrides', JSON.stringify(overridesDb));
                 this.set('imerys_atestados', JSON.stringify(atestadosDb));
             },
-
             isEphemeralEnvironment() {
-                const proto = window.location.protocol;
-                const badProto = proto === 'file:' || proto === 'content:' || proto === 'blob:' || proto === 'about:';
-                const opaqueOrigin = !window.origin || window.origin === 'null';
-                return badProto || opaqueOrigin || (!this.lsAvailable && !this.idbAvailable);
+                const p = window.location.protocol;
+                return (p === 'file:' || p === 'content:' || p === 'blob:' || p === 'about:' || !window.origin || window.origin === 'null' || (!this.lsAvailable && !this.idbAvailable));
             }
         };
-
         DB.testLocalStorage();
 
-        /* =========================================================================
-           3. MOTOR MATEMÁTICO DE ESCALA, FERIADOS E ATESTADOS
-           ========================================================================= */
+        /* 3. MOTOR DE ESCALA, FERIADOS E ATESTADOS */
         const CYCLE = ['M', 'M', 'M', 'F', 'T', 'T', 'T', 'F', 'N', 'N', 'N', 'F'];
         const SHIFTS_CONFIG = {
-            'M': { name: 'Manhã', hours: '05:00-13:00', style: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-black' },
-            'T': { name: 'Tarde', hours: '13:00-21:00', style: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 font-black' },
-            'N': { name: 'Noite', hours: '21:00-05:00', style: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 font-black' },
-            'F': { name: 'Folga', hours: '', style: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-black' },
-            'AT': { name: 'Atestado Médico', hours: '', style: 'bg-rose-100 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 font-black ring-2 ring-inset ring-rose-500/80 dark:ring-rose-500/70' }
+            M: { name: 'Manhã', hours: '05:00-13:00', style: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-black' },
+            T: { name: 'Tarde', hours: '13:00-21:00', style: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 font-black' },
+            N: { name: 'Noite', hours: '21:00-05:00', style: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 font-black' },
+            F: { name: 'Folga', hours: '', style: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-black' },
+            AT: { name: 'Atestado Médico', hours: '', style: 'bg-rose-100 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 font-black ring-2 ring-inset ring-rose-500/80 dark:ring-rose-500/70' }
         };
-
-        const BASE_DATE = Date.UTC(2026, 10, 1); // 1º de Novembro de 2026
+        const BASE_DATE = Date.UTC(2026, 10, 1);
         const TEAM_LETTERS = ['A', 'B', 'C', 'D'];
         const TEAM_DESC = ['Rolly e Aníbal', 'Marquinho e Matozo', 'Marcos e Socó', 'Alex e Tita'];
         const TEAM_OFFSETS = [0, 3, 6, 9];
         const DOW_NAMES = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
         const DOW_PRETTY = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-        let currentTurma = 2; // Padrão Turno C
+        let currentTurma = 2;
         const now = new Date();
         let currentDate = new Date(now.getFullYear(), now.getMonth(), 1, 12, 0, 0);
-        let notesDb = {};
-        let overridesDb = {};
-        let atestadosDb = [];
-
-        let currentModalDateStr = null;
-        let currentSelectedOverride = '';
-        let modalAtestadoEnabled = false;
-        let modalAtestadoStartDate = null;
-        let modalEditingAtestadoId = null;
-        let modalDirty = false;
-        let toastTimer = null;
+        let notesDb = {}, overridesDb = {}, atestadosDb = [];
+        let currentModalDateStr = null, currentSelectedOverride = '', modalAtestadoEnabled = false;
+        let modalAtestadoStartDate = null, modalEditingAtestadoId = null, modalDirty = false, toastTimer = null;
         const holidaysYearCache = {};
 
         function hydrateStateFromDB() {
@@ -707,400 +499,180 @@
             overridesDb = safeParseJSON(DB.get('imerys_overrides'), {}, 'object');
             atestadosDb = safeParseJSON(DB.get('imerys_atestados'), [], 'array');
         }
-
         hydrateStateFromDB();
 
-        function haptic() {
-            try { if (navigator.vibrate) navigator.vibrate(18); } catch (e) {}
-        }
-
-        function escapeHTML(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function formatDateKey(y, mZeroIndexed, d) {
-            return `${y}-${String(mZeroIndexed + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        }
-
-        function parseDateKey(dateKey) {
-            const parts = dateKey.split('-').map(Number);
-            return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
-        }
-
-        function addDaysToKey(dateKey, deltaDays) {
-            const dt = parseDateKey(dateKey);
-            dt.setDate(dt.getDate() + deltaDays);
-            return formatDateKey(dt.getFullYear(), dt.getMonth(), dt.getDate());
-        }
-
-        function formatShortDate(dateKey) {
-            const parts = dateKey.split('-');
-            return `${parts[2]}/${parts[1]}`;
-        }
-
-        function formatReturnDateLabel(dateKey) {
-            const dt = parseDateKey(dateKey);
-            return `${DOW_PRETTY[dt.getDay()]}, ${formatShortDate(dateKey)}`;
-        }
+        function haptic() { try { if (navigator.vibrate) navigator.vibrate(18); } catch (e) {} }
+        function escapeHTML(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+        function formatDateKey(y, mZero, d) { return `${y}-${String(mZero + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`; }
+        function parseDateKey(k) { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2], 12, 0, 0); }
+        function addDaysToKey(k, delta) { const dt = parseDateKey(k); dt.setDate(dt.getDate() + delta); return formatDateKey(dt.getFullYear(), dt.getMonth(), dt.getDate()); }
+        function formatShortDate(k) { const p = k.split('-'); return `${p[2]}/${p[1]}`; }
+        function formatReturnDateLabel(k) { return `${DOW_PRETTY[parseDateKey(k).getDay()]}, ${formatShortDate(k)}`; }
 
         function getEaster(year) {
-            const a = year % 19;
-            const b = Math.floor(year / 100);
-            const c = year % 100;
-            const d = Math.floor(b / 4);
-            const e = b % 4;
-            const f = Math.floor((b + 8) / 25);
-            const g = Math.floor((b - f + 1) / 3);
-            const h = (19 * a + b - d - g + 15) % 30;
-            const i = Math.floor(c / 4);
-            const k = c % 4;
-            const l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4;
+            const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
             const m = Math.floor((a + 11 * h + 22 * l) / 451);
             return new Date(year, Math.floor((h + l - 7 * m + 114) / 31) - 1, ((h + l - 7 * m + 114) % 31) + 1, 12, 0, 0);
         }
-
-        function getHolidaysForYear(year) {
-            if (holidaysYearCache[year]) return holidaysYearCache[year];
-            const easter = getEaster(year);
-            const addDays = (d, days) => {
-                const nd = new Date(d.getTime());
-                nd.setDate(nd.getDate() + days);
-                return nd;
-            };
-            const mk = (d) => `${d.getDate()}/${d.getMonth()}`;
-
-            const all = {
-                "1/0": "Ano Novo",
-                "21/3": "Tiradentes",
-                "1/4": "Dia do Trabalho",
-                "29/5": "Dia de São Pedro (Cachoeiro)",
-                "7/8": "Independência do Brasil",
-                "12/9": "Nossa Sra. Aparecida",
-                "2/10": "Finados",
-                "15/10": "Proc. da República",
-                "20/10": "Consciência Negra",
-                "25/11": "Natal",
-                [mk(addDays(easter, -47))]: "Carnaval",
-                [mk(addDays(easter, -2))]: "Paixão de Cristo",
-                [mk(easter)]: "Páscoa",
-                [mk(addDays(easter, 8))]: "Nossa Sra. da Penha (ES)",
-                [mk(addDays(easter, 60))]: "Corpus Christi"
-            };
-            holidaysYearCache[year] = all;
-            return all;
-        }
-
         function getHolidays(year, month) {
-            const yearMap = getHolidaysForYear(year);
-            const res = {};
-            const suffix = `/${month}`;
-            for (const [k, v] of Object.entries(yearMap)) {
-                if (k.endsWith(suffix)) {
-                    res[k.split('/')[0]] = v;
-                }
+            if (!holidaysYearCache[year]) {
+                const easter = getEaster(year);
+                const addD = (d, n) => { const nd = new Date(d.getTime()); nd.setDate(nd.getDate() + n); return nd; };
+                const mk = (d) => `${d.getDate()}/${d.getMonth()}`;
+                holidaysYearCache[year] = {
+                    '1/0': 'Ano Novo', '21/3': 'Tiradentes', '1/4': 'Dia do Trabalho', '29/5': 'Dia de São Pedro (Cachoeiro)',
+                    '7/8': 'Independência do Brasil', '12/9': 'Nossa Sra. Aparecida', '2/10': 'Finados',
+                    '15/10': 'Proc. da República', '20/10': 'Consciência Negra', '25/11': 'Natal',
+                    [mk(addD(easter, -47))]: 'Carnaval', [mk(addD(easter, -2))]: 'Paixão de Cristo',
+                    [mk(easter)]: 'Páscoa', [mk(addD(easter, 8))]: 'Nossa Sra. da Penha (ES)', [mk(addD(easter, 60))]: 'Corpus Christi'
+                };
             }
+            const res = {}, suffix = `/${month}`;
+            for (const [k, v] of Object.entries(holidaysYearCache[year])) { if (k.endsWith(suffix)) res[k.split('/')[0]] = v; }
             return res;
         }
-
-        function getShift(year, month, day, turmaIndex) {
-            const diffMs = Date.UTC(year, month, day) - BASE_DATE;
-            let index = (Math.floor(diffMs / 86400000) + TEAM_OFFSETS[turmaIndex]) % 12;
-            if (index < 0) index += 12;
-            return CYCLE[index];
+        function getShift(year, month, day, turmaIdx) {
+            let idx = (Math.floor((Date.UTC(year, month, day) - BASE_DATE) / 86400000) + TEAM_OFFSETS[turmaIdx]) % 12;
+            if (idx < 0) idx += 12;
+            return CYCLE[idx];
         }
-
-        function getEffectiveShift(dateKey, turmaIndex) {
-            const ov = overridesDb[`${dateKey}_${turmaIndex}`];
+        function getEffectiveShift(dateKey, turmaIdx) {
+            const ov = overridesDb[`${dateKey}_${turmaIdx}`];
             if (ov) return ov;
             const dt = parseDateKey(dateKey);
-            return getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), turmaIndex);
+            return getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), turmaIdx);
         }
-
         function getAtestadoDates(rec) {
-            const list = [];
-            const total = Math.max(1, parseInt(rec.days, 10) || 1);
-            for (let i = 0; i < total; i++) {
-                list.push(addDaysToKey(rec.startDate, i));
-            }
+            const list = [], total = Math.max(1, parseInt(rec.days, 10) || 1);
+            for (let i = 0; i < total; i++) list.push(addDaysToKey(rec.startDate, i));
             return list;
         }
-
         function getAtestadoReason(rec) {
-            if (notesDb[rec.startDate] && notesDb[rec.startDate].trim()) {
-                return notesDb[rec.startDate].trim();
-            }
+            if (notesDb[rec.startDate]?.trim()) return notesDb[rec.startDate].trim();
             const dates = getAtestadoDates(rec);
-            for (let i = 1; i < dates.length; i++) {
-                const txt = notesDb[dates[i]];
-                if (txt && txt.trim()) return txt.trim();
-            }
+            for (let i = 1; i < dates.length; i++) { if (notesDb[dates[i]]?.trim()) return notesDb[dates[i]].trim(); }
             return '';
         }
-
-        function findAtestadoOnDate(dateKey, turmaIndex) {
+        function findAtestadoOnDate(dateKey, turmaIdx) {
             for (const rec of atestadosDb) {
-                if (rec.turma !== turmaIndex) continue;
-                const dates = getAtestadoDates(rec);
-                const idx = dates.indexOf(dateKey);
-                if (idx !== -1) {
-                    return {
-                        record: rec,
-                        dayIndex: idx + 1,
-                        totalDays: dates.length,
-                        endDate: dates[dates.length - 1]
-                    };
-                }
+                if (rec.turma !== turmaIdx) continue;
+                const dates = getAtestadoDates(rec), idx = dates.indexOf(dateKey);
+                if (idx !== -1) return { record: rec, dayIndex: idx + 1, totalDays: dates.length, endDate: dates[dates.length - 1] };
             }
             return null;
         }
-
-        function computeReturnInfo(startDate, days, turmaIndex, ignoreRecordId = null) {
-            const total = Math.max(1, parseInt(days, 10) || 1);
-            const endDate = addDaysToKey(startDate, total - 1);
-
-            // Mapeia datas de outros atestados ativos da mesma turma para evitar retorno em cima de outro atestado
+        function computeReturnInfo(startDate, days, turmaIdx, ignoreId = null) {
+            const total = Math.max(1, parseInt(days, 10) || 1), endDate = addDaysToKey(startDate, total - 1);
             const otherBlocked = new Set();
-            atestadosDb.forEach(rec => {
-                if (rec.turma !== turmaIndex || rec.id === ignoreRecordId) return;
-                getAtestadoDates(rec).forEach(d => otherBlocked.add(d));
-            });
-
-            let candidate = addDaysToKey(startDate, total);
-            let skippedFolgas = 0;
+            atestadosDb.forEach(r => { if (r.turma === turmaIdx && r.id !== ignoreId) getAtestadoDates(r).forEach(d => otherBlocked.add(d)); });
+            let candidate = addDaysToKey(startDate, total), skippedFolgas = 0;
             for (let step = 0; step < 60; step++) {
                 if (!otherBlocked.has(candidate)) {
-                    const effShift = getEffectiveShift(candidate, turmaIndex);
-                    if (effShift !== 'F') {
-                        return {
-                            endDate,
-                            returnDateKey: candidate,
-                            returnShiftCode: effShift,
-                            skippedFolgas
-                        };
-                    }
+                    const eff = getEffectiveShift(candidate, turmaIdx);
+                    if (eff !== 'F') return { endDate, returnDateKey: candidate, returnShiftCode: eff, skippedFolgas };
                     skippedFolgas++;
                 }
                 candidate = addDaysToKey(candidate, 1);
             }
-            return {
-                endDate,
-                returnDateKey: addDaysToKey(startDate, total),
-                returnShiftCode: getEffectiveShift(addDaysToKey(startDate, total), turmaIndex),
-                skippedFolgas: 0
-            };
+            const fallback = addDaysToKey(startDate, total);
+            return { endDate, returnDateKey: fallback, returnShiftCode: getEffectiveShift(fallback, turmaIdx), skippedFolgas: 0 };
         }
-
         function showToast(msg) {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-msg');
+            const toast = document.getElementById('toast'), msgEl = document.getElementById('toast-msg');
             if (!toast || !msgEl) return;
             msgEl.innerText = msg;
             toast.classList.remove('opacity-0', '-translate-y-5');
             toast.classList.add('opacity-100', 'translate-y-0');
             if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', '-translate-y-5');
-            }, 3400);
+            toastTimer = setTimeout(() => { toast.classList.remove('opacity-100', 'translate-y-0'); toast.classList.add('opacity-0', '-translate-y-5'); }, 3400);
         }
 
-        /* =========================================================================
-           4. DIAGNÓSTICO DE ARMAZENAMENTO & SINCRONIZAÇÃO
-           ========================================================================= */
+        /* 4. DIAGNÓSTICO E SINCRONIZAÇÃO */
         function updateStorageHealthUI() {
-            const dot = document.getElementById('storage-status-dot');
-            const title = document.getElementById('storage-status-title');
-            const detail = document.getElementById('storage-status-detail');
-            const banner = document.getElementById('storage-warning-banner');
+            const dot = document.getElementById('storage-status-dot'), title = document.getElementById('storage-status-title');
+            const detail = document.getElementById('storage-status-detail'), banner = document.getElementById('storage-warning-banner');
             const bannerText = document.getElementById('storage-warning-text');
-
-            const isEphemeral = DB.isEphemeralEnvironment();
-            const proto = window.location.protocol;
-
+            const isEphemeral = DB.isEphemeralEnvironment(), proto = window.location.protocol;
             if (dot && title && detail) {
                 if (!isEphemeral && (DB.lsAvailable || DB.idbAvailable)) {
                     dot.className = 'w-2.5 h-2.5 rounded-full bg-green-500 shrink-0 shadow-[0_0_6px_rgba(34,197,94,0.6)]';
                     title.innerText = 'Salvamento automático ativo';
                     const layers = [];
                     if (DB.lsAvailable) layers.push('Memória Local');
-                    if (DB.idbAvailable) layers.push('Banco IndexedDB');
+                    if (DB.idbAvailable) layers.push('IndexedDB');
                     detail.innerText = `${layers.join(' + ')}${DB.persistedGranted ? ' • Protegido' : ''}`;
                 } else {
                     dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0 shadow-[0_0_6px_rgba(245,158,11,0.6)]';
                     title.innerText = 'Ambiente temporário / restrito';
-                    detail.innerText = (!DB.lsAvailable && !DB.idbAvailable)
-                        ? 'Navegador bloqueou gravação local. Use o Backup JSON.'
-                        : 'Abrir como arquivo/preview pode resetar dados ao reabrir.';
+                    detail.innerText = (!DB.lsAvailable && !DB.idbAvailable) ? 'Navegador bloqueou gravação local.' : 'Abra pelo link publicado para salvar sempre.';
                 }
             }
-
             if (banner && bannerText) {
                 if (isEphemeral && !DB.warningDismissed) {
-                    if (!DB.lsAvailable && !DB.idbAvailable) {
-                        bannerText.innerText = 'Seu navegador bloqueou o salvamento local (modo privado ou visualização restrita). Use "Salvar Backup" para não perder suas anotações.';
-                    } else if (proto === 'file:' || proto === 'content:') {
-                        bannerText.innerText = 'Você abriu o arquivo direto do celular/WhatsApp. Para manter tudo salvo sempre, publique o link (GitHub Pages) ou salve um Backup antes de fechar.';
-                    } else {
-                        bannerText.innerText = 'Você está usando uma pré-visualização temporária que limpa os dados ao recarregar. Publique o app no GitHub Pages ou use o Backup abaixo.';
-                    }
+                    bannerText.innerText = (proto === 'file:' || proto === 'content:')
+                        ? 'Você abriu o arquivo direto do celular. Para manter salvo sempre, use o link do GitHub Pages ou salve um Backup.'
+                        : 'Ambiente de pré-visualização temporário. Use o link publicado ou salve um Backup antes de fechar.';
                     banner.classList.remove('hidden');
-                } else {
-                    banner.classList.add('hidden');
-                }
+                } else { banner.classList.add('hidden'); }
             }
         }
-
-        function dismissStorageWarning() {
-            DB.warningDismissed = true;
-            const banner = document.getElementById('storage-warning-banner');
-            if (banner) banner.classList.add('hidden');
-        }
-
+        function dismissStorageWarning() { DB.warningDismissed = true; document.getElementById('storage-warning-banner')?.classList.add('hidden'); }
         async function initPersistence() {
-            if (navigator.storage && navigator.storage.persist) {
-                try { DB.persistedGranted = await navigator.storage.persist(); } catch (e) {}
-            }
-
+            if (navigator.storage?.persist) { try { DB.persistedGranted = await navigator.storage.persist(); } catch (e) {} }
             await DB.openIDB();
             if (DB.idbAvailable) {
                 const idbData = await DB.idbGetAll();
-                const hasIdbData = Object.keys(idbData).length > 0;
-                const hasLsData = DB.lsAvailable && STORAGE_KEYS.some(k => {
-                    try { return localStorage.getItem(k) !== null; } catch (e) { return false; }
-                });
-
-                if (hasIdbData && !hasLsData) {
-                    STORAGE_KEYS.forEach((k) => {
-                        if (idbData[k] !== undefined) {
-                            DB.memory[k] = idbData[k];
-                            try { localStorage.setItem(k, idbData[k]); } catch (e) {}
-                        }
-                    });
-                    hydrateStateFromDB();
-                    renderApp();
-                    showToast('Dados recuperados automaticamente!');
-                } else if (hasLsData) {
-                    DB.flushAll();
-                } else if (hasIdbData) {
-                    let recovered = false;
-                    STORAGE_KEYS.forEach((k) => {
-                        if (idbData[k] !== undefined && DB.get(k) === null) {
-                            DB.memory[k] = idbData[k];
-                            try { localStorage.setItem(k, idbData[k]); } catch (e) {}
-                            recovered = true;
-                        }
-                    });
-                    if (recovered) {
-                        hydrateStateFromDB();
-                        renderApp();
-                    }
-                }
+                const hasIdb = Object.keys(idbData).length > 0;
+                const hasLs = DB.lsAvailable && STORAGE_KEYS.some(k => { try { return localStorage.getItem(k) !== null; } catch (e) { return false; } });
+                if (hasIdb && !hasLs) {
+                    STORAGE_KEYS.forEach(k => { if (idbData[k] !== undefined) { DB.memory[k] = idbData[k]; try { localStorage.setItem(k, idbData[k]); } catch (e) {} } });
+                    hydrateStateFromDB(); renderApp(); showToast('Dados recuperados automaticamente!');
+                } else if (hasLs) { DB.flushAll(); }
             }
-
             updateStorageHealthUI();
         }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') DB.flushAll();
-        });
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') DB.flushAll(); });
         window.addEventListener('pagehide', () => DB.flushAll());
+        window.addEventListener('storage', (ev) => { if (ev.key && STORAGE_KEYS.includes(ev.key)) { hydrateStateFromDB(); renderApp(); } });
 
-        window.addEventListener('storage', (ev) => {
-            if (ev.key && STORAGE_KEYS.includes(ev.key)) {
-                hydrateStateFromDB();
-                renderApp();
-            }
-        });
-
-        /* =========================================================================
-           5. NAVEGAÇÃO E RENDERIZAÇÃO PRINCIPAL
-           ========================================================================= */
+        /* 5. NAVEGAÇÃO E RENDERIZAÇÃO PRINCIPAL */
         function setTurma(index) {
-            haptic();
-            currentTurma = index;
+            haptic(); currentTurma = index;
             const saved = DB.set('imerys_turma', index);
             renderApp();
-            if (!saved) {
-                showToast('Atenção: navegador bloqueou o salvamento.');
-                updateStorageHealthUI();
-            }
+            if (!saved) { showToast('Atenção: navegador bloqueou o salvamento.'); updateStorageHealthUI(); }
         }
-
-        function changeMonth(delta) {
-            haptic();
-            // Mantém sempre no dia 1º para evitar rollover em meses de 31 dias
-            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1, 12, 0, 0);
-            renderApp();
-        }
-
-        function goToToday() {
-            haptic();
-            const t = new Date();
-            currentDate = new Date(t.getFullYear(), t.getMonth(), 1, 12, 0, 0);
-            renderApp(true);
-        }
-
+        function changeMonth(delta) { haptic(); currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1, 12, 0, 0); renderApp(); }
+        function goToToday() { haptic(); const t = new Date(); currentDate = new Date(t.getFullYear(), t.getMonth(), 1, 12, 0, 0); renderApp(true); }
         function scrollToTodayColumn() {
             setTimeout(() => {
-                const colToday = document.getElementById('col-today');
-                const scrollContainer = document.querySelector('.table-scroll');
-                if (colToday && scrollContainer) {
-                    const targetLeft = colToday.offsetLeft - Math.max(120, Math.floor((scrollContainer.clientWidth - colToday.offsetWidth) / 2));
-                    scrollContainer.scrollLeft = Math.max(0, targetLeft);
-                }
+                const colToday = document.getElementById('col-today'), sc = document.querySelector('.table-scroll');
+                if (colToday && sc) sc.scrollLeft = Math.max(0, colToday.offsetLeft - Math.max(120, Math.floor((sc.clientWidth - colToday.offsetWidth) / 2)));
             }, 90);
         }
 
         function renderApp(forceScrollToday = false) {
             try {
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const today = new Date();
+                const year = currentDate.getFullYear(), month = currentDate.getMonth();
+                const daysInMonth = new Date(year, month + 1, 0).getDate(), today = new Date();
                 const isCMonth = today.getFullYear() === year && today.getMonth() === month;
 
-                document.getElementById('current-month-display').innerText =
-                    currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+                document.getElementById('current-month-display').innerText = currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+                document.getElementById('btn-today')?.classList.toggle('hidden', isCMonth);
 
-                const btnToday = document.getElementById('btn-today');
-                if (btnToday) {
-                    if (isCMonth) btnToday.classList.add('hidden');
-                    else btnToday.classList.remove('hidden');
-                }
-
-                // Atualiza estilo dos botões de Turno (sem ofuscamento branco no modo OLED)
                 document.querySelectorAll('.team-btn').forEach((btn, i) => {
                     const act = i === currentTurma;
-                    btn.className = `team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 ${
-                        act
-                        ? 'bg-slate-900 border-slate-900 text-white dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-md'
-                        : 'border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-surface text-slate-800 dark:text-slate-100'
-                    }`;
+                    btn.className = `team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 ${act ? 'bg-slate-900 border-slate-900 text-white dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-md' : 'border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-surface text-slate-800 dark:text-slate-100'}`;
                 });
 
-                // Pré-calcula atestados e datas de retorno do turno selecionado
-                const returnDateMap = {};
-                const monthAtestados = [];
-                const monthStartKey = formatDateKey(year, month, 1);
-                const monthEndKey = formatDateKey(year, month, daysInMonth);
-
-                const sortedAtestados = atestadosDb
-                    .filter(rec => rec.turma === currentTurma)
-                    .sort((a, b) => a.startDate.localeCompare(b.startDate));
-
-                sortedAtestados.forEach(rec => {
+                const returnDateMap = {}, monthAtestados = [];
+                const monthStartKey = formatDateKey(year, month, 1), monthEndKey = formatDateKey(year, month, daysInMonth);
+                atestadosDb.filter(r => r.turma === currentTurma).sort((a, b) => a.startDate.localeCompare(b.startDate)).forEach(rec => {
                     const retInfo = computeReturnInfo(rec.startDate, rec.days, currentTurma, rec.id);
                     returnDateMap[retInfo.returnDateKey] = { rec, retInfo };
-                    // Inclui no resumo se o período do atestado ou a data de retorno intersecta este mês
-                    if (
-                        (rec.startDate <= monthEndKey && retInfo.endDate >= monthStartKey) ||
-                        (retInfo.returnDateKey >= monthStartKey && retInfo.returnDateKey <= monthEndKey)
-                    ) {
+                    if ((rec.startDate <= monthEndKey && retInfo.endDate >= monthStartKey) || (retInfo.returnDateKey >= monthStartKey && retInfo.returnDateKey <= monthEndKey)) {
                         monthAtestados.push({ rec, retInfo });
                     }
                 });
@@ -1109,565 +681,283 @@
                 let hListHTML = '';
                 const counts = { M: 0, T: 0, N: 0, F: 0 };
 
-                // Cabeçalho da Tabela
-                let tableHTML = '<thead><tr class="bg-slate-100 dark:bg-surfaceBorder/40 border-b border-slate-200 dark:border-surfaceBorder">';
-                tableHTML += '<th class="sticky left-0 z-20 bg-slate-100 dark:bg-surface p-2 border-r border-slate-200 dark:border-surfaceBorder min-w-[122px] text-left pl-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] text-xs font-black uppercase text-slate-600 dark:text-slate-300">Turnos</th>';
-
+                let tableHTML = '<thead><tr class="bg-slate-100 dark:bg-surfaceBorder/40 border-b border-slate-200 dark:border-surfaceBorder"><th class="sticky left-0 z-20 bg-slate-100 dark:bg-surface p-2 border-r border-slate-200 dark:border-surfaceBorder min-w-[122px] text-left pl-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] text-xs font-black uppercase text-slate-600 dark:text-slate-300">Turnos</th>';
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const isToday = isCMonth && day === today.getDate();
-                    const holi = holidays[day];
-                    const dateObj = new Date(year, month, day, 12, 0, 0);
-                    const dow = dateObj.getDay();
-                    const dowStr = DOW_NAMES[dow];
-                    const isSunday = dow === 0;
-
-                    let dayColor = 'text-slate-700 dark:text-slate-300';
-                    if (holi) dayColor = 'text-red-600 dark:text-red-400';
-                    else if (isToday) dayColor = 'text-blue-600 dark:text-blue-400';
-                    else if (isSunday) dayColor = 'text-red-500 dark:text-red-400';
-
-                    if (holi) {
-                        hListHTML += `<div class="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-surfaceBorder last:border-0 last:pb-0"><span class="font-black text-red-500 dark:text-red-400 text-sm min-w-[22px] text-right">${day}</span><span class="text-slate-700 dark:text-slate-300 font-medium text-sm leading-tight">${escapeHTML(holi)}</span></div>`;
-                    }
-
-                    tableHTML += `
-                        <th ${isToday ? 'id="col-today"' : ''} class="p-1.5 min-w-[40px] border-r border-slate-200 dark:border-surfaceBorder ${isToday ? 'bg-blue-50/70 dark:bg-blue-900/25' : ''}">
-                            <div class="flex flex-col items-center relative">
-                                <span class="text-[13px] font-black leading-tight ${dayColor}">${day}</span>
-                                <span class="text-[9px] font-bold ${isSunday || holi ? 'opacity-90' : 'opacity-60'} ${dayColor}">${dowStr}</span>
-                            </div>
-                        </th>`;
+                    const isToday = isCMonth && day === today.getDate(), holi = holidays[day];
+                    const dow = new Date(year, month, day, 12, 0, 0).getDay(), isSunday = dow === 0;
+                    const dayColor = holi ? 'text-red-600 dark:text-red-400' : (isToday ? 'text-blue-600 dark:text-blue-400' : (isSunday ? 'text-red-500 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'));
+                    if (holi) hListHTML += `<div class="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-surfaceBorder last:border-0 last:pb-0"><span class="font-black text-red-500 dark:text-red-400 text-sm min-w-[22px] text-right">${day}</span><span class="text-slate-700 dark:text-slate-300 font-medium text-sm leading-tight">${escapeHTML(holi)}</span></div>`;
+                    tableHTML += `<th ${isToday ? 'id="col-today"' : ''} class="p-1.5 min-w-[40px] border-r border-slate-200 dark:border-surfaceBorder ${isToday ? 'bg-blue-50/70 dark:bg-blue-900/25' : ''}"><div class="flex flex-col items-center"><span class="text-[13px] font-black leading-tight ${dayColor}">${day}</span><span class="text-[9px] font-bold ${isSunday || holi ? 'opacity-90' : 'opacity-60'} ${dayColor}">${DOW_NAMES[dow]}</span></div></th>`;
                 }
                 tableHTML += '</tr></thead><tbody>';
 
-                // Linhas dos Turnos A, B, C, D
                 TEAM_LETTERS.forEach((teamLtr, idx) => {
-                    const isSelected = (idx === currentTurma);
-                    const rowBg = isSelected ? 'bg-white dark:bg-oled' : 'bg-slate-50 dark:bg-surface';
-
-                    tableHTML += `<tr class="${rowBg} border-b border-slate-200 dark:border-surfaceBorder last:border-b-0">`;
-                    tableHTML += `
-                        <td onclick="setTurma(${idx})" class="sticky left-0 z-20 p-2 border-r border-slate-200 dark:border-surfaceBorder flex flex-col items-start pl-3 ${rowBg} cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)]">
-                            <span class="font-black text-sm leading-tight ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}">Turno ${teamLtr}</span>
-                            <span class="text-[9px] font-semibold ${isSelected ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}">${TEAM_DESC[idx]}</span>
-                        </td>`;
-
+                    const isSel = idx === currentTurma, rowBg = isSel ? 'bg-white dark:bg-oled' : 'bg-slate-50 dark:bg-surface';
+                    tableHTML += `<tr class="${rowBg} border-b border-slate-200 dark:border-surfaceBorder last:border-b-0"><td onclick="setTurma(${idx})" class="sticky left-0 z-20 p-2 border-r border-slate-200 dark:border-surfaceBorder flex flex-col items-start pl-3 ${rowBg} cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)]"><span class="font-black text-sm leading-tight ${isSel ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}">Turno ${teamLtr}</span><span class="text-[9px] font-semibold ${isSel ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}">${TEAM_DESC[idx]}</span></td>`;
                     for (let day = 1; day <= daysInMonth; day++) {
-                        const dateKey = formatDateKey(year, month, day);
-                        const baseShift = getShift(year, month, day, idx);
-                        const overrideShift = overridesDb[`${dateKey}_${idx}`];
-                        const effectiveShift = overrideShift || baseShift;
+                        const dateKey = formatDateKey(year, month, day), baseShift = getShift(year, month, day, idx);
+                        const ovShift = overridesDb[`${dateKey}_${idx}`], effShift = ovShift || baseShift;
                         const isToday = isCMonth && day === today.getDate();
-
-                        if (isSelected) {
-                            const atInfo = findAtestadoOnDate(dateKey, idx);
-                            const isReturnDay = Boolean(returnDateMap[dateKey]) && !atInfo;
-                            const hasNote = Boolean(notesDb[dateKey]);
-
-                            let displayCode = effectiveShift;
-                            let cellStyle = SHIFTS_CONFIG[effectiveShift].style;
-
-                            if (atInfo) {
-                                displayCode = 'AT';
-                                cellStyle = SHIFTS_CONFIG['AT'].style;
-                            } else {
-                                counts[effectiveShift]++;
-                            }
-
-                            let extraRing = '';
-                            if (!atInfo && overrideShift) {
-                                extraRing = ' ring-2 ring-inset ring-amber-400 dark:ring-amber-500';
-                            } else if (isReturnDay) {
-                                extraRing = ' ring-2 ring-inset ring-sky-500 dark:ring-sky-400';
-                            }
-
-                            let tdClass = `p-0.5 border-r border-slate-200 dark:border-surfaceBorder relative text-center text-sm ${cellStyle}${extraRing} cursor-pointer active:scale-95 transition-transform`;
-
-                            const subTag = atInfo
-                                ? `<span class="text-[8px] font-black leading-none opacity-85 mt-0.5">${atInfo.dayIndex}/${atInfo.totalDays}</span>`
-                                : (isReturnDay ? '<span class="text-[7px] font-black uppercase tracking-tight text-sky-700 dark:text-sky-300 leading-none mt-0.5">Volta</span>' : '');
-
-                            const noteDot = hasNote
-                                ? '<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-slate-900 dark:bg-white rounded-full"></span>'
-                                : '';
-
-                            const ovDot = (!atInfo && overrideShift)
-                                ? '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>'
-                                : '';
-
-                            tableHTML += `
-                                <td class="${tdClass}" onclick="openModal('${dateKey}', '${day}')">
-                                    <div class="w-full h-full flex flex-col items-center justify-center min-h-[38px] px-0.5">
-                                        <span class="leading-none">${displayCode}</span>
-                                        ${subTag}
-                                        ${ovDot}
-                                        ${noteDot}
-                                    </div>
-                                </td>`;
+                        if (isSel) {
+                            const atInfo = findAtestadoOnDate(dateKey, idx), isRet = Boolean(returnDateMap[dateKey]) && !atInfo;
+                            let code = effShift, style = SHIFTS_CONFIG[effShift].style;
+                            if (atInfo) { code = 'AT'; style = SHIFTS_CONFIG.AT.style; } else { counts[effShift]++; }
+                            const ring = (!atInfo && ovShift) ? ' ring-2 ring-inset ring-amber-400 dark:ring-amber-500' : (isRet ? ' ring-2 ring-inset ring-sky-500 dark:ring-sky-400' : '');
+                            const sub = atInfo ? `<span class="text-[8px] font-black leading-none opacity-85 mt-0.5">${atInfo.dayIndex}/${atInfo.totalDays}</span>` : (isRet ? '<span class="text-[7px] font-black uppercase tracking-tight text-sky-700 dark:text-sky-300 leading-none mt-0.5">Volta</span>' : '');
+                            const noteDot = notesDb[dateKey] ? '<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-slate-900 dark:bg-white rounded-full"></span>' : '';
+                            const ovDot = (!atInfo && ovShift) ? '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>' : '';
+                            tableHTML += `<td class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder relative text-center text-sm ${style}${ring} cursor-pointer active:scale-95 transition-transform" onclick="openModal('${dateKey}','${day}')"><div class="w-full h-full flex flex-col items-center justify-center min-h-[38px] px-0.5"><span class="leading-none">${code}</span>${sub}${ovDot}${noteDot}</div></td>`;
                         } else {
-                            let tdClass = `p-0.5 border-r border-slate-200 dark:border-surfaceBorder relative text-center text-sm cursor-pointer`;
-                            if (isToday) tdClass += ' bg-blue-50/50 dark:bg-blue-900/20';
-                            const dimmedColor = baseShift === 'F'
-                                ? 'text-green-600/65 dark:text-green-400/60 font-bold'
-                                : 'text-slate-400 dark:text-slate-500 font-medium opacity-55';
-                            tableHTML += `
-                                <td class="${tdClass} ${dimmedColor}" onclick="setTurma(${idx})">
-                                    <div class="w-full h-full flex items-center justify-center min-h-[38px]">${baseShift}</div>
-                                </td>`;
+                            const dim = baseShift === 'F' ? 'text-green-600/65 dark:text-green-400/60 font-bold' : 'text-slate-400 dark:text-slate-500 font-medium opacity-55';
+                            tableHTML += `<td class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder relative text-center text-sm cursor-pointer ${isToday ? 'bg-blue-50/50 dark:bg-blue-900/20 ' : ''}${dim}" onclick="setTurma(${idx})"><div class="w-full h-full flex items-center justify-center min-h-[38px]">${baseShift}</div></td>`;
                         }
                     }
                     tableHTML += '</tr>';
                 });
-
                 tableHTML += '</tbody>';
                 document.getElementById('main-table').innerHTML = tableHTML;
+                ['M', 'T', 'N', 'F'].forEach(k => { document.getElementById(`count-${k}`).innerText = counts[k]; });
 
-                // Atualiza contadores no plural
-                ['M', 'T', 'N', 'F'].forEach(k => {
-                    const el = document.getElementById(`count-${k}`);
-                    if (el) el.innerText = counts[k];
-                });
-
-                // Renderiza Resumo de Atestados Médicos & Retorno (com Motivo/Observação)
-                const atSection = document.getElementById('atestado-summary-section');
-                const atContainer = document.getElementById('atestado-summary-container');
+                const atSec = document.getElementById('atestado-summary-section'), atCont = document.getElementById('atestado-summary-container');
                 if (monthAtestados.length > 0) {
-                    atContainer.innerHTML = monthAtestados.map(({ rec, retInfo }) => {
-                        const shiftObj = SHIFTS_CONFIG[retInfo.returnShiftCode];
-                        const periodLabel = rec.days === 1
-                            ? `${formatShortDate(rec.startDate)} (1 dia)`
-                            : `${formatShortDate(rec.startDate)} a ${formatShortDate(retInfo.endDate)} (${rec.days} dias)`;
-                        const returnStr = `${formatReturnDateLabel(retInfo.returnDateKey)} • ${shiftObj.name}${shiftObj.hours ? ` (${shiftObj.hours})` : ''}`;
+                    atCont.innerHTML = monthAtestados.map(({ rec, retInfo }) => {
+                        const sh = SHIFTS_CONFIG[retInfo.returnShiftCode];
+                        const pLbl = rec.days === 1 ? `${formatShortDate(rec.startDate)} (1 dia)` : `${formatShortDate(rec.startDate)} a ${formatShortDate(retInfo.endDate)} (${rec.days} dias)`;
+                        const rStr = `${formatReturnDateLabel(retInfo.returnDateKey)} • ${sh.name}${sh.hours ? ` (${sh.hours})` : ''}`;
                         const reason = getAtestadoReason(rec);
-                        const reasonBlock = reason ? `
-                            <div class="mt-2 rounded-xl bg-white/80 dark:bg-oled/65 border border-rose-200/70 dark:border-rose-900/40 px-3 py-2 flex items-start gap-2">
-                                <svg class="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                <div class="min-w-0 flex-1">
-                                    <span class="block text-[9px] font-black uppercase tracking-wider text-rose-600/80 dark:text-rose-400/80 leading-none mb-1">Motivo / Observação</span>
-                                    <p class="text-xs font-medium text-slate-700 dark:text-slate-200 leading-snug break-words line-clamp-3">${escapeHTML(reason)}</p>
-                                </div>
-                            </div>` : '';
-
-                        return `
-                            <div class="rounded-2xl bg-white/75 dark:bg-oled/75 border border-rose-200/80 dark:border-rose-900/40 p-3 shadow-sm">
-                                <div class="flex items-center justify-between gap-2 mb-2">
-                                    <span class="text-xs font-black text-rose-700 dark:text-rose-300">Período: ${periodLabel}</span>
-                                    <button type="button" onclick="openAtestadoEdit('${rec.startDate}')" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0">Editar &gt;</button>
-                                </div>
-                                <div class="rounded-xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200/80 dark:border-sky-900/50 px-3 py-2 flex items-center gap-1.5 flex-wrap text-xs">
-                                    <span class="font-black text-sky-600 dark:text-sky-400">↳ Retorno:</span>
-                                    <span class="font-bold text-slate-800 dark:text-slate-100">${returnStr}</span>
-                                </div>
-                                ${reasonBlock}
-                            </div>`;
+                        const reasonHTML = reason ? `<div class="mt-2 rounded-xl bg-white/80 dark:bg-oled/65 border border-rose-200/70 dark:border-rose-900/40 px-3 py-2 flex items-start gap-2"><svg class="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><div class="min-w-0 flex-1"><span class="block text-[9px] font-black uppercase tracking-wider text-rose-600/80 dark:text-rose-400/80 leading-none mb-1">Motivo / Observação</span><p class="text-xs font-medium text-slate-700 dark:text-slate-200 leading-snug break-words line-clamp-3">${escapeHTML(reason)}</p></div></div>` : '';
+                        return `<div class="rounded-2xl bg-white/75 dark:bg-oled/75 border border-rose-200/80 dark:border-rose-900/40 p-3 shadow-sm"><div class="flex items-center justify-between gap-2 mb-2"><span class="text-xs font-black text-rose-700 dark:text-rose-300">Período: ${pLbl}</span><button type="button" onclick="openAtestadoEdit('${rec.startDate}')" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0">Editar &gt;</button></div><div class="rounded-xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200/80 dark:border-sky-900/50 px-3 py-2 flex items-center gap-1.5 flex-wrap text-xs"><span class="font-black text-sky-600 dark:text-sky-400">↳ Retorno:</span><span class="font-bold text-slate-800 dark:text-slate-100">${rStr}</span></div>${reasonHTML}</div>`;
                     }).join('');
-                    atSection.classList.remove('hidden');
-                } else {
-                    atContainer.innerHTML = '';
-                    atSection.classList.add('hidden');
-                }
+                    atSec.classList.remove('hidden');
+                } else { atCont.innerHTML = ''; atSec.classList.add('hidden'); }
 
-                // Renderiza Feriados do Mês
-                const hListEl = document.getElementById('holidays-list');
-                if (hListHTML) {
-                    document.getElementById('holidays-container').innerHTML = hListHTML;
-                    hListEl.classList.remove('hidden');
-                } else {
-                    hListEl.classList.add('hidden');
-                }
-
-                if (isCMonth || forceScrollToday) {
-                    scrollToTodayColumn();
-                }
+                const hEl = document.getElementById('holidays-list');
+                if (hListHTML) { document.getElementById('holidays-container').innerHTML = hListHTML; hEl.classList.remove('hidden'); }
+                else { hEl.classList.add('hidden'); }
+                if (isCMonth || forceScrollToday) scrollToTodayColumn();
             } catch (err) {
-                console.error('Erro ao renderizar escala:', err);
-                showToast('Ocorreu um erro ao atualizar a visualização.');
+                console.error('Erro ao renderizar:', err);
+                showToast('Erro ao carregar a visualização.');
             }
         }
 
-        /* =========================================================================
-           6. MODAL DE NOTAS, TROCAS E ATESTADO MÉDICO
-           ========================================================================= */
-        function markModalDirty() {
-            modalDirty = true;
-            const guard = document.getElementById('unsaved-guard');
-            if (guard) guard.classList.add('hidden');
-        }
-
+        /* 6. MODAL DE NOTAS, TROCAS E ATESTADOS */
+        function markModalDirty() { modalDirty = true; document.getElementById('unsaved-guard')?.classList.add('hidden'); }
         function requestCloseModal() {
-            if (modalDirty) {
-                haptic();
-                const guard = document.getElementById('unsaved-guard');
-                if (guard) {
-                    guard.classList.remove('hidden');
-                    guard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-                return;
-            }
+            if (modalDirty) { haptic(); const g = document.getElementById('unsaved-guard'); g.classList.remove('hidden'); g.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return; }
             closeModal();
         }
-
         function selectOverride(code, silent = false) {
-            if (!silent) {
-                haptic();
-                markModalDirty();
-            }
+            if (!silent) { haptic(); markModalDirty(); }
             currentSelectedOverride = code;
-            if (code && modalAtestadoEnabled) {
-                setAtestadoUI(false);
-            }
+            if (code && modalAtestadoEnabled) setAtestadoUI(false);
             document.querySelectorAll('.ov-btn').forEach(btn => {
-                const isAct = btn.getAttribute('data-ov') === code;
-                btn.className = `ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 ${
-                    isAct
-                    ? 'bg-amber-500 border-amber-500 text-white shadow-sm'
-                    : 'bg-slate-50 dark:bg-oled border-slate-200 dark:border-surfaceBorder text-slate-600 dark:text-slate-400'
-                }`;
+                const act = btn.getAttribute('data-ov') === code;
+                btn.className = `ov-btn py-2 rounded-xl text-xs font-extrabold border transition-all active:scale-95 ${act ? 'bg-amber-500 border-amber-500 text-white shadow-sm' : 'bg-slate-50 dark:bg-oled border-slate-200 dark:border-surfaceBorder text-slate-600 dark:text-slate-400'}`;
             });
         }
-
         function setAtestadoUI(enabled) {
             modalAtestadoEnabled = Boolean(enabled);
-            const btn = document.getElementById('atestado-toggle-btn');
-            const knob = document.getElementById('atestado-toggle-knob');
-            const controls = document.getElementById('atestado-controls');
-            const noteInput = document.getElementById('note-text');
-
+            const btn = document.getElementById('atestado-toggle-btn'), knob = document.getElementById('atestado-toggle-knob');
+            const ctrl = document.getElementById('atestado-controls'), noteEl = document.getElementById('note-text');
             if (modalAtestadoEnabled) {
                 btn.className = 'w-12 h-7 rounded-full bg-rose-600 p-1 transition-colors shrink-0 flex items-center';
                 btn.setAttribute('aria-checked', 'true');
                 knob.className = 'w-5 h-5 rounded-full bg-white shadow-sm transform translate-x-5 transition-transform';
-                controls.classList.remove('hidden');
-                if (noteInput) {
-                    noteInput.placeholder = 'Motivo do atestado (ex: CID, consulta, cirurgia...). Aparecerá no resumo.';
-                }
+                ctrl.classList.remove('hidden');
+                if (noteEl) noteEl.placeholder = 'Motivo do atestado (aparecerá no resumo)...';
                 updateAtestadoPreview();
             } else {
                 btn.className = 'w-12 h-7 rounded-full bg-slate-300 dark:bg-surfaceBorder p-1 transition-colors shrink-0 flex items-center';
                 btn.setAttribute('aria-checked', 'false');
                 knob.className = 'w-5 h-5 rounded-full bg-white shadow-sm transform translate-x-0 transition-transform';
-                controls.classList.add('hidden');
-                if (noteInput) {
-                    noteInput.placeholder = 'Observações para este dia (ex: hora extra, troca, compromisso...)';
-                }
+                ctrl.classList.add('hidden');
+                if (noteEl) noteEl.placeholder = 'Observações para este dia...';
             }
         }
-
         function toggleAtestadoMode() {
-            haptic();
-            markModalDirty();
-            const nextState = !modalAtestadoEnabled;
-            if (nextState) {
-                selectOverride('', true);
-                if (!modalAtestadoStartDate) modalAtestadoStartDate = currentModalDateStr;
-            }
-            setAtestadoUI(nextState);
+            haptic(); markModalDirty();
+            const next = !modalAtestadoEnabled;
+            if (next) { selectOverride('', true); if (!modalAtestadoStartDate) modalAtestadoStartDate = currentModalDateStr; }
+            setAtestadoUI(next);
         }
-
         function setAtestadoDays(val) {
-            haptic();
-            markModalDirty();
-            const clamped = Math.max(1, Math.min(180, parseInt(val, 10) || 1));
-            document.getElementById('atestado-days-input').value = clamped;
+            haptic(); markModalDirty();
+            document.getElementById('atestado-days-input').value = Math.max(1, Math.min(180, parseInt(val, 10) || 1));
             updateAtestadoPreview();
         }
-
-        function adjustAtestadoDays(delta) {
-            const input = document.getElementById('atestado-days-input');
-            const cur = parseInt(input.value, 10) || 1;
-            setAtestadoDays(cur + delta);
-        }
-
-        function onAtestadoDaysInput() {
-            markModalDirty();
-            updateAtestadoPreview();
-        }
-
+        function adjustAtestadoDays(delta) { setAtestadoDays((parseInt(document.getElementById('atestado-days-input').value, 10) || 1) + delta); }
+        function onAtestadoDaysInput() { markModalDirty(); updateAtestadoPreview(); }
         function updateAtestadoPreview() {
-            const input = document.getElementById('atestado-days-input');
-            const previewEl = document.getElementById('atestado-preview-box');
-            if (!input || !previewEl || !modalAtestadoStartDate) return;
-
-            const days = Math.max(1, Math.min(180, parseInt(input.value, 10) || 1));
-            const retInfo = computeReturnInfo(modalAtestadoStartDate, days, currentTurma, modalEditingAtestadoId);
-            const shiftObj = SHIFTS_CONFIG[retInfo.returnShiftCode];
-            const periodTxt = days === 1
-                ? `${formatShortDate(modalAtestadoStartDate)} (1 dia)`
-                : `${formatShortDate(modalAtestadoStartDate)} até ${formatShortDate(retInfo.endDate)} (${days} dias)`;
-            const skipNote = retInfo.skippedFolgas > 0
-                ? `<span class="block text-[10px] font-semibold text-sky-700/80 dark:text-sky-300/80 mt-0.5">Pulando ${retInfo.skippedFolgas} folga(s) normal(is) da escala.</span>`
-                : '';
-
-            previewEl.innerHTML = `
-                <span class="block font-bold text-slate-600 dark:text-slate-300">Afastamento: <b class="text-rose-600 dark:text-rose-300">${periodTxt}</b></span>
-                <span class="block font-extrabold text-sky-700 dark:text-sky-300 mt-1">↳ Retorno: ${formatReturnDateLabel(retInfo.returnDateKey)} • ${shiftObj.name}${shiftObj.hours ? ` (${shiftObj.hours})` : ''}</span>
-                ${skipNote}
-            `;
+            const pv = document.getElementById('atestado-preview-box');
+            if (!pv || !modalAtestadoStartDate) return;
+            const days = Math.max(1, Math.min(180, parseInt(document.getElementById('atestado-days-input').value, 10) || 1));
+            const ret = computeReturnInfo(modalAtestadoStartDate, days, currentTurma, modalEditingAtestadoId);
+            const sh = SHIFTS_CONFIG[ret.returnShiftCode];
+            const pTxt = days === 1 ? `${formatShortDate(modalAtestadoStartDate)} (1 dia)` : `${formatShortDate(modalAtestadoStartDate)} até ${formatShortDate(ret.endDate)} (${days} dias)`;
+            const skip = ret.skippedFolgas > 0 ? `<span class="block text-[10px] font-semibold text-sky-700/80 dark:text-sky-300/80 mt-0.5">Pulando ${ret.skippedFolgas} folga(s) normal(is).</span>` : '';
+            pv.innerHTML = `<span class="block font-bold text-slate-600 dark:text-slate-300">Afastamento: <b class="text-rose-600 dark:text-rose-300">${pTxt}</b></span><span class="block font-extrabold text-sky-700 dark:text-sky-300 mt-1">↳ Retorno: ${formatReturnDateLabel(ret.returnDateKey)} • ${sh.name}${sh.hours ? ` (${sh.hours})` : ''}</span>${skip}`;
         }
-
-        function openAtestadoEdit(startDateKey) {
-            const dt = parseDateKey(startDateKey);
-            openModal(startDateKey, String(dt.getDate()));
-        }
-
+        function openAtestadoEdit(startKey) { openModal(startKey, String(parseDateKey(startKey).getDate())); }
         function openModal(dateKey, dayNumber) {
-            haptic();
-            currentModalDateStr = dateKey;
-
-            const dt = parseDateKey(dateKey);
-            const baseShift = getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), currentTurma);
-            const activeOverride = overridesDb[`${dateKey}_${currentTurma}`] || '';
-            const existingAt = findAtestadoOnDate(dateKey, currentTurma);
-            const teamLtr = TEAM_LETTERS[currentTurma];
-
-            const effectiveShift = activeOverride || baseShift;
-            const shiftName = SHIFTS_CONFIG[effectiveShift].name;
-            let statusBadge = '';
-            if (existingAt) {
-                statusBadge = ' • ATESTADO';
-            } else if (activeOverride) {
-                statusBadge = ' • ALTERADO';
-            }
-
-            document.getElementById('modal-date-title').innerHTML = `Dia ${dayNumber} <br><span class="text-[13px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Turno ${teamLtr} • ${shiftName}${statusBadge}</span>`;
+            haptic(); currentModalDateStr = dateKey;
+            const dt = parseDateKey(dateKey), base = getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), currentTurma);
+            const activeOv = overridesDb[`${dateKey}_${currentTurma}`] || '', existingAt = findAtestadoOnDate(dateKey, currentTurma);
+            const badge = existingAt ? ' • ATESTADO' : (activeOv ? ' • ALTERADO' : '');
+            document.getElementById('modal-date-title').innerHTML = `Dia ${dayNumber} <br><span class="text-[13px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Turno ${TEAM_LETTERS[currentTurma]} • ${SHIFTS_CONFIG[activeOv || base].name}${badge}</span>`;
             document.getElementById('note-text').value = notesDb[dateKey] || '';
-            selectOverride(existingAt ? '' : activeOverride, true);
+            selectOverride(existingAt ? '' : activeOv, true);
 
             const originNotice = document.getElementById('atestado-origin-notice');
             if (existingAt) {
-                modalEditingAtestadoId = existingAt.record.id;
-                modalAtestadoStartDate = existingAt.record.startDate;
+                modalEditingAtestadoId = existingAt.record.id; modalAtestadoStartDate = existingAt.record.startDate;
                 document.getElementById('atestado-days-input').value = existingAt.record.days;
                 document.getElementById('atestado-subtitle').innerText = `Iniciado em ${formatShortDate(existingAt.record.startDate)} (${existingAt.record.days}d)`;
                 if (existingAt.record.startDate !== dateKey) {
-                    originNotice.innerText = `Editando o atestado iniciado em ${formatShortDate(existingAt.record.startDate)}. Desative a chave acima para remover.`;
+                    originNotice.innerText = `Editando atestado iniciado em ${formatShortDate(existingAt.record.startDate)}. Desative a chave para remover.`;
                     originNotice.classList.remove('hidden');
-                } else {
-                    originNotice.classList.add('hidden');
-                }
+                } else { originNotice.classList.add('hidden'); }
                 setAtestadoUI(true);
             } else {
-                modalEditingAtestadoId = null;
-                modalAtestadoStartDate = dateKey;
+                modalEditingAtestadoId = null; modalAtestadoStartDate = dateKey;
                 document.getElementById('atestado-days-input').value = 1;
                 document.getElementById('atestado-subtitle').innerText = 'Marcar dias e calcular retorno';
                 originNotice.classList.add('hidden');
                 setAtestadoUI(false);
             }
-
-            modalDirty = false;
-            const guard = document.getElementById('unsaved-guard');
-            if (guard) guard.classList.add('hidden');
-
-            const md = document.getElementById('note-modal');
-            const ct = document.getElementById('modal-content');
-            md.classList.remove('hidden');
-            md.classList.add('flex');
-            void md.offsetWidth;
-            md.classList.replace('opacity-0', 'opacity-100');
-            ct.classList.remove('translate-y-full');
+            modalDirty = false; document.getElementById('unsaved-guard')?.classList.add('hidden');
+            const md = document.getElementById('note-modal'), ct = document.getElementById('modal-content');
+            md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
+            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.remove('translate-y-full');
         }
-
         function closeModal() {
-            haptic();
-            modalDirty = false;
-            const guard = document.getElementById('unsaved-guard');
-            if (guard) guard.classList.add('hidden');
-            const md = document.getElementById('note-modal');
-            const ct = document.getElementById('modal-content');
-            md.classList.replace('opacity-100', 'opacity-0');
-            ct.classList.add('translate-y-full');
-            setTimeout(() => {
-                md.classList.add('hidden');
-                md.classList.remove('flex');
-            }, 300);
+            haptic(); modalDirty = false; document.getElementById('unsaved-guard')?.classList.add('hidden');
+            const md = document.getElementById('note-modal'), ct = document.getElementById('modal-content');
+            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.add('translate-y-full');
+            setTimeout(() => { md.classList.add('hidden'); md.classList.remove('flex'); }, 300);
         }
-
         function saveNote(isClear = false) {
             const v = document.getElementById('note-text').value.trim();
-            if (v) notesDb[currentModalDateStr] = v;
-            else delete notesDb[currentModalDateStr];
-
-            let toastMessage = isClear ? 'Registro do dia limpo!' : 'Alterações salvas!';
-
+            if (v) notesDb[currentModalDateStr] = v; else delete notesDb[currentModalDateStr];
+            let toastMsg = isClear ? 'Registro do dia limpo!' : 'Alterações salvas!';
             if (modalAtestadoEnabled) {
                 const days = Math.max(1, Math.min(180, parseInt(document.getElementById('atestado-days-input').value, 10) || 1));
                 const startDate = modalAtestadoStartDate || currentModalDateStr;
-                const newRec = {
-                    id: modalEditingAtestadoId || `at_${Date.now()}`,
-                    turma: currentTurma,
-                    startDate,
-                    days
-                };
+                const newRec = { id: modalEditingAtestadoId || `at_${Date.now()}`, turma: currentTurma, startDate, days };
                 const newDates = new Set(getAtestadoDates(newRec));
-
-                // Remove registro editado e eventuais atestados sobrepostos do mesmo turno
-                atestadosDb = atestadosDb.filter(rec => {
-                    if (rec.id === modalEditingAtestadoId) return false;
-                    if (rec.turma !== currentTurma) return true;
-                    return !getAtestadoDates(rec).some(d => newDates.has(d));
-                });
-
+                atestadosDb = atestadosDb.filter(r => r.id !== modalEditingAtestadoId && (r.turma !== currentTurma || !getAtestadoDates(r).some(d => newDates.has(d))));
                 atestadosDb.push(newRec);
-                newDates.forEach(dKey => { delete overridesDb[`${dKey}_${currentTurma}`]; });
-
-                const retInfo = computeReturnInfo(startDate, days, currentTurma, newRec.id);
-                const retShiftName = SHIFTS_CONFIG[retInfo.returnShiftCode].name;
-                toastMessage = `Atestado salvo! Retorno: ${formatShortDate(retInfo.returnDateKey)} (${retShiftName})`;
+                newDates.forEach(d => { delete overridesDb[`${d}_${currentTurma}`]; });
+                const ret = computeReturnInfo(startDate, days, currentTurma, newRec.id);
+                toastMsg = `Atestado salvo! Retorno: ${formatShortDate(ret.returnDateKey)} (${SHIFTS_CONFIG[ret.returnShiftCode].name})`;
             } else {
-                if (modalEditingAtestadoId) {
-                    atestadosDb = atestadosDb.filter(rec => rec.id !== modalEditingAtestadoId);
-                    toastMessage = 'Atestado removido da escala.';
-                }
-
-                const overrideKey = `${currentModalDateStr}_${currentTurma}`;
-                if (currentSelectedOverride) {
-                    overridesDb[overrideKey] = currentSelectedOverride;
-                } else {
-                    delete overridesDb[overrideKey];
-                }
+                if (modalEditingAtestadoId) { atestadosDb = atestadosDb.filter(r => r.id !== modalEditingAtestadoId); toastMsg = 'Atestado removido da escala.'; }
+                const ovKey = `${currentModalDateStr}_${currentTurma}`;
+                if (currentSelectedOverride) overridesDb[ovKey] = currentSelectedOverride; else delete overridesDb[ovKey];
             }
-
-            const okNotes = DB.set('imerys_notes', JSON.stringify(notesDb));
-            const okOverrides = DB.set('imerys_overrides', JSON.stringify(overridesDb));
-            const okAtestados = DB.set('imerys_atestados', JSON.stringify(atestadosDb));
-            const okTurma = DB.set('imerys_turma', currentTurma);
-            const allSaved = okNotes && okOverrides && okAtestados && okTurma;
-
-            closeModal();
-            renderApp();
-            updateStorageHealthUI();
-
-            if (!allSaved) {
-                showToast('Aviso: salvamento bloqueado! Use o Backup em (i).');
-            } else if (toastMessage) {
-                showToast(toastMessage);
-            }
+            const ok = DB.set('imerys_notes', JSON.stringify(notesDb)) && DB.set('imerys_overrides', JSON.stringify(overridesDb)) && DB.set('imerys_atestados', JSON.stringify(atestadosDb)) && DB.set('imerys_turma', currentTurma);
+            closeModal(); renderApp(); updateStorageHealthUI();
+            showToast(ok ? toastMsg : 'Aviso: salvamento bloqueado! Use o Backup em (i).');
         }
+        function deleteNote() { document.getElementById('note-text').value = ''; currentSelectedOverride = ''; setAtestadoUI(false); saveNote(true); }
 
-        function deleteNote() {
-            document.getElementById('note-text').value = '';
-            currentSelectedOverride = '';
-            setAtestadoUI(false);
-            saveNote(true);
-        }
-
-        /* =========================================================================
-           7. MODAL DE LEGENDA & BACKUP JSON
-           ========================================================================= */
+        /* 7. MODAL LEGENDA E BACKUP JSON */
         function openInfoModal() {
-            haptic();
-            updateStorageHealthUI();
-            const md = document.getElementById('info-modal');
-            const ct = document.getElementById('info-modal-content');
-            md.classList.remove('hidden');
-            md.classList.add('flex');
-            void md.offsetWidth;
-            md.classList.replace('opacity-0', 'opacity-100');
-            ct.classList.replace('scale-95', 'scale-100');
+            haptic(); updateStorageHealthUI();
+            const md = document.getElementById('info-modal'), ct = document.getElementById('info-modal-content');
+            md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
+            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.replace('scale-95', 'scale-100');
         }
-
         function closeInfoModal() {
             haptic();
-            const md = document.getElementById('info-modal');
-            const ct = document.getElementById('info-modal-content');
-            md.classList.replace('opacity-100', 'opacity-0');
-            ct.classList.replace('scale-100', 'scale-95');
-            setTimeout(() => {
-                md.classList.add('hidden');
-                md.classList.remove('flex');
-            }, 300);
+            const md = document.getElementById('info-modal'), ct = document.getElementById('info-modal-content');
+            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => { md.classList.add('hidden'); md.classList.remove('flex'); }, 300);
         }
-
         function exportBackup() {
             haptic();
-            const backupPayload = {
-                version: 3,
-                exportedAt: new Date().toISOString(),
-                turma: currentTurma,
-                notes: notesDb,
-                overrides: overridesDb,
-                atestados: atestadosDb
-            };
-            const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'Backup_Escala_Imerys.json');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const payload = { version: 3, exportedAt: new Date().toISOString(), turma: currentTurma, notes: notesDb, overrides: overridesDb, atestados: atestadosDb };
+            const url = window.URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+            const a = document.createElement('a'); a.href = url; a.setAttribute('download', 'Backup_Escala_Imerys.json');
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
             setTimeout(() => window.URL.revokeObjectURL(url), 1000);
             showToast('Backup exportado com sucesso!');
         }
-
         function importBackup(event) {
-            const file = event.target.files && event.target.files[0];
+            const file = event.target.files?.[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (typeof data.turma === 'number' && data.turma >= 0 && data.turma <= 3) {
-                        currentTurma = data.turma;
-                    }
-                    if (data.notes && typeof data.notes === 'object' && !Array.isArray(data.notes)) {
-                        notesDb = { ...notesDb, ...data.notes };
-                    }
-                    if (data.overrides && typeof data.overrides === 'object' && !Array.isArray(data.overrides)) {
-                        overridesDb = { ...overridesDb, ...data.overrides };
-                    }
+                    if (typeof data.turma === 'number' && data.turma >= 0 && data.turma <= 3) currentTurma = data.turma;
+                    if (data.notes && typeof data.notes === 'object' && !Array.isArray(data.notes)) notesDb = { ...notesDb, ...data.notes };
+                    if (data.overrides && typeof data.overrides === 'object' && !Array.isArray(data.overrides)) overridesDb = { ...overridesDb, ...data.overrides };
                     if (Array.isArray(data.atestados)) {
                         const byKey = new Map(atestadosDb.map(a => [`${a.startDate}_${a.turma}`, a]));
                         data.atestados.forEach(item => {
-                            if (item && item.startDate && typeof item.turma === 'number' && item.days >= 1) {
-                                const k = `${item.startDate}_${item.turma}`;
-                                byKey.set(k, {
-                                    id: item.id || `at_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-                                    turma: item.turma,
-                                    startDate: item.startDate,
-                                    days: parseInt(item.days, 10)
-                                });
+                            if (item?.startDate && typeof item.turma === 'number' && item.days >= 1) {
+                                byKey.set(`${item.startDate}_${item.turma}`, { id: item.id || `at_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, turma: item.turma, startDate: item.startDate, days: parseInt(item.days, 10) });
                             }
                         });
                         atestadosDb = Array.from(byKey.values());
                     }
-                    DB.flushAll();
-                    closeInfoModal();
-                    renderApp();
-                    updateStorageHealthUI();
+                    DB.flushAll(); closeInfoModal(); renderApp(); updateStorageHealthUI();
                     showToast('Backup restaurado com sucesso!');
-                } catch (err) {
-                    showToast('Arquivo de backup inválido.');
-                }
+                } catch (err) { showToast('Arquivo de backup inválido.'); }
                 event.target.value = '';
             };
             reader.readAsText(file);
         }
 
-        /* =========================================================================
-           8. EXPORTAÇÃO PARA AGENDA (.ICS - RFC 5545 Compatível com Apple/Google)
-           ========================================================================= */
-        function formatICSDate(date, timeStr) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}${m}${d}T${timeStr.replace(':', '')}00`;
-        }
-
-        function formatICSAllDay(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}${m}${d}`;
-        }
-
-        function sanitizeICS(str) {
-            return String(str).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
-        }
-
+        /* 8. EXPORTAÇÃO AGENDA (.ICS - RFC 5545) */
+        function formatICSDate(date, timeStr) { return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}T${timeStr.replace(':', '')}00`; }
+        function formatICSAllDay(date) { return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`; }
+        function sanitizeICS(str) { return String(str).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
         function exportICS() {
             haptic();
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const da
+            const year = currentDate.getFullYear(), month = currentDate.getMonth(), daysInMonth = new Date(year, month + 1, 0).getDate();
+            const turmaLtr = TEAM_LETTERS[currentTurma];
+            showToast(`Exportando escala do Turno ${turmaLtr}...`);
+            const dtStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Escala Imerys Britagem ICP1//PT-BR', 'CALSCALE:GREGORIAN'];
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = formatDateKey(year, month, day), atInfo = findAtestadoOnDate(dateKey, currentTurma);
+                if (atInfo) {
+                    const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day + 1, 12, 0, 0);
+                    const reason = getAtestadoReason(atInfo.record);
+                    let desc = `Turno ${turmaLtr} - Atestado Médico (${atInfo.dayIndex}/${atInfo.totalDays})`;
+                    if (reason) desc += `\nMotivo: ${reason}`;
+                    lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-AT-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:Imerys - Atestado Médico (${atInfo.dayIndex}/${atInfo.totalDays})`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
+                    continue;
+                }
+                const sCode = getEffectiveShift(dateKey, currentTurma);
+                if (sCode === 'F') continue;
+                const sCfg = SHIFTS_CONFIG[sCode], [startHr, endHr] = sCfg.hours.split('-');
+                const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day, 12, 0, 0);
+                if (sCode === 'N') eD.setDate(eD.getDate() + 1);
+                const isOv = Boolean(overridesDb[`${dateKey}_${currentTurma}`]);
+                let desc = `Turno ${turmaLtr}${isOv ? ' (Troca/Extra)' : ''}`;
+                if (notesDb[dateKey]) desc += `\nNota: ${notesDb[dateKey]}`;
+                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART:${formatICSDate(sD, startHr)}`, `DTEND:${formatICSDate(eD, endHr)}`, `SUMMARY:Imerys - ${sCfg.name}${isOv ? ' (Extra)' : ''}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
+            }
+            lines.push('END:VCALENDAR');
+            const url = window.URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' }));
+            const a = document.createElement('a'); a.href = url; a.setAttribute('download', `Escala_Turno_${turmaLtr}_${String(month + 1).padStart(2, '0')}_${year}.ics`);
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            if (!document.getElementById('note-modal').classList.contains('hidden')) requestCloseModal();
+            else if (!document.getElementById('info-modal').classList.contains('hidden')) closeInfoModal();
+            else if (!document.getElementById('ios-install-modal').classList.contains('hidden')) closeIosInstallPrompt();
+        });
+
+        function bootApp() { renderApp(); initPersistence(); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootApp);
+        else bootApp();
+    </script>
+</body>
+</html>
