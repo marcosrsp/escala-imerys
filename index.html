@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" class="antialiased">
 <head>
@@ -73,7 +72,7 @@
                     <button id="install-btn" type="button" onclick="installApp()" class="hidden p-2.5 rounded-full bg-blue-600 text-white hover:scale-105 active:scale-95 transition-transform animate-bounce-subtle shadow-lg shadow-blue-500/30" aria-label="Adicionar à Tela Inicial">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     </button>
-                    <button type="button" onclick="openInfoModal()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Legenda, Ícones e Backup">
+                    <button type="button" onclick="openInfoModal()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Legenda e Backup">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </button>
                     <button type="button" onclick="exportICS()" class="p-2.5 rounded-full bg-slate-200 dark:bg-surfaceBorder text-slate-700 dark:text-slate-300 hover:scale-105 active:scale-95 transition-transform" aria-label="Exportar Agenda ICS">
@@ -118,17 +117,23 @@
                 </button>
             </div>
 
-            <!-- Seletor de Turno -->
+            <!-- Seletor de Turno + Edição de Equipes -->
             <section>
-                <div class="flex items-center gap-2 mb-2 px-1">
-                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path></svg>
-                    <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Destacar Turno na Tabela</h2>
+                <div class="flex items-center justify-between gap-2 mb-2 px-1">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <svg class="w-4 h-4 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path></svg>
+                        <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 truncate">Destacar Turno na Tabela</h2>
+                    </div>
+                    <button type="button" onclick="openTeamsModal()" class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-surface border border-slate-200 dark:border-surfaceBorder text-[10px] font-extrabold text-blue-600 dark:text-blue-400 active:scale-95 transition-transform shrink-0" aria-label="Editar nomes dos turnos">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        <span>Editar nomes</span>
+                    </button>
                 </div>
                 <div class="grid grid-cols-2 gap-2" id="team-selector">
-                    <button type="button" onclick="setTurma(0)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95"><span class="font-extrabold text-base leading-tight">Turno A</span><span class="text-[10px] font-semibold mt-0.5 opacity-80">Rolly e Aníbal</span></button>
-                    <button type="button" onclick="setTurma(1)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95"><span class="font-extrabold text-base leading-tight">Turno B</span><span class="text-[10px] font-semibold mt-0.5 opacity-80">Marquinho e Matozo</span></button>
-                    <button type="button" onclick="setTurma(2)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95"><span class="font-extrabold text-base leading-tight">Turno C</span><span class="text-[10px] font-semibold mt-0.5 opacity-80">Marcos e Socó</span></button>
-                    <button type="button" onclick="setTurma(3)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95"><span class="font-extrabold text-base leading-tight">Turno D</span><span class="text-[10px] font-semibold mt-0.5 opacity-80">Alex e Tita</span></button>
+                    <button type="button" onclick="setTurma(0)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0"><span class="font-extrabold text-base leading-tight">Turno A</span><span id="team-desc-0" class="text-[10px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Rolly e Aníbal</span></button>
+                    <button type="button" onclick="setTurma(1)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0"><span class="font-extrabold text-base leading-tight">Turno B</span><span id="team-desc-1" class="text-[10px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Marquinho e Matozo</span></button>
+                    <button type="button" onclick="setTurma(2)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0"><span class="font-extrabold text-base leading-tight">Turno C</span><span id="team-desc-2" class="text-[10px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Marcos e Socó</span></button>
+                    <button type="button" onclick="setTurma(3)" class="team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0"><span class="font-extrabold text-base leading-tight">Turno D</span><span id="team-desc-3" class="text-[10px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Alex e Tita</span></button>
                 </div>
             </section>
 
@@ -166,10 +171,13 @@
 
             <!-- Resumo de Atestados Médicos & Retorno -->
             <section id="atestado-summary-section" class="hidden bg-rose-50/80 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4">
-                <h3 class="text-[11px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                    Atestado Médico &amp; Retorno
-                </h3>
+                <div class="flex items-center justify-between gap-2 mb-3">
+                    <h3 class="text-[11px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        Atestado Médico &amp; Retorno
+                    </h3>
+                    <span id="atestado-summary-badge" class="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-[10px] font-black"></span>
+                </div>
                 <div id="atestado-summary-container" class="space-y-2.5"></div>
             </section>
 
@@ -183,8 +191,46 @@
             </section>
         </main>
 
+        <!-- Modal Editar Nomes das Equipes -->
+        <div id="teams-modal" role="dialog" aria-modal="true" aria-labelledby="teams-modal-title" onclick="if(event.target===this) closeTeamsModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end transition-opacity duration-300 opacity-0">
+            <div id="teams-modal-content" class="bg-white dark:bg-surface border-t border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] p-6 w-full max-w-md mx-auto transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe max-h-[90dvh] overflow-y-auto no-scrollbar">
+                <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <h3 id="teams-modal-title" class="text-lg font-black text-slate-800 dark:text-white leading-tight">Editar Equipes dos Turnos</h3>
+                    <button type="button" onclick="closeTeamsModal()" class="p-2 bg-slate-100 dark:bg-surfaceBorder rounded-full text-slate-500 dark:text-slate-300" aria-label="Fechar editor de equipes">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-4">Atualize os nomes em casos de férias, substituições ou trocas de turno.</p>
+
+                <form onsubmit="event.preventDefault(); saveTeamNames();" class="space-y-3">
+                    <div>
+                        <label for="team-input-0" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno A</label>
+                        <input id="team-input-0" type="text" maxlength="40" autocomplete="off" placeholder="Rolly e Aníbal" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                    </div>
+                    <div>
+                        <label for="team-input-1" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno B</label>
+                        <input id="team-input-1" type="text" maxlength="40" autocomplete="off" placeholder="Marquinho e Matozo" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                    </div>
+                    <div>
+                        <label for="team-input-2" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno C</label>
+                        <input id="team-input-2" type="text" maxlength="40" autocomplete="off" placeholder="Marcos e Socó" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                    </div>
+                    <div>
+                        <label for="team-input-3" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno D</label>
+                        <input id="team-input-3" type="text" maxlength="40" autocomplete="off" placeholder="Alex e Tita" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                    </div>
+
+                    <div class="flex gap-3 pt-3 pb-2">
+                        <button type="button" onclick="resetTeamNames()" class="w-2/5 py-3.5 rounded-2xl font-bold text-xs text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-surfaceBorder border border-slate-200 dark:border-surfaceBorder active:scale-95 transition-transform">Padrão</button>
+                        <button type="submit" class="w-3/5 py-3.5 rounded-2xl font-bold text-white bg-blue-600 shadow-lg shadow-blue-500/30 active:scale-95 transition-transform">Salvar Equipes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Modal Instalação iOS -->
-        <div id="ios-install-modal" onclick="if(event.target===this) closeIosInstallPrompt()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[70] hidden flex-col justify-end items-center transition-opacity duration-300 opacity-0 px-4 pb-8">
+        <div id="ios-install-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) closeIosInstallPrompt()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[70] hidden flex-col justify-end items-center transition-opacity duration-300 opacity-0 px-4 pb-8">
             <div id="ios-install-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-sm transform translate-y-full transition-transform duration-300 shadow-2xl text-center">
                 <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
                 <img id="ios-modal-icon" alt="Ícone Escala Imerys" class="w-16 h-16 mx-auto mb-3 rounded-[16px] bg-white shadow-md border border-slate-200 dark:border-surfaceBorder object-contain">
@@ -204,8 +250,8 @@
             </div>
         </div>
 
-        <!-- Modal Legenda, Ícones HD e Backup -->
-        <div id="info-modal" onclick="if(event.target===this) closeInfoModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-center items-center transition-opacity duration-300 opacity-0 px-4">
+        <!-- Modal Legenda e Backup -->
+        <div id="info-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) closeInfoModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-center items-center transition-opacity duration-300 opacity-0 px-4">
             <div id="info-modal-content" class="bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-xs transform scale-95 transition-transform duration-300 shadow-2xl max-h-[88dvh] overflow-y-auto no-scrollbar">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-black text-slate-800 dark:text-white leading-tight">Legenda de Horários</h3>
@@ -225,24 +271,8 @@
                     </div>
                 </div>
 
-                <!-- Pacote de Ícones HD (iOS + Android para GitHub Pages) -->
-                <div class="mt-5 pt-4 border-t border-slate-200 dark:border-surfaceBorder">
-                    <div class="flex items-center gap-3 mb-3">
-                        <img id="info-icon-preview" alt="Ícone Imerys HD" class="w-12 h-12 rounded-[13px] bg-white shadow-sm border border-slate-200 dark:border-surfaceBorder shrink-0 object-contain">
-                        <div class="min-w-0">
-                            <span class="block text-xs font-black text-slate-800 dark:text-slate-100 leading-tight">Ícone Oficial HD (PNG)</span>
-                            <span class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Baixe e envie no GitHub para ícone nativo no iOS e Android.</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-1.5">
-                        <button type="button" onclick="downloadIconPNG(180, 'apple-touch-icon.png')" class="py-2 px-1.5 rounded-xl font-extrabold text-[10px] bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 active:scale-95 transition-transform">iOS 180px</button>
-                        <button type="button" onclick="downloadIconPNG(192, 'icon-192.png')" class="py-2 px-1.5 rounded-xl font-extrabold text-[10px] bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 active:scale-95 transition-transform">And 192px</button>
-                        <button type="button" onclick="downloadIconPNG(512, 'icon-512.png')" class="py-2 px-1.5 rounded-xl font-extrabold text-[10px] bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-700 dark:text-blue-300 active:scale-95 transition-transform">HD 512px</button>
-                    </div>
-                </div>
-
                 <!-- Diagnóstico e Backup -->
-                <div class="mt-4 pt-4 border-t border-slate-200 dark:border-surfaceBorder">
+                <div class="mt-5 pt-4 border-t border-slate-200 dark:border-surfaceBorder">
                     <div class="mb-3 rounded-xl px-3 py-2.5 border border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-oled flex items-center gap-2.5">
                         <span id="storage-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0"></span>
                         <div class="min-w-0 flex-1">
@@ -250,7 +280,7 @@
                             <span id="storage-status-detail" class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 leading-tight"></span>
                         </div>
                     </div>
-                    <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2.5 text-center">Backup de Notas, Trocas e Atestados</span>
+                    <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2.5 text-center">Backup de Equipes, Notas e Atestados</span>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" onclick="exportBackup()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">Exportar</button>
                         <button type="button" onclick="document.getElementById('backup-file-input').click()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 transition-transform">Importar</button>
@@ -261,7 +291,7 @@
         </div>
 
         <!-- Modal Notas, Trocas e Atestado -->
-        <div id="note-modal" onclick="if(event.target===this) requestCloseModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end transition-opacity duration-300 opacity-0">
+        <div id="note-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) requestCloseModal()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end transition-opacity duration-300 opacity-0">
             <div id="modal-content" class="bg-white dark:bg-surface border-t border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] p-6 w-full max-w-md mx-auto transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe max-h-[90dvh] overflow-y-auto no-scrollbar">
                 <div class="w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
                 <div class="flex justify-between items-center mb-4">
@@ -304,9 +334,9 @@
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-[11px] font-extrabold text-rose-900 dark:text-rose-200">Quantidade de dias:</span>
                             <div class="flex items-center gap-1.5">
-                                <button type="button" onclick="adjustAtestadoDays(-1)" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90">−</button>
-                                <input type="number" id="atestado-days-input" min="1" max="180" value="1" oninput="onAtestadoDaysInput()" class="w-14 h-9 text-center text-base font-black text-rose-800 dark:text-rose-200 bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 rounded-xl outline-none focus:ring-2 focus:ring-rose-500">
-                                <button type="button" onclick="adjustAtestadoDays(1)" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90">+</button>
+                                <button type="button" onclick="adjustAtestadoDays(-1)" aria-label="Diminuir dias" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90">−</button>
+                                <input type="number" id="atestado-days-input" inputmode="numeric" pattern="[0-9]*" min="1" max="180" value="1" oninput="onAtestadoDaysInput()" class="w-14 h-9 text-center text-base font-black text-rose-800 dark:text-rose-200 bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 rounded-xl outline-none focus:ring-2 focus:ring-rose-500">
+                                <button type="button" onclick="adjustAtestadoDays(1)" aria-label="Aumentar dias" class="w-9 h-9 rounded-xl bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90">+</button>
                             </div>
                         </div>
                         <div class="grid grid-cols-5 gap-1.5">
@@ -340,7 +370,7 @@
         </div>
 
         <!-- Toast -->
-        <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 px-5 py-3 rounded-full shadow-2xl z-[80] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-5 max-w-[90vw]">
+        <div id="toast" role="status" aria-live="polite" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 px-5 py-3 rounded-full shadow-2xl z-[80] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-5 max-w-[90vw]">
             <svg class="w-5 h-5 text-blue-400 dark:text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
             <span id="toast-msg" class="font-bold text-xs sm:text-sm tracking-wide truncate"></span>
         </div>
@@ -407,33 +437,13 @@
         }
 
         function setBrandImages(src) {
-            ['header-brand-icon', 'ios-modal-icon', 'info-icon-preview'].forEach(id => {
+            ['header-brand-icon', 'ios-modal-icon'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.src = src;
             });
         }
 
-        async function initAppIcons() {
-            setBrandImages(IMERYS_SVG_URI);
-            const [png180, png192, png512] = await Promise.all([renderIconPNG(180), renderIconPNG(192), renderIconPNG(512)]);
-            setBrandImages(png512);
-
-            const [hasApple, has192, has512] = await Promise.all([
-                checkStaticAsset('./apple-touch-icon.png'),
-                checkStaticAsset('./icon-192.png'),
-                checkStaticAsset('./icon-512.png')
-            ]);
-
-            const baseUrl = window.location.protocol.startsWith('http') ? new URL('./', window.location.href).href : '';
-            const appleHref = hasApple ? `${baseUrl}apple-touch-icon.png` : png180;
-            const icon192Href = has192 ? `${baseUrl}icon-192.png` : png192;
-            const icon512Href = has512 ? `${baseUrl}icon-512.png` : png512;
-
-            const appleLink = document.getElementById('apple-icon');
-            if (appleLink) appleLink.href = appleHref;
-            const favLink = document.getElementById('app-favicon');
-            if (favLink) favLink.href = icon192Href;
-
+        function applyManifest(icon192Href, icon512Href) {
             const manifestData = {
                 name: 'Escala Imerys',
                 short_name: 'Escala Imerys',
@@ -453,19 +463,45 @@
             } catch (e) {}
         }
 
-        async function downloadIconPNG(size, filename) {
-            haptic();
-            const dataUrl = await renderIconPNG(size);
-            const a = document.createElement('a');
-            a.href = dataUrl;
-            a.setAttribute('download', filename);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast(`Baixado: ${filename} (${size}x${size})`);
+        async function initAppIcons() {
+            const isHttp = window.location.protocol.startsWith('http');
+            const baseUrl = isHttp ? new URL('./', window.location.href).href : '';
+            if (isHttp) applyManifest(`${baseUrl}icon-192.png`, `${baseUrl}icon-512.png`);
+
+            setBrandImages(IMERYS_SVG_URI);
+            const [png180, png192, png512] = await Promise.all([renderIconPNG(180), renderIconPNG(192), renderIconPNG(512)]);
+            setBrandImages(png512);
+
+            const [hasApple, has192, has512] = await Promise.all([
+                checkStaticAsset('./apple-touch-icon.png'),
+                checkStaticAsset('./icon-192.png'),
+                checkStaticAsset('./icon-512.png')
+            ]);
+
+            const appleHref = hasApple ? `${baseUrl}apple-touch-icon.png` : png180;
+            const icon192Href = has192 ? `${baseUrl}icon-192.png` : png192;
+            const icon512Href = has512 ? `${baseUrl}icon-512.png` : png512;
+
+            const appleLink = document.getElementById('apple-icon');
+            if (appleLink) appleLink.href = appleHref;
+            const favLink = document.getElementById('app-favicon');
+            if (favLink) favLink.href = icon192Href;
+
+            if (!isHttp || !has192 || !has512) applyManifest(icon192Href, icon512Href);
         }
 
-        /* 2. INSTALAÇÃO PWA (Android + iOS) */
+        /* 2. CONTROLE CENTRAL DE MODAIS (Scroll-Lock + Proteção contra Race Condition) */
+        const modalTimers = { note: null, info: null, ios: null, teams: null };
+        function syncBodyScrollLock() {
+            const ids = ['note-modal', 'info-modal', 'ios-install-modal', 'teams-modal'];
+            const anyOpen = ids.some(id => {
+                const el = document.getElementById(id);
+                return el && !el.classList.contains('hidden');
+            });
+            document.body.classList.toggle('overflow-hidden', anyOpen);
+        }
+
+        /* 3. INSTALAÇÃO PWA (Android + iOS) */
         function isIosDevice() {
             const ua = window.navigator.userAgent.toLowerCase();
             return /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -495,19 +531,25 @@
         }
         function openIosInstallPrompt() {
             haptic();
+            if (modalTimers.ios) { clearTimeout(modalTimers.ios); modalTimers.ios = null; }
             const md = document.getElementById('ios-install-modal'), ct = document.getElementById('ios-install-content');
             md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
             md.classList.replace('opacity-0', 'opacity-100'); ct.classList.remove('translate-y-full');
+            syncBodyScrollLock();
         }
         function closeIosInstallPrompt() {
             haptic();
             const md = document.getElementById('ios-install-modal'), ct = document.getElementById('ios-install-content');
             md.classList.replace('opacity-100', 'opacity-0'); ct.classList.add('translate-y-full');
-            setTimeout(() => { md.classList.add('hidden'); md.classList.remove('flex'); }, 300);
+            if (modalTimers.ios) clearTimeout(modalTimers.ios);
+            modalTimers.ios = setTimeout(() => {
+                md.classList.add('hidden'); md.classList.remove('flex');
+                modalTimers.ios = null; syncBodyScrollLock();
+            }, 300);
         }
 
-        /* 3. PERSISTÊNCIA EM DUPLA CAMADA (localStorage + IndexedDB) */
-        const STORAGE_KEYS = ['imerys_turma', 'imerys_notes', 'imerys_overrides', 'imerys_atestados'];
+        /* 4. PERSISTÊNCIA EM DUPLA CAMADA (localStorage + IndexedDB) */
+        const STORAGE_KEYS = ['imerys_turma', 'imerys_notes', 'imerys_overrides', 'imerys_atestados', 'imerys_teams'];
         const IDB_NAME = 'EscalaImerysStorage', IDB_STORE = 'kv';
 
         function safeParseJSON(raw, fallback, expectedType) {
@@ -586,10 +628,13 @@
                 return lsSaved || this.idbAvailable;
             },
             flushAll() {
-                this.set('imerys_turma', currentTurma);
-                this.set('imerys_notes', JSON.stringify(notesDb));
-                this.set('imerys_overrides', JSON.stringify(overridesDb));
-                this.set('imerys_atestados', JSON.stringify(atestadosDb));
+                return [
+                    this.set('imerys_turma', currentTurma),
+                    this.set('imerys_notes', JSON.stringify(notesDb)),
+                    this.set('imerys_overrides', JSON.stringify(overridesDb)),
+                    this.set('imerys_atestados', JSON.stringify(atestadosDb)),
+                    this.set('imerys_teams', JSON.stringify(teamNames))
+                ].every(Boolean);
             },
             isEphemeralEnvironment() {
                 const p = window.location.protocol;
@@ -598,7 +643,7 @@
         };
         DB.testLocalStorage();
 
-        /* 4. MOTOR DE ESCALA, FERIADOS E ATESTADOS */
+        /* 5. MOTOR DE ESCALA, FERIADOS E ATESTADOS */
         const CYCLE = ['M', 'M', 'M', 'F', 'T', 'T', 'T', 'F', 'N', 'N', 'N', 'F'];
         const SHIFTS_CONFIG = {
             M: { name: 'Manhã', hours: '05:00-13:00', style: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-black' },
@@ -609,25 +654,61 @@
         };
         const BASE_DATE = Date.UTC(2026, 10, 1);
         const TEAM_LETTERS = ['A', 'B', 'C', 'D'];
-        const TEAM_DESC = ['Rolly e Aníbal', 'Marquinho e Matozo', 'Marcos e Socó', 'Alex e Tita'];
+        const DEFAULT_TEAM_DESC = ['Rolly e Aníbal', 'Marquinho e Matozo', 'Marcos e Socó', 'Alex e Tita'];
         const TEAM_OFFSETS = [0, 3, 6, 9];
         const DOW_NAMES = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
         const DOW_PRETTY = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const MONTH_SHORT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
         let currentTurma = 2;
         const now = new Date();
         let currentDate = new Date(now.getFullYear(), now.getMonth(), 1, 12, 0, 0);
+        let teamNames = [...DEFAULT_TEAM_DESC];
         let notesDb = {}, overridesDb = {}, atestadosDb = [];
         let currentModalDateStr = null, currentSelectedOverride = '', modalAtestadoEnabled = false;
         let modalAtestadoStartDate = null, modalEditingAtestadoId = null, modalDirty = false, toastTimer = null;
         const holidaysYearCache = {};
 
+        function sanitizeTeamList(rawList) {
+            return DEFAULT_TEAM_DESC.map((fallback, idx) => {
+                if (!Array.isArray(rawList) || typeof rawList[idx] !== 'string') return fallback;
+                const clean = rawList[idx].trim().slice(0, 40);
+                return clean || fallback;
+            });
+        }
+        function getNoteKey(dateKey, turmaIdx) { return `${dateKey}_${turmaIdx}`; }
+        function getNote(dateKey, turmaIdx) { return notesDb[getNoteKey(dateKey, turmaIdx)] || ''; }
+        function setNote(dateKey, turmaIdx, val) {
+            const k = getNoteKey(dateKey, turmaIdx);
+            const clean = String(val || '').trim();
+            if (clean) notesDb[k] = clean; else delete notesDb[k];
+        }
+        function migrateLegacyNotes() {
+            let changed = false;
+            Object.keys(notesDb).forEach((k) => {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(k)) {
+                    const text = String(notesDb[k] || '').trim();
+                    if (text) {
+                        const matchAt = atestadosDb.find(r => getAtestadoDates(r).includes(k));
+                        const targetTurma = matchAt ? matchAt.turma : currentTurma;
+                        const scopedKey = getNoteKey(k, targetTurma);
+                        if (!notesDb[scopedKey]) notesDb[scopedKey] = text;
+                    }
+                    delete notesDb[k];
+                    changed = true;
+                }
+            });
+            if (changed) DB.set('imerys_notes', JSON.stringify(notesDb));
+        }
+
         function hydrateStateFromDB() {
             const parsedTurma = parseInt(DB.get('imerys_turma'), 10);
             currentTurma = (!isNaN(parsedTurma) && parsedTurma >= 0 && parsedTurma <= 3) ? parsedTurma : 2;
+            teamNames = sanitizeTeamList(safeParseJSON(DB.get('imerys_teams'), DEFAULT_TEAM_DESC, 'array'));
             notesDb = safeParseJSON(DB.get('imerys_notes'), {}, 'object');
             overridesDb = safeParseJSON(DB.get('imerys_overrides'), {}, 'object');
             atestadosDb = safeParseJSON(DB.get('imerys_atestados'), [], 'array');
+            migrateLegacyNotes();
         }
         hydrateStateFromDB();
 
@@ -648,16 +729,27 @@
         }
         function getHolidays(year, month) {
             if (!holidaysYearCache[year]) {
+                const map = {};
+                const addH = (k, name) => { map[k] = map[k] ? `${map[k]} / ${name}` : name; };
                 const easter = getEaster(year);
                 const addD = (d, n) => { const nd = new Date(d.getTime()); nd.setDate(nd.getDate() + n); return nd; };
                 const mk = (d) => `${d.getDate()}/${d.getMonth()}`;
-                holidaysYearCache[year] = {
-                    '1/0': 'Ano Novo', '21/3': 'Tiradentes', '1/4': 'Dia do Trabalho', '29/5': 'Dia de São Pedro (Cachoeiro)',
-                    '7/8': 'Independência do Brasil', '12/9': 'Nossa Sra. Aparecida', '2/10': 'Finados',
-                    '15/10': 'Proc. da República', '20/10': 'Consciência Negra', '25/11': 'Natal',
-                    [mk(addD(easter, -47))]: 'Carnaval', [mk(addD(easter, -2))]: 'Paixão de Cristo',
-                    [mk(easter)]: 'Páscoa', [mk(addD(easter, 8))]: 'Nossa Sra. da Penha (ES)', [mk(addD(easter, 60))]: 'Corpus Christi'
-                };
+                addH('1/0', 'Ano Novo');
+                addH('21/3', 'Tiradentes');
+                addH('1/4', 'Dia do Trabalho');
+                addH('29/5', 'Dia de São Pedro (Cachoeiro)');
+                addH('7/8', 'Independência do Brasil');
+                addH('12/9', 'Nossa Sra. Aparecida');
+                addH('2/10', 'Finados');
+                addH('15/10', 'Proc. da República');
+                addH('20/10', 'Consciência Negra');
+                addH('25/11', 'Natal');
+                addH(mk(addD(easter, -47)), 'Carnaval');
+                addH(mk(addD(easter, -2)), 'Paixão de Cristo');
+                addH(mk(easter), 'Páscoa');
+                addH(mk(addD(easter, 8)), 'Nossa Sra. da Penha (ES)');
+                addH(mk(addD(easter, 60)), 'Corpus Christi');
+                holidaysYearCache[year] = map;
             }
             const res = {}, suffix = `/${month}`;
             for (const [k, v] of Object.entries(holidaysYearCache[year])) { if (k.endsWith(suffix)) res[k.split('/')[0]] = v; }
@@ -680,10 +772,12 @@
             return list;
         }
         function getAtestadoReason(rec) {
-            if (notesDb[rec.startDate]?.trim()) return notesDb[rec.startDate].trim();
-            const dates = getAtestadoDates(rec);
-            for (let i = 1; i < dates.length; i++) { if (notesDb[dates[i]]?.trim()) return notesDb[dates[i]].trim(); }
-            return '';
+            const seen = new Set(), parts = [];
+            getAtestadoDates(rec).forEach((d) => {
+                const txt = getNote(d, rec.turma).trim();
+                if (txt && !seen.has(txt)) { seen.add(txt); parts.push(txt); }
+            });
+            return parts.join(' • ');
         }
         function findAtestadoOnDate(dateKey, turmaIdx) {
             for (const rec of atestadosDb) {
@@ -719,7 +813,7 @@
             toastTimer = setTimeout(() => { toast.classList.remove('opacity-100', 'translate-y-0'); toast.classList.add('opacity-0', '-translate-y-5'); }, 3400);
         }
 
-        /* 5. DIAGNÓSTICO E SINCRONIZAÇÃO */
+        /* 6. DIAGNÓSTICO E SINCRONIZAÇÃO */
         function updateStorageHealthUI() {
             const dot = document.getElementById('storage-status-dot'), title = document.getElementById('storage-status-title');
             const detail = document.getElementById('storage-status-detail'), banner = document.getElementById('storage-warning-banner');
@@ -754,37 +848,105 @@
             await DB.openIDB();
             if (DB.idbAvailable) {
                 const idbData = await DB.idbGetAll();
-                const hasIdb = Object.keys(idbData).length > 0;
-                const hasLs = DB.lsAvailable && STORAGE_KEYS.some(k => { try { return localStorage.getItem(k) !== null; } catch (e) { return false; } });
-                if (hasIdb && !hasLs) {
-                    STORAGE_KEYS.forEach(k => { if (idbData[k] !== undefined) { DB.memory[k] = idbData[k]; try { localStorage.setItem(k, idbData[k]); } catch (e) {} } });
-                    hydrateStateFromDB(); renderApp(); showToast('Dados recuperados automaticamente!');
-                } else if (hasLs) { DB.flushAll(); }
+                let restoredAny = false;
+                STORAGE_KEYS.forEach((k) => {
+                    let lsVal = null;
+                    if (DB.lsAvailable) { try { lsVal = localStorage.getItem(k); } catch (e) {} }
+                    if (lsVal === null && idbData[k] !== undefined) {
+                        DB.memory[k] = idbData[k];
+                        try { localStorage.setItem(k, idbData[k]); } catch (e) {}
+                        restoredAny = true;
+                    } else if (lsVal !== null && idbData[k] !== lsVal) {
+                        DB.idbSet(k, lsVal);
+                    }
+                });
+                if (restoredAny) {
+                    hydrateStateFromDB();
+                    renderApp(false);
+                    showToast('Dados recuperados automaticamente!');
+                }
             }
             updateStorageHealthUI();
         }
         document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') DB.flushAll(); });
         window.addEventListener('pagehide', () => DB.flushAll());
-        window.addEventListener('storage', (ev) => { if (ev.key && STORAGE_KEYS.includes(ev.key)) { hydrateStateFromDB(); renderApp(); } });
+        window.addEventListener('storage', (ev) => { if (ev.key && STORAGE_KEYS.includes(ev.key)) { hydrateStateFromDB(); renderApp(false); } });
 
-        /* 6. NAVEGAÇÃO E RENDERIZAÇÃO PRINCIPAL */
+        /* 7. EDITOR DE NOMES DAS EQUIPES */
+        function openTeamsModal() {
+            haptic();
+            if (modalTimers.teams) { clearTimeout(modalTimers.teams); modalTimers.teams = null; }
+            for (let i = 0; i < 4; i++) {
+                const inp = document.getElementById(`team-input-${i}`);
+                if (inp) inp.value = teamNames[i];
+            }
+            const md = document.getElementById('teams-modal'), ct = document.getElementById('teams-modal-content');
+            md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
+            md.classList.replace('opacity-0', 'opacity-100'); ct.classList.remove('translate-y-full');
+            syncBodyScrollLock();
+        }
+        function closeTeamsModal() {
+            haptic();
+            const md = document.getElementById('teams-modal'), ct = document.getElementById('teams-modal-content');
+            md.classList.replace('opacity-100', 'opacity-0'); ct.classList.add('translate-y-full');
+            if (modalTimers.teams) clearTimeout(modalTimers.teams);
+            modalTimers.teams = setTimeout(() => {
+                md.classList.add('hidden'); md.classList.remove('flex');
+                modalTimers.teams = null; syncBodyScrollLock();
+            }, 300);
+        }
+        function resetTeamNames() {
+            haptic();
+            for (let i = 0; i < 4; i++) {
+                const inp = document.getElementById(`team-input-${i}`);
+                if (inp) inp.value = DEFAULT_TEAM_DESC[i];
+            }
+            showToast('Nomes padrão preenchidos. Toque em Salvar!');
+        }
+        function saveTeamNames() {
+            haptic();
+            const nextNames = [];
+            for (let i = 0; i < 4; i++) {
+                const inp = document.getElementById(`team-input-${i}`);
+                const clean = inp ? inp.value.trim().slice(0, 40) : '';
+                nextNames.push(clean || DEFAULT_TEAM_DESC[i]);
+            }
+            teamNames = nextNames;
+            const ok = DB.set('imerys_teams', JSON.stringify(teamNames));
+            closeTeamsModal();
+            renderApp(false);
+            updateStorageHealthUI();
+            showToast(ok ? 'Nomes das equipes atualizados!' : 'Aviso: salvamento bloqueado! Use o Backup em (i).');
+        }
+
+        /* 8. NAVEGAÇÃO E RENDERIZAÇÃO PRINCIPAL */
         function setTurma(index) {
             haptic(); currentTurma = index;
             const saved = DB.set('imerys_turma', index);
-            renderApp();
+            renderApp(false);
             if (!saved) { showToast('Atenção: navegador bloqueou o salvamento.'); updateStorageHealthUI(); }
         }
-        function changeMonth(delta) { haptic(); currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1, 12, 0, 0); renderApp(); }
+        function changeMonth(delta) {
+            haptic();
+            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1, 12, 0, 0);
+            const t = new Date();
+            const isTargetCurrentMonth = currentDate.getFullYear() === t.getFullYear() && currentDate.getMonth() === t.getMonth();
+            const sc = document.querySelector('.table-scroll');
+            if (sc && !isTargetCurrentMonth) sc.scrollLeft = 0;
+            renderApp(isTargetCurrentMonth);
+        }
         function goToToday() { haptic(); const t = new Date(); currentDate = new Date(t.getFullYear(), t.getMonth(), 1, 12, 0, 0); renderApp(true); }
         function scrollToTodayColumn() {
             setTimeout(() => {
                 const colToday = document.getElementById('col-today'), sc = document.querySelector('.table-scroll');
-                if (colToday && sc) sc.scrollLeft = Math.max(0, colToday.offsetLeft - Math.max(120, Math.floor((sc.clientWidth - colToday.offsetWidth) / 2)));
+                if (colToday && sc) sc.scrollLeft = Math.max(0, colToday.offsetLeft - Math.max(124, Math.floor((sc.clientWidth - colToday.offsetWidth) / 2)));
             }, 90);
         }
 
-        function renderApp(forceScrollToday = false) {
+        function renderApp(shouldScrollToday = false) {
             try {
+                const sc = document.querySelector('.table-scroll');
+                const prevScroll = sc ? sc.scrollLeft : 0;
                 const year = currentDate.getFullYear(), month = currentDate.getMonth();
                 const daysInMonth = new Date(year, month + 1, 0).getDate(), today = new Date();
                 const isCMonth = today.getFullYear() === year && today.getMonth() === month;
@@ -794,7 +956,9 @@
 
                 document.querySelectorAll('.team-btn').forEach((btn, i) => {
                     const act = i === currentTurma;
-                    btn.className = `team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 ${act ? 'bg-slate-900 border-slate-900 text-white dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-md' : 'border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-surface text-slate-800 dark:text-slate-100'}`;
+                    btn.className = `team-btn p-2 rounded-xl border flex flex-col items-center justify-center transition-all active:scale-95 min-w-0 ${act ? 'bg-slate-900 border-slate-900 text-white dark:bg-slate-800 dark:border-slate-700 dark:text-white shadow-md' : 'border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-surface text-slate-800 dark:text-slate-100'}`;
+                    const descEl = document.getElementById(`team-desc-${i}`);
+                    if (descEl) descEl.innerText = teamNames[i];
                 });
 
                 const returnDateMap = {}, monthAtestados = [];
@@ -810,20 +974,23 @@
                 const holidays = getHolidays(year, month);
                 let hListHTML = '';
                 const counts = { M: 0, T: 0, N: 0, F: 0 };
+                let monthAtDaysCount = 0;
 
-                let tableHTML = '<thead><tr class="bg-slate-100 dark:bg-surfaceBorder/40 border-b border-slate-200 dark:border-surfaceBorder"><th class="sticky left-0 z-20 bg-slate-100 dark:bg-surface p-2 border-r border-slate-200 dark:border-surfaceBorder min-w-[122px] text-left pl-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] text-xs font-black uppercase text-slate-600 dark:text-slate-300">Turnos</th>';
+                let tableHTML = '<thead><tr class="bg-slate-100 dark:bg-surfaceBorder/40 border-b border-slate-200 dark:border-surfaceBorder"><th class="sticky left-0 z-20 bg-slate-100 dark:bg-surface p-2 border-r border-slate-200 dark:border-surfaceBorder min-w-[126px] max-w-[144px] text-left pl-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] text-xs font-black uppercase text-slate-600 dark:text-slate-300">Turnos</th>';
                 for (let day = 1; day <= daysInMonth; day++) {
                     const isToday = isCMonth && day === today.getDate(), holi = holidays[day];
                     const dow = new Date(year, month, day, 12, 0, 0).getDay(), isSunday = dow === 0;
                     const dayColor = holi ? 'text-red-600 dark:text-red-400' : (isToday ? 'text-blue-600 dark:text-blue-400' : (isSunday ? 'text-red-500 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'));
                     if (holi) hListHTML += `<div class="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-surfaceBorder last:border-0 last:pb-0"><span class="font-black text-red-500 dark:text-red-400 text-sm min-w-[22px] text-right">${day}</span><span class="text-slate-700 dark:text-slate-300 font-medium text-sm leading-tight">${escapeHTML(holi)}</span></div>`;
-                    tableHTML += `<th ${isToday ? 'id="col-today"' : ''} class="p-1.5 min-w-[40px] border-r border-slate-200 dark:border-surfaceBorder ${isToday ? 'bg-blue-50/70 dark:bg-blue-900/25' : ''}"><div class="flex flex-col items-center"><span class="text-[13px] font-black leading-tight ${dayColor}">${day}</span><span class="text-[9px] font-bold ${isSunday || holi ? 'opacity-90' : 'opacity-60'} ${dayColor}">${DOW_NAMES[dow]}</span></div></th>`;
+                    const todayHeaderStyle = isToday ? 'bg-blue-100/75 dark:bg-blue-950/60 border-b-2 border-b-blue-500' : '';
+                    tableHTML += `<th ${isToday ? 'id="col-today"' : ''} class="p-1.5 min-w-[40px] border-r border-slate-200 dark:border-surfaceBorder ${todayHeaderStyle}"><div class="flex flex-col items-center"><span class="text-[13px] font-black leading-tight ${dayColor}">${day}</span><span class="text-[9px] font-bold ${isSunday || holi || isToday ? 'opacity-95' : 'opacity-60'} ${dayColor}">${DOW_NAMES[dow]}</span></div></th>`;
                 }
                 tableHTML += '</tr></thead><tbody>';
 
                 TEAM_LETTERS.forEach((teamLtr, idx) => {
                     const isSel = idx === currentTurma, rowBg = isSel ? 'bg-white dark:bg-oled' : 'bg-slate-50 dark:bg-surface';
-                    tableHTML += `<tr class="${rowBg} border-b border-slate-200 dark:border-surfaceBorder last:border-b-0"><td onclick="setTurma(${idx})" class="sticky left-0 z-20 p-2 border-r border-slate-200 dark:border-surfaceBorder flex flex-col items-start pl-3 ${rowBg} cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)]"><span class="font-black text-sm leading-tight ${isSel ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}">Turno ${teamLtr}</span><span class="text-[9px] font-semibold ${isSel ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}">${TEAM_DESC[idx]}</span></td>`;
+                    const safeName = escapeHTML(teamNames[idx]);
+                    tableHTML += `<tr class="${rowBg} border-b border-slate-200 dark:border-surfaceBorder last:border-b-0"><td onclick="setTurma(${idx})" class="sticky left-0 z-20 p-2 pl-3 border-r border-slate-200 dark:border-surfaceBorder align-middle text-left max-w-[144px] ${rowBg} cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)]"><div class="flex flex-col items-start justify-center min-w-0"><span class="font-black text-sm leading-tight ${isSel ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}">Turno ${teamLtr}</span><span class="text-[9px] font-semibold truncate w-full max-w-[116px] ${isSel ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'}" title="${safeName}">${safeName}</span></div></td>`;
                     for (let day = 1; day <= daysInMonth; day++) {
                         const dateKey = formatDateKey(year, month, day), baseShift = getShift(year, month, day, idx);
                         const ovShift = overridesDb[`${dateKey}_${idx}`], effShift = ovShift || baseShift;
@@ -831,10 +998,10 @@
                         if (isSel) {
                             const atInfo = findAtestadoOnDate(dateKey, idx), isRet = Boolean(returnDateMap[dateKey]) && !atInfo;
                             let code = effShift, style = SHIFTS_CONFIG[effShift].style;
-                            if (atInfo) { code = 'AT'; style = SHIFTS_CONFIG.AT.style; } else { counts[effShift]++; }
+                            if (atInfo) { code = 'AT'; style = SHIFTS_CONFIG.AT.style; monthAtDaysCount++; } else { counts[effShift]++; }
                             const ring = (!atInfo && ovShift) ? ' ring-2 ring-inset ring-amber-400 dark:ring-amber-500' : (isRet ? ' ring-2 ring-inset ring-sky-500 dark:ring-sky-400' : '');
                             const sub = atInfo ? `<span class="text-[8px] font-black leading-none opacity-85 mt-0.5">${atInfo.dayIndex}/${atInfo.totalDays}</span>` : (isRet ? '<span class="text-[7px] font-black uppercase tracking-tight text-sky-700 dark:text-sky-300 leading-none mt-0.5">Volta</span>' : '');
-                            const noteDot = notesDb[dateKey] ? '<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-slate-900 dark:bg-white rounded-full"></span>' : '';
+                            const noteDot = getNote(dateKey, idx) ? '<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-slate-900 dark:bg-white rounded-full"></span>' : '';
                             const ovDot = (!atInfo && ovShift) ? '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>' : '';
                             tableHTML += `<td class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder relative text-center text-sm ${style}${ring} cursor-pointer active:scale-95 transition-transform" onclick="openModal('${dateKey}','${day}')"><div class="w-full h-full flex flex-col items-center justify-center min-h-[38px] px-0.5"><span class="leading-none">${code}</span>${sub}${ovDot}${noteDot}</div></td>`;
                         } else {
@@ -848,8 +1015,11 @@
                 document.getElementById('main-table').innerHTML = tableHTML;
                 ['M', 'T', 'N', 'F'].forEach(k => { document.getElementById(`count-${k}`).innerText = counts[k]; });
 
-                const atSec = document.getElementById('atestado-summary-section'), atCont = document.getElementById('atestado-summary-container');
+                const atSec = document.getElementById('atestado-summary-section');
+                const atCont = document.getElementById('atestado-summary-container');
+                const atBadge = document.getElementById('atestado-summary-badge');
                 if (monthAtestados.length > 0) {
+                    if (atBadge) atBadge.innerText = monthAtDaysCount > 0 ? `${monthAtDaysCount} ${monthAtDaysCount === 1 ? 'dia no mês' : 'dias no mês'}` : 'Retorno no mês';
                     atCont.innerHTML = monthAtestados.map(({ rec, retInfo }) => {
                         const sh = SHIFTS_CONFIG[retInfo.returnShiftCode];
                         const pLbl = rec.days === 1 ? `${formatShortDate(rec.startDate)} (1 dia)` : `${formatShortDate(rec.startDate)} a ${formatShortDate(retInfo.endDate)} (${rec.days} dias)`;
@@ -864,14 +1034,15 @@
                 const hEl = document.getElementById('holidays-list');
                 if (hListHTML) { document.getElementById('holidays-container').innerHTML = hListHTML; hEl.classList.remove('hidden'); }
                 else { hEl.classList.add('hidden'); }
-                if (isCMonth || forceScrollToday) scrollToTodayColumn();
+                if (shouldScrollToday && isCMonth) scrollToTodayColumn();
+                else if (sc) sc.scrollLeft = prevScroll;
             } catch (err) {
                 console.error('Erro ao renderizar:', err);
                 showToast('Erro ao carregar a visualização.');
             }
         }
 
-        /* 7. MODAL DE NOTAS, TROCAS E ATESTADOS */
+        /* 9. MODAL DE NOTAS, TROCAS E ATESTADOS */
         function markModalDirty() { modalDirty = true; document.getElementById('unsaved-guard')?.classList.add('hidden'); }
         function requestCloseModal() {
             if (modalDirty) { haptic(); const g = document.getElementById('unsaved-guard'); g.classList.remove('hidden'); g.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return; }
@@ -930,12 +1101,14 @@
         }
         function openAtestadoEdit(startKey) { openModal(startKey, String(parseDateKey(startKey).getDate())); }
         function openModal(dateKey, dayNumber) {
-            haptic(); currentModalDateStr = dateKey;
+            haptic();
+            if (modalTimers.note) { clearTimeout(modalTimers.note); modalTimers.note = null; }
+            currentModalDateStr = dateKey;
             const dt = parseDateKey(dateKey), base = getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), currentTurma);
             const activeOv = overridesDb[`${dateKey}_${currentTurma}`] || '', existingAt = findAtestadoOnDate(dateKey, currentTurma);
             const badge = existingAt ? ' • ATESTADO' : (activeOv ? ' • ALTERADO' : '');
-            document.getElementById('modal-date-title').innerHTML = `Dia ${dayNumber} <br><span class="text-[13px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Turno ${TEAM_LETTERS[currentTurma]} • ${SHIFTS_CONFIG[activeOv || base].name}${badge}</span>`;
-            document.getElementById('note-text').value = notesDb[dateKey] || '';
+            document.getElementById('modal-date-title').innerHTML = `Dia ${dt.getDate()} de ${MONTH_SHORT[dt.getMonth()]} <br><span class="text-[13px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Turno ${TEAM_LETTERS[currentTurma]} • ${SHIFTS_CONFIG[activeOv || base].name}${badge}</span>`;
+            document.getElementById('note-text').value = getNote(dateKey, currentTurma);
             selectOverride(existingAt ? '' : activeOv, true);
 
             const originNotice = document.getElementById('atestado-origin-notice');
@@ -944,7 +1117,8 @@
                 document.getElementById('atestado-days-input').value = existingAt.record.days;
                 document.getElementById('atestado-subtitle').innerText = `Iniciado em ${formatShortDate(existingAt.record.startDate)} (${existingAt.record.days}d)`;
                 if (existingAt.record.startDate !== dateKey) {
-                    originNotice.innerText = `Editando atestado iniciado em ${formatShortDate(existingAt.record.startDate)}. Desative a chave para remover.`;
+                    const startReason = getNote(existingAt.record.startDate, currentTurma);
+                    originNotice.innerText = `Editando atestado iniciado em ${formatShortDate(existingAt.record.startDate)}.${startReason ? ` Motivo registrado: "${startReason}".` : ''} Desative a chave para remover.`;
                     originNotice.classList.remove('hidden');
                 } else { originNotice.classList.add('hidden'); }
                 setAtestadoUI(true);
@@ -959,16 +1133,21 @@
             const md = document.getElementById('note-modal'), ct = document.getElementById('modal-content');
             md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
             md.classList.replace('opacity-0', 'opacity-100'); ct.classList.remove('translate-y-full');
+            syncBodyScrollLock();
         }
         function closeModal() {
             haptic(); modalDirty = false; document.getElementById('unsaved-guard')?.classList.add('hidden');
             const md = document.getElementById('note-modal'), ct = document.getElementById('modal-content');
             md.classList.replace('opacity-100', 'opacity-0'); ct.classList.add('translate-y-full');
-            setTimeout(() => { md.classList.add('hidden'); md.classList.remove('flex'); }, 300);
+            if (modalTimers.note) clearTimeout(modalTimers.note);
+            modalTimers.note = setTimeout(() => {
+                md.classList.add('hidden'); md.classList.remove('flex');
+                modalTimers.note = null; syncBodyScrollLock();
+            }, 300);
         }
         function saveNote(isClear = false) {
             const v = document.getElementById('note-text').value.trim();
-            if (v) notesDb[currentModalDateStr] = v; else delete notesDb[currentModalDateStr];
+            setNote(currentModalDateStr, currentTurma, v);
             let toastMsg = isClear ? 'Registro do dia limpo!' : 'Alterações salvas!';
             if (modalAtestadoEnabled) {
                 const days = Math.max(1, Math.min(180, parseInt(document.getElementById('atestado-days-input').value, 10) || 1));
@@ -981,32 +1160,42 @@
                 const ret = computeReturnInfo(startDate, days, currentTurma, newRec.id);
                 toastMsg = `Atestado salvo! Retorno: ${formatShortDate(ret.returnDateKey)} (${SHIFTS_CONFIG[ret.returnShiftCode].name})`;
             } else {
-                if (modalEditingAtestadoId) { atestadosDb = atestadosDb.filter(r => r.id !== modalEditingAtestadoId); toastMsg = 'Atestado removido da escala.'; }
+                if (modalEditingAtestadoId) {
+                    atestadosDb = atestadosDb.filter(r => r.id !== modalEditingAtestadoId);
+                    toastMsg = isClear ? 'Atestado e registro do dia removidos.' : 'Atestado removido da escala.';
+                }
                 const ovKey = `${currentModalDateStr}_${currentTurma}`;
                 if (currentSelectedOverride) overridesDb[ovKey] = currentSelectedOverride; else delete overridesDb[ovKey];
             }
-            const ok = DB.set('imerys_notes', JSON.stringify(notesDb)) && DB.set('imerys_overrides', JSON.stringify(overridesDb)) && DB.set('imerys_atestados', JSON.stringify(atestadosDb)) && DB.set('imerys_turma', currentTurma);
-            closeModal(); renderApp(); updateStorageHealthUI();
+            const ok = DB.flushAll();
+            closeModal(); renderApp(false); updateStorageHealthUI();
             showToast(ok ? toastMsg : 'Aviso: salvamento bloqueado! Use o Backup em (i).');
         }
         function deleteNote() { document.getElementById('note-text').value = ''; currentSelectedOverride = ''; setAtestadoUI(false); saveNote(true); }
 
-        /* 8. MODAL LEGENDA E BACKUP JSON */
+        /* 10. MODAL LEGENDA E BACKUP JSON */
         function openInfoModal() {
-            haptic(); updateStorageHealthUI();
+            haptic();
+            if (modalTimers.info) { clearTimeout(modalTimers.info); modalTimers.info = null; }
+            updateStorageHealthUI();
             const md = document.getElementById('info-modal'), ct = document.getElementById('info-modal-content');
             md.classList.remove('hidden'); md.classList.add('flex'); void md.offsetWidth;
             md.classList.replace('opacity-0', 'opacity-100'); ct.classList.replace('scale-95', 'scale-100');
+            syncBodyScrollLock();
         }
         function closeInfoModal() {
             haptic();
             const md = document.getElementById('info-modal'), ct = document.getElementById('info-modal-content');
             md.classList.replace('opacity-100', 'opacity-0'); ct.classList.replace('scale-100', 'scale-95');
-            setTimeout(() => { md.classList.add('hidden'); md.classList.remove('flex'); }, 300);
+            if (modalTimers.info) clearTimeout(modalTimers.info);
+            modalTimers.info = setTimeout(() => {
+                md.classList.add('hidden'); md.classList.remove('flex');
+                modalTimers.info = null; syncBodyScrollLock();
+            }, 300);
         }
         function exportBackup() {
             haptic();
-            const payload = { version: 3, exportedAt: new Date().toISOString(), turma: currentTurma, notes: notesDb, overrides: overridesDb, atestados: atestadosDb };
+            const payload = { version: 4, exportedAt: new Date().toISOString(), turma: currentTurma, teams: teamNames, notes: notesDb, overrides: overridesDb, atestados: atestadosDb };
             const url = window.URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
             const a = document.createElement('a'); a.href = url; a.setAttribute('download', 'Backup_Escala_Imerys.json');
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -1020,19 +1209,39 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (typeof data.turma === 'number' && data.turma >= 0 && data.turma <= 3) currentTurma = data.turma;
-                    if (data.notes && typeof data.notes === 'object' && !Array.isArray(data.notes)) notesDb = { ...notesDb, ...data.notes };
-                    if (data.overrides && typeof data.overrides === 'object' && !Array.isArray(data.overrides)) overridesDb = { ...overridesDb, ...data.overrides };
+                    const validTurma = (typeof data.turma === 'number' && Number.isInteger(data.turma) && data.turma >= 0 && data.turma <= 3) ? data.turma : currentTurma;
+                    currentTurma = validTurma;
+                    if (Array.isArray(data.teams) && data.teams.length === 4) {
+                        teamNames = sanitizeTeamList(data.teams);
+                    }
+                    if (data.notes && typeof data.notes === 'object' && !Array.isArray(data.notes)) {
+                        Object.entries(data.notes).forEach(([k, val]) => {
+                            const txt = String(val || '').trim();
+                            if (!txt) return;
+                            if (/^\d{4}-\d{2}-\d{2}_[0-3]$/.test(k)) notesDb[k] = txt;
+                            else if (/^\d{4}-\d{2}-\d{2}$/.test(k)) notesDb[getNoteKey(k, validTurma)] = txt;
+                        });
+                    }
+                    if (data.overrides && typeof data.overrides === 'object' && !Array.isArray(data.overrides)) {
+                        Object.entries(data.overrides).forEach(([k, val]) => {
+                            if (/^\d{4}-\d{2}-\d{2}_[0-3]$/.test(k) && ['M', 'T', 'N', 'F'].includes(val)) overridesDb[k] = val;
+                        });
+                    }
                     if (Array.isArray(data.atestados)) {
                         const byKey = new Map(atestadosDb.map(a => [`${a.startDate}_${a.turma}`, a]));
                         data.atestados.forEach(item => {
-                            if (item?.startDate && typeof item.turma === 'number' && item.days >= 1) {
-                                byKey.set(`${item.startDate}_${item.turma}`, { id: item.id || `at_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, turma: item.turma, startDate: item.startDate, days: parseInt(item.days, 10) });
+                            if (item && /^\d{4}-\d{2}-\d{2}$/.test(item.startDate) && Number.isInteger(item.turma) && item.turma >= 0 && item.turma <= 3 && item.days >= 1) {
+                                byKey.set(`${item.startDate}_${item.turma}`, {
+                                    id: item.id || `at_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                                    turma: item.turma,
+                                    startDate: item.startDate,
+                                    days: Math.max(1, Math.min(180, parseInt(item.days, 10) || 1))
+                                });
                             }
                         });
                         atestadosDb = Array.from(byKey.values());
                     }
-                    DB.flushAll(); closeInfoModal(); renderApp(); updateStorageHealthUI();
+                    DB.flushAll(); closeInfoModal(); renderApp(false); updateStorageHealthUI();
                     showToast('Backup restaurado com sucesso!');
                 } catch (err) { showToast('Arquivo de backup inválido.'); }
                 event.target.value = '';
@@ -1040,14 +1249,14 @@
             reader.readAsText(file);
         }
 
-        /* 9. EXPORTAÇÃO AGENDA (.ICS - RFC 5545) */
+        /* 11. EXPORTAÇÃO AGENDA (.ICS - RFC 5545) */
         function formatICSDate(date, timeStr) { return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}T${timeStr.replace(':', '')}00`; }
         function formatICSAllDay(date) { return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`; }
         function sanitizeICS(str) { return String(str).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
         function exportICS() {
             haptic();
             const year = currentDate.getFullYear(), month = currentDate.getMonth(), daysInMonth = new Date(year, month + 1, 0).getDate();
-            const turmaLtr = TEAM_LETTERS[currentTurma];
+            const turmaLtr = TEAM_LETTERS[currentTurma], teamLabel = `Turno ${turmaLtr} (${teamNames[currentTurma]})`;
             showToast(`Exportando escala do Turno ${turmaLtr}...`);
             const dtStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
             const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Escala Imerys Britagem ICP1//PT-BR', 'CALSCALE:GREGORIAN'];
@@ -1056,7 +1265,7 @@
                 if (atInfo) {
                     const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day + 1, 12, 0, 0);
                     const reason = getAtestadoReason(atInfo.record);
-                    let desc = `Turno ${turmaLtr} - Atestado Médico (${atInfo.dayIndex}/${atInfo.totalDays})`;
+                    let desc = `${teamLabel} - Atestado Médico (${atInfo.dayIndex}/${atInfo.totalDays})`;
                     if (reason) desc += `\nMotivo: ${reason}`;
                     lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-AT-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:Imerys - Atestado Médico (${atInfo.dayIndex}/${atInfo.totalDays})`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
                     continue;
@@ -1067,8 +1276,9 @@
                 const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day, 12, 0, 0);
                 if (sCode === 'N') eD.setDate(eD.getDate() + 1);
                 const isOv = Boolean(overridesDb[`${dateKey}_${currentTurma}`]);
-                let desc = `Turno ${turmaLtr}${isOv ? ' (Troca/Extra)' : ''}`;
-                if (notesDb[dateKey]) desc += `\nNota: ${notesDb[dateKey]}`;
+                const dayNote = getNote(dateKey, currentTurma);
+                let desc = `${teamLabel}${isOv ? ' (Troca/Extra)' : ''}`;
+                if (dayNote) desc += `\nNota: ${dayNote}`;
                 lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART:${formatICSDate(sD, startHr)}`, `DTEND:${formatICSDate(eD, endHr)}`, `SUMMARY:Imerys - ${sCfg.name}${isOv ? ' (Extra)' : ''}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
             }
             lines.push('END:VCALENDAR');
@@ -1081,11 +1291,12 @@
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
             if (!document.getElementById('note-modal').classList.contains('hidden')) requestCloseModal();
+            else if (!document.getElementById('teams-modal').classList.contains('hidden')) closeTeamsModal();
             else if (!document.getElementById('info-modal').classList.contains('hidden')) closeInfoModal();
             else if (!document.getElementById('ios-install-modal').classList.contains('hidden')) closeIosInstallPrompt();
         });
 
-        function bootApp() { initAppIcons(); renderApp(); initPersistence(); }
+        function bootApp() { initAppIcons(); renderApp(true); initPersistence(); }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootApp);
         else bootApp();
     </script>
