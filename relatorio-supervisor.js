@@ -7,6 +7,7 @@
     window.__IMERYS_SUPERVISOR_LOADED__ = true;
 
     const META_STORAGE_KEY = 'imerys_override_meta';
+<<<<<<< HEAD
     if (typeof STORAGE_KEYS !== 'undefined' && Array.isArray(STORAGE_KEYS) && !STORAGE_KEYS.includes(META_STORAGE_KEY)) {
         STORAGE_KEYS.push(META_STORAGE_KEY);
     }
@@ -35,20 +36,35 @@
     let supTeamFilter = 'all';     // 'all' | '0' | '1' | '2' | '3'
     let supCategoryFilter = 'all'; // 'all' | 'he' | 'at' | 'fa' | 'td' | 'ea_sa' | 'dm_ep' | 'other'
     let supSortMode = 'date';      // 'date' | 'team'
+=======
+    if (Array.isArray(STORAGE_KEYS) && !STORAGE_KEYS.includes(META_STORAGE_KEY)) {
+        STORAGE_KEYS.push(META_STORAGE_KEY);
+    }
+
+    let exportMode = 'quadro'; // 'quadro' | 'supervisor'
+    let supTeamFilter = 'all'; // 'all' | '0' | '1' | '2' | '3'
+    let supSortMode = 'date';  // 'date' | 'team'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
     let overrideMetaDb = {};
     let modalAtestadoWho = 'both'; // '0' | '1' | 'both'
     let modalOverrideWho = 'both'; // '0' | '1' | 'both'
     let modalSwapWith = '';
     let modalSwapWithTeam = '';
+<<<<<<< HEAD
     let modalCoveredBy = '';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     let modalEntryTime = '';
     let modalExitTime = '';
     let modalArrivalTime = '';
 
+<<<<<<< HEAD
     let lastRenderedTurma = null;
     let lastRenderedMonthKey = '';
 
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     if (typeof SHIFTS_CONFIG === 'object' && SHIFTS_CONFIG) {
         SHIFTS_CONFIG.FA = {
             name: 'Falta',
@@ -61,62 +77,112 @@
         HE50: {
             code: '50%', chip: '50%', label: 'Hora Extra 50%', short: 'HE 50%',
             palette: 'HE', ring: 'ring-2 ring-inset ring-amber-400 dark:ring-amber-500', dot: 'bg-amber-500',
+<<<<<<< HEAD
             pillCls: 'sup-pill-he', cardCls: 'occ-card-he', hasWho: true, isSwap: false, canCover: false,
             timeFields: ['entry', 'exit'], countKey: 'he', filterGroup: 'he'
+=======
+            pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e',
+            hasWho: true, isSwap: false, timeFields: ['entry', 'exit'], countKey: 'he'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         HE75: {
             code: '75%', chip: '75%', label: 'Hora Extra 75%', short: 'HE 75%',
             palette: 'HE', ring: 'ring-2 ring-inset ring-amber-400 dark:ring-amber-500', dot: 'bg-amber-500',
+<<<<<<< HEAD
             pillCls: 'sup-pill-he', cardCls: 'occ-card-he', hasWho: true, isSwap: false, canCover: false,
             timeFields: ['entry', 'exit'], countKey: 'he', filterGroup: 'he'
+=======
+            pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e',
+            hasWho: true, isSwap: false, timeFields: ['entry', 'exit'], countKey: 'he'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         HE110: {
             code: '110%', chip: '110%', label: 'Hora Extra 110%', short: 'HE 110%',
             palette: 'HE', ring: 'ring-2 ring-inset ring-amber-600 dark:ring-amber-400', dot: 'bg-amber-600',
+<<<<<<< HEAD
             pillCls: 'sup-pill-he', cardCls: 'occ-card-he', hasWho: true, isSwap: false, canCover: false,
             timeFields: ['entry', 'exit'], countKey: 'he', filterGroup: 'he'
+=======
+            pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e',
+            hasWho: true, isSwap: false, timeFields: ['entry', 'exit'], countKey: 'he'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         TD: {
             code: 'TD', chip: 'TD', label: 'Troca de Dia', short: 'Troca',
             palette: 'TD', ring: 'ring-2 ring-inset ring-purple-500 dark:ring-purple-400', dot: 'bg-purple-500',
+<<<<<<< HEAD
             pillCls: 'sup-pill-td', cardCls: 'occ-card-td', hasWho: true, isSwap: true, canCover: true,
             timeFields: [], countKey: 'td', filterGroup: 'td'
+=======
+            pillCls: 'sup-pill-td', pillBg: '#f3e8ff', pillBd: '#ddd6fe', pillFg: '#6b21a8',
+            hasWho: true, isSwap: true, timeFields: [], countKey: 'td'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         F: {
             code: 'F', chip: 'F', label: 'Folga', short: 'Folga',
             palette: 'F', ring: 'ring-2 ring-inset ring-emerald-500 dark:ring-emerald-400', dot: 'bg-emerald-500',
+<<<<<<< HEAD
             pillCls: 'sup-pill-f', cardCls: 'occ-card-f', hasWho: false, isSwap: false, canCover: false,
             timeFields: [], countKey: 'other', filterGroup: 'other'
+=======
+            pillCls: 'sup-pill-f', pillBg: '#dcfce7', pillBd: '#bbf7d0', pillFg: '#15803d',
+            hasWho: false, isSwap: false, timeFields: [], countKey: 'other'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         FA: {
             code: 'FA', chip: 'FA', label: 'Falta', short: 'Falta',
             palette: 'FA', ring: 'ring-2 ring-inset ring-red-600 dark:ring-red-400', dot: 'bg-red-600',
+<<<<<<< HEAD
             pillCls: 'sup-pill-fa', cardCls: 'occ-card-fa', hasWho: true, isSwap: false, canCover: true,
             timeFields: [], countKey: 'fa', filterGroup: 'fa'
+=======
+            pillCls: 'sup-pill-fa', pillBg: '#fee2e2', pillBd: '#fecaca', pillFg: '#b91c1c',
+            hasWho: true, isSwap: false, timeFields: [], countKey: 'fa'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         EA: {
             code: 'EA', chip: 'EA', label: 'Entrada Atrasada', short: 'Ent. Atr.',
             palette: 'EA', ring: 'ring-2 ring-inset ring-cyan-500 dark:ring-cyan-400', dot: 'bg-cyan-500',
+<<<<<<< HEAD
             pillCls: 'sup-pill-ea', cardCls: 'occ-card-ea', hasWho: true, isSwap: false, canCover: false,
             timeFields: ['entry'], countKey: 'ea', filterGroup: 'ea_sa'
+=======
+            pillCls: 'sup-pill-ea', pillBg: '#cffafe', pillBd: '#a5f3fc', pillFg: '#0e7490',
+            hasWho: true, isSwap: false, timeFields: ['entry'], countKey: 'ea'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         SA: {
             code: 'SA', chip: 'SA', label: 'Saída Adiantada', short: 'Saí. Adi.',
             palette: 'SA', ring: 'ring-2 ring-inset ring-teal-500 dark:ring-teal-400', dot: 'bg-teal-500',
+<<<<<<< HEAD
             pillCls: 'sup-pill-sa', cardCls: 'occ-card-sa', hasWho: true, isSwap: false, canCover: false,
             timeFields: ['exit'], countKey: 'sa', filterGroup: 'ea_sa'
+=======
+            pillCls: 'sup-pill-sa', pillBg: '#ccfbf1', pillBd: '#99f6e4', pillFg: '#0f766e',
+            hasWho: true, isSwap: false, timeFields: ['exit'], countKey: 'sa'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         DM: {
             code: 'DM', chip: 'DM', label: 'Declaração Médica', short: 'Decl. Méd.',
             palette: 'DM', ring: 'ring-2 ring-inset ring-indigo-500 dark:ring-indigo-400', dot: 'bg-indigo-500',
+<<<<<<< HEAD
             pillCls: 'sup-pill-dm', cardCls: 'occ-card-dm', hasWho: true, isSwap: false, canCover: false,
             timeFields: ['exit', 'entry'], countKey: 'dm', filterGroup: 'dm_ep'
+=======
+            pillCls: 'sup-pill-dm', pillBg: '#e0e7ff', pillBd: '#c7d2fe', pillFg: '#3730a3',
+            hasWho: true, isSwap: false, timeFields: ['exit', 'entry'], countKey: 'dm'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         },
         EP: {
             code: 'EP', chip: 'EP', label: 'Exame Periódico', short: 'Ex. Periód.',
             palette: 'EP', ring: 'ring-2 ring-inset ring-sky-500 dark:ring-sky-400', dot: 'bg-sky-500',
+<<<<<<< HEAD
             pillCls: 'sup-pill-ep', cardCls: 'occ-card-ep', hasWho: true, isSwap: false, canCover: false,
             timeFields: ['arrival'], countKey: 'ep', filterGroup: 'dm_ep'
+=======
+            pillCls: 'sup-pill-ep', pillBg: '#e0f2fe', pillBd: '#bae6fd', pillFg: '#0369a1',
+            hasWho: true, isSwap: false, timeFields: ['arrival'], countKey: 'ep'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         }
     };
 
@@ -146,6 +212,7 @@
         return `${String(parseInt(m[1], 10)).padStart(2, '0')}:${m[2]}`;
     }
 
+<<<<<<< HEAD
     function timeToMinutes(hhmm) {
         const clean = sanitizeTimeStr(hhmm);
         if (!clean) return null;
@@ -183,6 +250,8 @@
         };
     }
 
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     function sanitizeAllState() {
         const tNum = parseInt(currentTurma, 10);
         currentTurma = (!isNaN(tNum) && tNum >= 0 && tNum <= 3) ? tNum : 2;
@@ -212,8 +281,22 @@
 
         const cleanMeta = {};
         Object.entries(overrideMetaDb).forEach(([k, v]) => {
+<<<<<<< HEAD
             if (/^\d{4}-\d{2}-\d{2}_[0-3]$/.test(k) && cleanOv[k] && v && typeof v === 'object' && !Array.isArray(v)) {
                 cleanMeta[k] = normalizeMetaRecord(v);
+=======
+            if (/^\d{4}-\d{2}-\d{2}_[0-3]$/.test(k) && v && typeof v === 'object' && !Array.isArray(v)) {
+                const wt = ['0', '1', 'both'].includes(String(v.whoType)) ? String(v.whoType) : 'both';
+                cleanMeta[k] = {
+                    whoType: wt,
+                    whoName: typeof v.whoName === 'string' ? v.whoName.trim().slice(0, 40) : '',
+                    swapWith: typeof v.swapWith === 'string' ? v.swapWith.trim().slice(0, 40) : '',
+                    swapWithTeam: typeof v.swapWithTeam === 'string' ? v.swapWithTeam.trim().slice(0, 2) : '',
+                    entryTime: sanitizeTimeStr(v.entryTime),
+                    exitTime: sanitizeTimeStr(v.exitTime),
+                    arrivalTime: sanitizeTimeStr(v.arrivalTime)
+                };
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             }
         });
         overrideMetaDb = cleanMeta;
@@ -290,6 +373,7 @@
         if (whoType === 'both' || members.length < 2) {
             if (members.length === 1) {
                 return {
+<<<<<<< HEAD
                     whoType: '0', whoName: members[0], label: members[0],
                     fullLabel: members[0], shortLabel: shortMemberName(members[0])
                 };
@@ -297,14 +381,37 @@
             return {
                 whoType: 'both', whoName: '', label: 'Os dois',
                 fullLabel: `Os dois (${teamStr})`, shortLabel: 'Os dois'
+=======
+                    whoType: '0',
+                    whoName: members[0],
+                    label: members[0],
+                    fullLabel: members[0],
+                    shortLabel: shortMemberName(members[0])
+                };
+            }
+            return {
+                whoType: 'both',
+                whoName: '',
+                label: 'Os dois',
+                fullLabel: `Os dois (${teamStr})`,
+                shortLabel: 'Os dois'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             };
         }
 
         const idx = whoType === '1' ? 1 : 0;
         const resolvedName = (rec && rec.whoName) ? rec.whoName : (members[idx] || teamStr);
         return {
+<<<<<<< HEAD
             whoType: String(idx), whoName: resolvedName, label: resolvedName,
             fullLabel: resolvedName, shortLabel: shortMemberName(resolvedName)
+=======
+            whoType: String(idx),
+            whoName: resolvedName,
+            label: resolvedName,
+            fullLabel: resolvedName,
+            shortLabel: shortMemberName(resolvedName)
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         };
     }
 
@@ -320,8 +427,16 @@
             return { whoType: whoState, whoName: name, label: name, fullLabel: name, shortLabel: shortMemberName(name) };
         }
         return {
+<<<<<<< HEAD
             whoType: 'both', whoName: '', label: 'Os dois',
             fullLabel: `Os dois (${teamStr})`, shortLabel: 'Os dois'
+=======
+            whoType: 'both',
+            whoName: '',
+            label: 'Os dois',
+            fullLabel: `Os dois (${teamStr})`,
+            shortLabel: 'Os dois'
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         };
     }
 
@@ -341,6 +456,7 @@
         return { who, target, targetTeam, targetFull, targetShort, compactLabel, pairLabel };
     }
 
+<<<<<<< HEAD
     function buildOccurrenceDetailSummary(code, meta, baseCfg) {
         const m = OCC_META[code];
         const fields = (m && Array.isArray(m.timeFields)) ? m.timeFields : [];
@@ -391,6 +507,44 @@
             extraSummary: extraParts.join(' • '),
             summary,
             warning
+=======
+    function formatOccurrenceTimeInfo(code, meta) {
+        const fields = (OCC_META[code] && Array.isArray(OCC_META[code].timeFields)) ? OCC_META[code].timeFields : [];
+        const entry = sanitizeTimeStr(meta && meta.entryTime);
+        const exit = sanitizeTimeStr(meta && meta.exitTime);
+        const arrival = sanitizeTimeStr(meta && meta.arrivalTime);
+        const parts = [];
+
+        fields.forEach(f => {
+            if (f === 'entry' && entry) {
+                parts.push(code === 'EA' ? `Entrada às ${entry}` : `Entrou ${entry}`);
+            } else if (f === 'exit' && exit) {
+                parts.push(code === 'SA' ? `Saída às ${exit}` : `Saiu ${exit}`);
+            } else if (f === 'arrival' && arrival) {
+                parts.push(`Chegou ${arrival}`);
+            }
+        });
+
+        let compact = '';
+        if (code === 'EA' && entry) compact = entry;
+        else if (code === 'SA' && exit) compact = exit;
+        else if (code === 'EP' && arrival) compact = arrival;
+        else if (code === 'DM') {
+            if (exit && entry) compact = `${exit}-${entry}`;
+            else compact = exit || entry || '';
+        } else if (fields.includes('entry') && fields.includes('exit')) {
+            if (entry && exit) compact = `${entry}-${exit}`;
+            else compact = entry || exit || '';
+        }
+
+        return {
+            entry,
+            exit,
+            arrival,
+            parts,
+            summary: parts.join(' • '),
+            compact
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         };
     }
 
@@ -428,6 +582,7 @@
                 white-space: nowrap;
             }
 
+<<<<<<< HEAD
             /* Identificação visual correspondente em cada cartão de ocorrência */
             .occ-card {
                 border-radius: 1rem;
@@ -463,6 +618,8 @@
                 .occ-card-note { border-left-color: #71717a; }
             }
 
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             .occ-pill {
                 display: inline-flex;
                 align-items: center;
@@ -523,18 +680,30 @@
             .sup-breakdown-wrap {
                 margin-top: 12px;
                 display: grid;
+<<<<<<< HEAD
                 grid-template-columns: repeat(5, 1fr) 1.15fr;
                 gap: 7px;
+=======
+                grid-template-columns: repeat(9, 1fr) 1.25fr;
+                gap: 6px;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             }
             .sup-cat-box {
                 border: 1.2px solid #cbd5e1;
                 border-radius: 9px;
                 background: #f8fafc;
+<<<<<<< HEAD
                 padding: 7px 10px;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 gap: 6px;
+=======
+                padding: 7px 7px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             }
             .sup-cat-box.is-total {
                 background: #0f172a;
@@ -542,9 +711,15 @@
                 color: #ffffff;
             }
             .sup-cat-lbl {
+<<<<<<< HEAD
                 font-size: 8.5px;
                 font-weight: 900;
                 letter-spacing: 0.04em;
+=======
+                font-size: 7.8px;
+                font-weight: 900;
+                letter-spacing: 0.03em;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 text-transform: uppercase;
                 color: #475569;
                 line-height: 1.15;
@@ -554,10 +729,18 @@
                 font-size: 19px;
                 font-weight: 900;
                 color: #0f172a;
+<<<<<<< HEAD
                 line-height: 1;
                 font-variant-numeric: tabular-nums;
             }
             .sup-cat-box.is-total .sup-cat-num { color: #ffffff; font-size: 22px; }
+=======
+                line-height: 1.1;
+                margin-top: 4px;
+                font-variant-numeric: tabular-nums;
+            }
+            .sup-cat-box.is-total .sup-cat-num { color: #ffffff; font-size: 21px; }
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
             .sup-meta-row {
                 margin-top: 8px;
@@ -636,7 +819,11 @@
 
             .sup-col-date { width: 88px; }
             .sup-col-team { width: 196px; }
+<<<<<<< HEAD
             .sup-col-occ { width: 282px; }
+=======
+            .sup-col-occ { width: 274px; }
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
             .sup-date-main {
                 display: block;
@@ -766,7 +953,11 @@
         document.head.appendChild(style);
     }
 
+<<<<<<< HEAD
     /* 4. MONTAGEM DA PÁGINA PRINCIPAL, LEGENDA E MODAIS */
+=======
+    /* 4. MONTAGEM DA PÁGINA PRINCIPAL E MODAIS */
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     function ensureOccurrencesSectionDOM() {
         const bottomGrid = document.getElementById('bottom-cards-grid');
         if (!bottomGrid) return null;
@@ -797,8 +988,13 @@
 
     function upgradeInfoModalDOM() {
         const panel = document.getElementById('info-modal-content');
+<<<<<<< HEAD
         if (!panel || panel.dataset.v8Upgraded === '1') return;
         panel.dataset.v8Upgraded = '1';
+=======
+        if (!panel || panel.dataset.v5Upgraded === '1') return;
+        panel.dataset.v5Upgraded = '1';
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         panel.innerHTML = `
             <div class="flex justify-between items-center mb-4">
@@ -807,6 +1003,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
+<<<<<<< HEAD
 
             <div class="space-y-4">
                 <div>
@@ -879,6 +1076,30 @@
 
             <div class="mt-4 pt-3.5 border-t border-slate-200 dark:border-surfaceBorder">
                 <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 text-center">Backup de Equipes, Notas e Atestados</span>
+=======
+            <div class="space-y-2">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300 font-black text-xs">M</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Manhã</span></div><span class="font-black text-blue-700 dark:text-blue-400 text-xs">05:00 - 13:00</span></div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300 font-black text-xs">T</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Tarde</span></div><span class="font-black text-orange-700 dark:text-orange-400 text-xs">13:00 - 21:00</span></div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 font-black text-xs">N</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Noite</span></div><span class="font-black text-indigo-700 dark:text-indigo-400 text-xs">21:00 - 05:00</span></div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300 font-black text-xs">F</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Folga</span></div><span class="font-black text-green-700 dark:text-green-400 text-xs uppercase">Descanso</span></div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-black text-[11px]">AT</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Atestado</span></div><span class="font-black text-rose-700 dark:text-rose-400 text-xs uppercase">Afastamento</span></div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300 font-black text-[11px]">FA</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Falta</span></div><span class="font-black text-red-700 dark:text-red-400 text-xs uppercase">Ausência</span></div>
+                <div class="grid grid-cols-2 gap-1.5 pt-0.5">
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-900/40"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-200 font-black text-[10px]">EA</span><span class="text-xs font-bold text-cyan-900 dark:text-cyan-200">Entrada Atrasada</span></div>
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/40"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-teal-100 dark:bg-teal-900/50 text-teal-800 dark:text-teal-200 font-black text-[10px]">SA</span><span class="text-xs font-bold text-teal-900 dark:text-teal-200">Saída Adiantada</span></div>
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/40"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200 font-black text-[10px]">DM</span><span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">Declaração Médica</span></div>
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-200 font-black text-[10px]">EP</span><span class="text-xs font-bold text-sky-900 dark:text-sky-200">Exame Periódico</span></div>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 pt-0.5">
+                    <div class="flex items-center gap-1.5 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span><span class="text-[10.5px] font-bold text-amber-800 dark:text-amber-300 leading-tight">Hora Extra</span></div>
+                    <div class="flex items-center gap-1.5 p-2 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0"></span><span class="text-[10.5px] font-bold text-purple-800 dark:text-purple-300 leading-tight">Troca</span></div>
+                    <div class="flex items-center gap-1.5 p-2 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0"></span><span class="text-[10.5px] font-bold text-sky-800 dark:text-sky-300 leading-tight">Dia de Volta</span></div>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-4 border-t border-slate-200 dark:border-surfaceBorder">
+                <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2.5 text-center">Backup de Equipes, Notas e Atestados</span>
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 <div class="grid grid-cols-2 gap-2">
                     <button type="button" onclick="exportBackup()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 btn-smooth cursor-pointer">Exportar</button>
                     <button type="button" onclick="document.getElementById('backup-file-input').click()" class="py-2.5 px-3 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1.5 active:scale-95 btn-smooth cursor-pointer">Importar</button>
@@ -890,23 +1111,38 @@
 
     function upgradeNoteModalDOM() {
         const panel = document.getElementById('modal-content');
+<<<<<<< HEAD
         if (!panel || panel.dataset.v8Upgraded === '1') return;
         panel.dataset.v8Upgraded = '1';
 
         panel.innerHTML = `
             <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-3.5"></div>
             <div class="flex justify-between items-center mb-3.5">
+=======
+        if (!panel || panel.dataset.v5Upgraded === '1') return;
+        panel.dataset.v5Upgraded = '1';
+
+        panel.innerHTML = `
+            <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+            <div class="flex justify-between items-center mb-4">
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 <h3 id="modal-date-title" class="text-lg font-black text-slate-800 dark:text-white leading-tight"></h3>
                 <button type="button" onclick="requestCloseModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer btn-smooth" aria-label="Fechar janela">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
+<<<<<<< HEAD
             <div class="mb-3.5">
+=======
+            <!-- Ocorrências Unificadas -->
+            <div class="mb-4">
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 <div class="flex items-center justify-between gap-2 mb-2">
                     <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Tipo de Ocorrência</span>
                     <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Toque novamente p/ desmarcar</span>
                 </div>
+<<<<<<< HEAD
                 <div class="grid grid-cols-2 gap-1.5">
                     <button type="button" data-ov="HE50" onclick="selectOverride('HE50')" class="ov-btn py-2 px-2.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 50%</button>
                     <button type="button" data-ov="HE75" onclick="selectOverride('HE75')" class="ov-btn py-2 px-2.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 75%</button>
@@ -922,11 +1158,30 @@
                 <button type="button" id="ov-atestado-btn" onclick="toggleAtestadoMode()" class="mt-1.5 w-full py-2 px-2.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Atestado Médico</button>
 
                 <div id="override-details-box" class="hidden mt-3 rounded-2xl border p-3 space-y-2.5">
+=======
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    <button type="button" data-ov="HE50" onclick="selectOverride('HE50')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 50%</button>
+                    <button type="button" data-ov="HE75" onclick="selectOverride('HE75')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 75%</button>
+                    <button type="button" data-ov="HE110" onclick="selectOverride('HE110')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 110%</button>
+                    <button type="button" data-ov="TD" onclick="selectOverride('TD')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Troca de Dia</button>
+                    <button type="button" data-ov="F" onclick="selectOverride('F')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Folga</button>
+                    <button type="button" data-ov="FA" onclick="selectOverride('FA')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Falta</button>
+                    <button type="button" data-ov="EA" onclick="selectOverride('EA')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Entrada Atrasada</button>
+                    <button type="button" data-ov="SA" onclick="selectOverride('SA')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Saída Adiantada</button>
+                    <button type="button" data-ov="DM" onclick="selectOverride('DM')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Declaração Médica</button>
+                    <button type="button" data-ov="EP" onclick="selectOverride('EP')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Exame Periódico</button>
+                    <button type="button" id="ov-atestado-btn" onclick="toggleAtestadoMode()" class="col-span-2 sm:col-span-2 py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Atestado Médico</button>
+                </div>
+
+                <!-- Painel Dinâmico de Funcionário, Horários e Troca de Dia -->
+                <div id="override-details-box" class="hidden mt-3 rounded-2xl border p-3.5 space-y-3">
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     <div>
                         <span id="override-who-label" class="block text-[11px] font-extrabold mb-1.5"></span>
                         <div id="override-who-group" class="grid grid-cols-3 gap-1.5"></div>
                     </div>
 
+<<<<<<< HEAD
                     <div id="override-times-wrap" class="hidden space-y-2 pt-2 border-t border-black/10 dark:border-white/10">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div id="time-field-entry" class="hidden">
@@ -958,6 +1213,34 @@
                 </div>
 
                 <div id="atestado-controls" class="hidden mt-3 rounded-2xl border border-rose-200/90 dark:border-rose-900/60 bg-rose-50/75 dark:bg-rose-950/25 p-3 space-y-2.5">
+=======
+                    <!-- Campos de Horário Específicos por Ocorrência -->
+                    <div id="override-times-wrap" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-black/10 dark:border-white/10">
+                        <div id="time-field-entry" class="hidden">
+                            <label id="time-label-entry" for="occ-time-entry" class="block text-[11px] font-extrabold mb-1">Hora que entrou</label>
+                            <input type="time" id="occ-time-entry" oninput="onOccTimeChange('entry', this.value)" class="w-full px-3 py-2 text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl outline-none focus:ring-2 focus:ring-blue-500 tabular-nums">
+                        </div>
+                        <div id="time-field-exit" class="hidden">
+                            <label id="time-label-exit" for="occ-time-exit" class="block text-[11px] font-extrabold mb-1">Hora que saiu</label>
+                            <input type="time" id="occ-time-exit" oninput="onOccTimeChange('exit', this.value)" class="w-full px-3 py-2 text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl outline-none focus:ring-2 focus:ring-blue-500 tabular-nums">
+                        </div>
+                        <div id="time-field-arrival" class="hidden sm:col-span-2">
+                            <label id="time-label-arrival" for="occ-time-arrival" class="block text-[11px] font-extrabold mb-1">Hora que chegou</label>
+                            <input type="time" id="occ-time-arrival" oninput="onOccTimeChange('arrival', this.value)" class="w-full px-3 py-2 text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl outline-none focus:ring-2 focus:ring-blue-500 tabular-nums">
+                        </div>
+                    </div>
+
+                    <!-- Parceiro de Troca de Dia -->
+                    <div id="swap-target-section" class="hidden pt-2.5 border-t border-purple-200/70 dark:border-purple-900/50 space-y-2">
+                        <span class="block text-[11px] font-extrabold text-purple-900 dark:text-purple-200">Troca com quem?</span>
+                        <div id="swap-presets-group" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
+                        <input type="text" id="swap-custom-input" maxlength="40" autocomplete="off" oninput="onSwapCustomInput()" placeholder="Ou digite outro nome..." class="w-full px-3 py-2 text-base font-semibold text-slate-800 dark:text-slate-100 bg-white dark:bg-oled border border-purple-200 dark:border-purple-900/60 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-slate-400 dark:placeholder:text-slate-500">
+                    </div>
+                </div>
+
+                <!-- Painel de Atestado Médico -->
+                <div id="atestado-controls" class="hidden mt-3 rounded-2xl border border-rose-200/90 dark:border-rose-900/60 bg-rose-50/75 dark:bg-rose-950/25 p-3.5 space-y-3">
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-xs font-black text-rose-800 dark:text-rose-200">Configuração do Atestado Médico</span>
                         <span id="atestado-subtitle" class="text-[10px] font-bold text-rose-600 dark:text-rose-300"></span>
@@ -970,9 +1253,15 @@
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-[11px] font-extrabold text-rose-900 dark:text-rose-200">Quantidade de dias:</span>
                         <div class="flex items-center gap-1.5">
+<<<<<<< HEAD
                             <button type="button" onclick="adjustAtestadoDays(-1)" aria-label="Diminuir dias" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-base flex items-center justify-center active:scale-90 btn-smooth cursor-pointer">−</button>
                             <input type="number" id="atestado-days-input" inputmode="numeric" pattern="[0-9]*" min="1" max="180" value="1" oninput="onAtestadoDaysInput()" class="w-14 h-8 text-center text-base font-black text-rose-800 dark:text-rose-200 bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 rounded-xl outline-none focus:ring-2 focus:ring-rose-500 tabular-nums">
                             <button type="button" onclick="adjustAtestadoDays(1)" aria-label="Aumentar dias" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-base flex items-center justify-center active:scale-90 btn-smooth cursor-pointer">+</button>
+=======
+                            <button type="button" onclick="adjustAtestadoDays(-1)" aria-label="Diminuir dias" class="w-9 h-9 rounded-xl bg-white hover:bg-rose-50 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90 btn-smooth cursor-pointer">−</button>
+                            <input type="number" id="atestado-days-input" inputmode="numeric" pattern="[0-9]*" min="1" max="180" value="1" oninput="onAtestadoDaysInput()" class="w-14 h-9 text-center text-base font-black text-rose-800 dark:text-rose-200 bg-white dark:bg-oled border border-rose-200 dark:border-rose-900/50 rounded-xl outline-none focus:ring-2 focus:ring-rose-500 tabular-nums">
+                            <button type="button" onclick="adjustAtestadoDays(1)" aria-label="Aumentar dias" class="w-9 h-9 rounded-xl bg-white hover:bg-rose-50 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 font-black text-lg flex items-center justify-center active:scale-90 btn-smooth cursor-pointer">+</button>
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                         </div>
                     </div>
                     <div class="grid grid-cols-5 gap-1.5">
@@ -982,12 +1271,23 @@
                         <button type="button" onclick="setAtestadoDays(7)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white hover:bg-rose-100/60 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 btn-smooth cursor-pointer">7d</button>
                         <button type="button" onclick="setAtestadoDays(15)" class="py-1.5 rounded-lg text-[11px] font-extrabold bg-white hover:bg-rose-100/60 dark:bg-oled dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 active:scale-95 btn-smooth cursor-pointer">15d</button>
                     </div>
+<<<<<<< HEAD
                     <div id="atestado-preview-box" class="rounded-xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200 dark:border-sky-900/60 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 leading-snug"></div>
                 </div>
             </div>
 
             <textarea id="note-text" oninput="markModalDirty()" class="w-full h-24 md:h-28 p-3.5 text-base font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600" placeholder="Observações para este dia..."></textarea>
 
+=======
+                    <div id="atestado-preview-box" class="rounded-xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200 dark:border-sky-900/60 px-3 py-2.5 text-xs text-slate-700 dark:text-slate-200 leading-snug"></div>
+                </div>
+            </div>
+
+            <!-- Observação -->
+            <textarea id="note-text" oninput="markModalDirty()" class="w-full h-24 md:h-28 p-3.5 text-base font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600" placeholder="Observações para este dia..."></textarea>
+
+            <!-- Aviso de alterações não salvas -->
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             <div id="unsaved-guard" class="hidden mt-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300/80 dark:border-amber-800/60 px-3 py-2.5 flex items-center justify-between gap-2">
                 <span class="text-xs font-extrabold text-amber-800 dark:text-amber-300">Alterações não salvas</span>
                 <div class="flex items-center gap-1.5 shrink-0">
@@ -1005,18 +1305,31 @@
 
     function upgradeExportModalDOM() {
         const panel = document.getElementById('export-modal-content');
+<<<<<<< HEAD
         if (!panel || panel.dataset.v8Upgraded === '1') return;
         panel.dataset.v8Upgraded = '1';
+=======
+        if (!panel || panel.dataset.v5Upgraded === '1') return;
+        panel.dataset.v5Upgraded = '1';
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         panel.innerHTML = `
             <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
             <div class="flex justify-between items-start gap-3 mb-3.5">
                 <div class="min-w-0">
+<<<<<<< HEAD
                     <span id="export-mode-pill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-[10px] font-black uppercase tracking-wider border border-blue-200/70 dark:border-blue-900/50 mb-1.5">Gerar / Imprimir Relatório</span>
                     <h3 id="export-modal-title" class="text-lg md:text-xl font-black text-slate-900 dark:text-white leading-tight">Gerar / Imprimir Relatório</h3>
                     <p id="export-modal-subtitle" class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">Escala oficial dos 4 turnos em A4 horizontal ou relatório mensal de ocorrências.</p>
                 </div>
                 <button type="button" onclick="closeExportModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer btn-smooth shrink-0" aria-label="Fechar janela">
+=======
+                    <span id="export-mode-pill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-[10px] font-black uppercase tracking-wider border border-blue-200/70 dark:border-blue-900/50 mb-1.5">Quadro de Avisos • A4 Horizontal</span>
+                    <h3 id="export-modal-title" class="text-lg md:text-xl font-black text-slate-900 dark:text-white leading-tight">Exportar &amp; Imprimir Escala</h3>
+                    <p id="export-modal-subtitle" class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">Todos os 4 turnos, horários, totais e feriados — sem observações individuais.</p>
+                </div>
+                <button type="button" onclick="closeExportModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer btn-smooth shrink-0" aria-label="Fechar exportação">
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -1026,7 +1339,11 @@
                     <span>Quadro dos Turnos</span>
                 </button>
                 <button type="button" id="export-tab-supervisor" onclick="switchExportMode('supervisor')" class="py-2.5 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 btn-smooth cursor-pointer">
+<<<<<<< HEAD
                     <span class="truncate">Ocorrências Mensais</span>
+=======
+                    <span class="truncate">Relatório de Ocorrências Mensais</span>
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     <span id="sup-tab-badge" class="px-1.5 py-0.5 rounded-full text-[10px] font-black tabular-nums shrink-0">0</span>
                 </button>
             </div>
@@ -1042,6 +1359,7 @@
                         <button type="button" data-sup-team="3" onclick="setSupervisorTeamFilter('3')" class="sup-filter-btn py-1.5 px-2 rounded-lg text-[11px] font-extrabold border btn-smooth cursor-pointer">D</button>
                     </div>
                 </div>
+<<<<<<< HEAD
 
                 <div class="pt-2.5 border-t border-slate-200/80 dark:border-surfaceBorder space-y-1.5">
                     <span class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Categoria</span>
@@ -1057,6 +1375,8 @@
                     </div>
                 </div>
 
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2.5 border-t border-slate-200/80 dark:border-surfaceBorder">
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Ordenação</span>
@@ -1081,7 +1401,19 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+=======
+            <label id="export-quadro-options" class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder mb-4 cursor-pointer">
+                <div class="min-w-0">
+                    <span class="block text-xs font-extrabold text-slate-800 dark:text-slate-100">Incluir ocorrências e atestados no quadro</span>
+                    <span class="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Desligado imprime a escala oficial limpa de todos os turnos. Observações nunca aparecem.</span>
+                </div>
+                <input type="checkbox" id="a4-include-changes" onchange="onA4OptionsChange()" class="w-5 h-5 rounded accent-blue-600 shrink-0 cursor-pointer">
+            </label>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 <button type="button" onclick="printA4Schedule()" class="py-3.5 px-4 rounded-2xl font-extrabold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 active:scale-95 btn-smooth cursor-pointer">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                     <span id="export-print-btn-label">Imprimir / Salvar PDF (A4)</span>
@@ -1092,17 +1424,40 @@
                 </button>
             </div>
 
+<<<<<<< HEAD
             <button type="button" id="sup-copy-btn" onclick="copySupervisorSummary()" class="hidden w-full mt-2.5 py-3 px-4 rounded-2xl font-extrabold text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 bg-emerald-50 hover:bg-emerald-100/90 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-900/60 flex items-center justify-center gap-2 active:scale-95 btn-smooth cursor-pointer">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                 <span>Copiar / Compartilhar Relatório (Texto)</span>
             </button>
+=======
+            <button type="button" id="sup-copy-btn" onclick="copySupervisorSummary()" class="hidden w-full py-3 px-4 mb-4 rounded-2xl font-extrabold text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 bg-emerald-50 hover:bg-emerald-100/90 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-900/60 flex items-center justify-center gap-2 active:scale-95 btn-smooth cursor-pointer">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                <span>Copiar Relatório em Texto (WhatsApp / E-mail)</span>
+            </button>
+
+            <div class="pt-3.5 border-t border-slate-200 dark:border-surfaceBorder flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                <div class="min-w-0">
+                    <span class="block text-xs font-extrabold text-slate-700 dark:text-slate-200">Agenda Pessoal do Celular (.ICS)</span>
+                    <span id="export-ics-subtitle" class="block text-[11px] font-medium text-slate-500 dark:text-slate-400">Importe apenas o turno selecionado no Google ou Apple Calendar.</span>
+                </div>
+                <button type="button" onclick="exportICS()" class="py-2.5 px-4 rounded-xl font-bold text-xs text-blue-700 dark:text-blue-300 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-900/60 flex items-center justify-center gap-1.5 active:scale-95 btn-smooth shrink-0 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>Baixar .ICS</span>
+                </button>
+            </div>
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         `;
     }
 
     function upgradeDesktopInlineLegend() {
         const legendRow = document.querySelector('section .hidden.md\\:flex.items-center.gap-3');
+<<<<<<< HEAD
         if (!legendRow || legendRow.dataset.v8Legend === '1') return;
         legendRow.dataset.v8Legend = '1';
+=======
+        if (!legendRow || legendRow.dataset.v5Legend === '1') return;
+        legendRow.dataset.v5Legend = '1';
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         [
             { cls: 'bg-red-600', label: 'Falta' },
             { cls: 'bg-purple-500', label: 'Troca' },
@@ -1154,12 +1509,17 @@
             const pName = btn.getAttribute('data-swap-name') || '';
             const pTeam = btn.getAttribute('data-swap-team') || '';
             const isSelected = modalSwapWith === pName && (modalSwapWithTeam === pTeam || !modalSwapWithTeam);
+<<<<<<< HEAD
             btn.className = `py-1.5 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer ${isSelected
+=======
+            btn.className = `py-2 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer ${isSelected
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 ? 'bg-purple-600 border-purple-600 text-white shadow-sm'
                 : 'bg-white hover:bg-purple-100/60 dark:bg-oled dark:hover:bg-purple-950/40 border-purple-200 dark:border-purple-900/50 text-purple-900 dark:text-purple-200'}`;
         });
     }
 
+<<<<<<< HEAD
     function updateTimeHelperFeedback(code) {
         const helper = document.getElementById('occ-time-helper');
         if (!helper) return;
@@ -1196,6 +1556,8 @@
         helper.classList.add('hidden');
     }
 
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     function renderOverrideTimeFieldsUI(code, meta, labelCls) {
         const wrap = document.getElementById('override-times-wrap');
         const entryBox = document.getElementById('time-field-entry');
@@ -1216,6 +1578,7 @@
         }
 
         wrap.classList.remove('hidden');
+<<<<<<< HEAD
         entryBox.classList.toggle('hidden', !fields.includes('entry'));
         exitBox.classList.toggle('hidden', !fields.includes('exit'));
         arrivalBox.classList.toggle('hidden', !fields.includes('arrival'));
@@ -1223,11 +1586,36 @@
         if (entryLbl) { entryLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`; entryLbl.innerText = 'Hora que entrou'; }
         if (exitLbl)  { exitLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`; exitLbl.innerText = 'Hora que saiu'; }
         if (arrivalLbl) { arrivalLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`; arrivalLbl.innerText = 'Hora que chegou'; }
+=======
+        const showEntry = fields.includes('entry');
+        const showExit = fields.includes('exit');
+        const showArrival = fields.includes('arrival');
+
+        entryBox.classList.toggle('hidden', !showEntry);
+        exitBox.classList.toggle('hidden', !showExit);
+        arrivalBox.classList.toggle('hidden', !showArrival);
+
+        if (entryLbl) {
+            entryLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`;
+            entryLbl.innerText = code === 'EA' ? 'Hora que entrou' : 'Quando entrou';
+        }
+        if (exitLbl) {
+            exitLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`;
+            exitLbl.innerText = code === 'SA' ? 'Hora que saiu' : 'Quando saiu';
+        }
+        if (arrivalLbl) {
+            arrivalLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`;
+            arrivalLbl.innerText = 'Hora que chegou';
+        }
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         if (entryInp && document.activeElement !== entryInp) entryInp.value = modalEntryTime;
         if (exitInp && document.activeElement !== exitInp) exitInp.value = modalExitTime;
         if (arrivalInp && document.activeElement !== arrivalInp) arrivalInp.value = modalArrivalTime;
+<<<<<<< HEAD
         updateTimeHelperFeedback(code);
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     }
 
     function renderOverrideDetailsUI() {
@@ -1237,8 +1625,11 @@
         const swapSec = document.getElementById('swap-target-section');
         const swapGroup = document.getElementById('swap-presets-group');
         const swapInput = document.getElementById('swap-custom-input');
+<<<<<<< HEAD
         const coverSec = document.getElementById('cover-target-section');
         const coverInp = document.getElementById('occ-covered-by-input');
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         if (!box || !labelEl || !whoGroup) return;
 
         const code = modalAtestadoEnabled ? '' : currentSelectedOverride;
@@ -1303,7 +1694,11 @@
         };
         const th = themes[meta.palette] || themes.HE;
 
+<<<<<<< HEAD
         box.className = `mt-3 rounded-2xl border p-3 space-y-2.5 ${th.box}`;
+=======
+        box.className = `mt-3 rounded-2xl border p-3.5 space-y-3 ${th.box}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         labelEl.className = `block text-[11px] font-extrabold mb-1.5 ${th.lbl}`;
         labelEl.innerText = th.title;
 
@@ -1325,7 +1720,11 @@
 
         whoGroup.innerHTML = options.map(opt => {
             const act = modalOverrideWho === opt.val;
+<<<<<<< HEAD
             return `<button type="button" onclick="selectOverrideWho('${opt.val}')" class="py-1.5 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer ${act ? th.act : th.idle}" title="${escapeHTML(opt.label)}">${escapeHTML(opt.label)}</button>`;
+=======
+            return `<button type="button" onclick="selectOverrideWho('${opt.val}')" class="py-2 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer ${act ? th.act : th.idle}" title="${escapeHTML(opt.label)}">${escapeHTML(opt.label)}</button>`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         }).join('');
 
         renderOverrideTimeFieldsUI(code, meta, th.lbl);
@@ -1342,7 +1741,11 @@
                     });
                 }
                 swapGroup.innerHTML = presets.map(p => (
+<<<<<<< HEAD
                     `<button type="button" data-swap-name="${escapeHTML(p.name)}" data-swap-team="${escapeHTML(p.teamLtr)}" onclick="selectSwapPreset(${p.tIdx}, ${p.mIdx})" class="py-1.5 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer" title="${escapeHTML(`${p.name} (Turno ${p.teamLtr})`)}">${escapeHTML(p.name)} <span class="opacity-70">(${escapeHTML(p.teamLtr)})</span></button>`
+=======
+                    `<button type="button" data-swap-name="${escapeHTML(p.name)}" data-swap-team="${escapeHTML(p.teamLtr)}" onclick="selectSwapPreset(${p.tIdx}, ${p.mIdx})" class="py-2 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer" title="${escapeHTML(`${p.name} (Turno ${p.teamLtr})`)}">${escapeHTML(p.name)} <span class="opacity-70">(${escapeHTML(p.teamLtr)})</span></button>`
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 )).join('');
 
                 const matchesPreset = presets.some(p => modalSwapWith === p.name && (modalSwapWithTeam === p.teamLtr || !modalSwapWithTeam));
@@ -1352,6 +1755,7 @@
                 syncSwapPresetsHighlight();
             }
         }
+<<<<<<< HEAD
 
         if (coverSec && coverInp) {
             coverSec.classList.toggle('hidden', !meta.canCover);
@@ -1361,6 +1765,8 @@
                 if (document.activeElement !== coverInp) coverInp.value = modalCoveredBy;
             }
         }
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     }
 
     function syncOccurrenceButtonsUI() {
@@ -1381,12 +1787,20 @@
         document.querySelectorAll('#note-modal .ov-btn').forEach(btn => {
             const val = btn.getAttribute('data-ov') || '';
             const isAct = !modalAtestadoEnabled && val === currentSelectedOverride;
+<<<<<<< HEAD
             btn.className = `ov-btn py-2 px-2.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer ${isAct ? (activeStyles[val] || idleStyle) : idleStyle}`;
+=======
+            btn.className = `ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer ${isAct ? (activeStyles[val] || idleStyle) : idleStyle}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         });
 
         const atBtn = document.getElementById('ov-atestado-btn');
         if (atBtn) {
+<<<<<<< HEAD
             atBtn.className = `mt-1.5 w-full py-2 px-2.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer ${modalAtestadoEnabled
+=======
+            atBtn.className = `col-span-2 sm:col-span-2 py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer ${modalAtestadoEnabled
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 ? 'bg-rose-600 border-rose-600 text-white shadow-sm'
                 : 'bg-rose-50/70 hover:bg-rose-100/70 dark:bg-rose-950/25 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300'}`;
         }
@@ -1411,6 +1825,7 @@
         if (field === 'entry') modalEntryTime = clean;
         else if (field === 'exit') modalExitTime = clean;
         else if (field === 'arrival') modalArrivalTime = clean;
+<<<<<<< HEAD
         if (!modalAtestadoEnabled && currentSelectedOverride) {
             updateTimeHelperFeedback(currentSelectedOverride);
         }
@@ -1420,6 +1835,8 @@
         markModalDirty();
         const inp = document.getElementById('occ-covered-by-input');
         modalCoveredBy = inp ? inp.value.slice(0, 40) : '';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     };
 
     window.selectSwapPreset = function (tIdx, mIdx) {
@@ -1532,7 +1949,10 @@
         modalOverrideWho = (activeMeta && activeMeta.whoType) ? String(activeMeta.whoType) : (members.length >= 2 ? '0' : '0');
         modalSwapWith = (activeMeta && activeMeta.swapWith) ? String(activeMeta.swapWith) : '';
         modalSwapWithTeam = (activeMeta && activeMeta.swapWithTeam) ? String(activeMeta.swapWithTeam) : '';
+<<<<<<< HEAD
         modalCoveredBy = (activeMeta && activeMeta.coveredBy) ? String(activeMeta.coveredBy) : '';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         modalEntryTime = sanitizeTimeStr(activeMeta && activeMeta.entryTime);
         modalExitTime = sanitizeTimeStr(activeMeta && activeMeta.exitTime);
         modalArrivalTime = sanitizeTimeStr(activeMeta && activeMeta.arrivalTime);
@@ -1610,7 +2030,10 @@
                 if (meta && meta.hasWho) {
                     const who = getSelectionWhoInfo(modalOverrideWho, currentTurma);
                     const cleanSwap = String(modalSwapWith || '').trim().slice(0, 40);
+<<<<<<< HEAD
                     const cleanCover = String(modalCoveredBy || '').trim().slice(0, 40);
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     const entryInp = sanitizeTimeStr(document.getElementById('occ-time-entry')?.value) || sanitizeTimeStr(modalEntryTime);
                     const exitInp = sanitizeTimeStr(document.getElementById('occ-time-exit')?.value) || sanitizeTimeStr(modalExitTime);
                     const arrivalInp = sanitizeTimeStr(document.getElementById('occ-time-arrival')?.value) || sanitizeTimeStr(modalArrivalTime);
@@ -1620,7 +2043,10 @@
                         whoName: who.whoName,
                         swapWith: meta.isSwap ? cleanSwap : '',
                         swapWithTeam: meta.isSwap && cleanSwap ? String(modalSwapWithTeam || '').trim().slice(0, 2) : '',
+<<<<<<< HEAD
                         coveredBy: meta.canCover ? cleanCover : '',
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                         entryTime: meta.timeFields.includes('entry') ? entryInp : '',
                         exitTime: meta.timeFields.includes('exit') ? exitInp : '',
                         arrivalTime: meta.timeFields.includes('arrival') ? arrivalInp : ''
@@ -1646,7 +2072,10 @@
         currentSelectedOverride = '';
         modalSwapWith = '';
         modalSwapWithTeam = '';
+<<<<<<< HEAD
         modalCoveredBy = '';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         modalEntryTime = '';
         modalExitTime = '';
         modalArrivalTime = '';
@@ -1664,6 +2093,7 @@
             const tableEl = document.getElementById('main-table');
             const prevScroll = sc ? sc.scrollLeft : 0;
             const year = currentDate.getFullYear(), month = currentDate.getMonth();
+<<<<<<< HEAD
             const monthKey = `${year}-${month}`;
             const daysInMonth = new Date(year, month + 1, 0).getDate(), today = new Date();
             const isCMonth = today.getFullYear() === year && today.getMonth() === month;
@@ -1672,6 +2102,11 @@
             lastRenderedTurma = currentTurma;
             lastRenderedMonthKey = monthKey;
 
+=======
+            const daysInMonth = new Date(year, month + 1, 0).getDate(), today = new Date();
+            const isCMonth = today.getFullYear() === year && today.getMonth() === month;
+
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             document.getElementById('current-month-display').innerText = currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
             document.getElementById('btn-today')?.classList.toggle('hidden', isCMonth);
 
@@ -1744,10 +2179,16 @@
                         let badgeDot = '';
                         const tipParts = [`Dia ${String(day).padStart(2, '0')}/${mmStr} • Turno ${teamLtr} (${teamNames[idx]})`];
 
+<<<<<<< HEAD
                         let itemCardCls = 'occ-card-note';
                         let itemPillCls = 'occ-pill-note';
                         let itemPillTxt = 'Observação';
                         let itemTitle = '';
+=======
+                        let itemPillCls = 'occ-pill-note';
+                        let itemPillTxt = 'Observação';
+                        let itemTitle = `${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                         let itemDetail = '';
                         let itemObs = dayNote;
                         let itemOpenDate = dateKey;
@@ -1768,10 +2209,16 @@
                                     : `${formatShortDate(atInfo.record.startDate)} a ${formatShortDate(retInfo.endDate)} (${atInfo.record.days} dias)`;
                                 const rStr = `${formatReturnDateLabel(retInfo.returnDateKey)} • ${retCfg.name}${retCfg.hours ? ` (${retCfg.hours})` : ''}`;
                                 const skipTxt = retInfo.skippedFolgas > 0 ? ` • Emenda ${retInfo.skippedFolgas} folga(s)` : '';
+<<<<<<< HEAD
                                 itemCardCls = 'occ-card-at';
                                 itemPillCls = 'occ-pill-at';
                                 itemPillTxt = `Atestado • ${atInfo.whoInfo.fullLabel}`;
                                 itemTitle = pLbl;
+=======
+                                itemPillCls = 'occ-pill-at';
+                                itemPillTxt = `Atestado • ${atInfo.whoInfo.fullLabel}`;
+                                itemTitle = `Período: ${pLbl}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                                 itemDetail = `↳ Retorno: ${rStr}${skipTxt}`;
                                 itemObs = getAtestadoReason(atInfo.record) || dayNote;
                                 itemOpenDate = atInfo.record.startDate;
@@ -1783,19 +2230,31 @@
                             else if (ovShift === 'FA') { /* Falta não soma como dia trabalhado nem folga */ }
                             else counts[baseShift]++;
 
+<<<<<<< HEAD
                             const det = buildOccurrenceDetailSummary(ovShift, ovMeta, baseCfg);
+=======
+                            const tInfo = formatOccurrenceTimeInfo(ovShift, ovMeta);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
                             if (ovShift === 'FA') {
                                 code = 'FA';
                                 style = SHIFTS_CONFIG.FA.style;
                                 const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                                 sub = `<span class="text-[7px] font-black leading-none mt-0.5 truncate max-w-[40px] opacity-95">${escapeHTML(who.shortLabel)}</span>`;
+<<<<<<< HEAD
                                 tipParts.push(`Falta • ${who.fullLabel} • ${det.summary}`);
                                 itemCardCls = m.cardCls;
                                 itemPillCls = m.pillCls;
                                 itemPillTxt = `${m.label} • ${who.fullLabel}`;
                                 itemTitle = det.coveredBy ? `Cobertura: ${det.coveredBy}` : '';
                                 itemDetail = '';
+=======
+                                tipParts.push(`Falta • ${who.fullLabel} (Escala: ${baseCfg.name})`);
+                                itemPillCls = m.pillCls;
+                                itemPillTxt = `${m.label} • ${who.fullLabel}`;
+                                itemTitle = `${m.label} — ${who.fullLabel}`;
+                                itemDetail = `Escala do dia: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                                 shouldPushCard = true;
                             } else if (ovShift === 'F') {
                                 code = 'F';
@@ -1804,10 +2263,16 @@
                                     ring = m.ring;
                                     badgeDot = `<span class="absolute top-1 left-1 w-1.5 h-1.5 ${m.dot} rounded-full"></span>`;
                                     tipParts.push(`Folga (Alterado de ${baseCfg.name})`);
+<<<<<<< HEAD
                                     itemCardCls = m.cardCls;
                                     itemPillCls = m.pillCls;
                                     itemPillTxt = `${m.label} • Alterado`;
                                     itemTitle = `Era ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+=======
+                                    itemPillCls = m.pillCls;
+                                    itemPillTxt = m.label;
+                                    itemTitle = `Folga (Alterado de ${baseCfg.name})`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                                     shouldPushCard = true;
                                 } else {
                                     tipParts.push('Folga');
@@ -1817,17 +2282,26 @@
                                 ring = m.ring;
                                 badgeDot = `<span class="absolute top-1 left-1 w-1.5 h-1.5 ${m.dot} rounded-full"></span>`;
                                 sub = `<span class="text-[6.5px] font-black leading-none text-purple-700 dark:text-purple-300 mt-0.5 truncate max-w-[40px]">${escapeHTML(swap.compactLabel)}</span>`;
+<<<<<<< HEAD
                                 tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • Troca: ${swap.pairLabel}${det.coveredBy ? ` • Cobertura: ${det.coveredBy}` : ''}`);
                                 itemCardCls = m.cardCls;
                                 itemPillCls = m.pillCls;
                                 itemPillTxt = `${m.label} • ${swap.pairLabel}`;
                                 itemTitle = det.coveredBy ? `Cobertura: ${det.coveredBy}` : '';
                                 itemDetail = '';
+=======
+                                tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • Troca: ${swap.pairLabel}`);
+                                itemPillCls = m.pillCls;
+                                itemPillTxt = `${m.label} • ${swap.pairLabel}`;
+                                itemTitle = `${m.label}: ${swap.pairLabel}`;
+                                itemDetail = `Escala: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                                 shouldPushCard = true;
                             } else {
                                 const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                                 ring = m.ring;
                                 badgeDot = `<span class="absolute top-1 left-1 w-1.5 h-1.5 ${m.dot} rounded-full"></span>`;
+<<<<<<< HEAD
                                 const line1 = det.compact || m.code;
                                 sub = `<span class="text-[6.5px] font-black leading-none mt-0.5 truncate max-w-[40px] opacity-95 tabular-nums">${escapeHTML(line1)}</span><span class="text-[6.5px] font-extrabold leading-none opacity-85 truncate max-w-[40px]">${escapeHTML(who.shortLabel)}</span>`;
                                 tipParts.push(`${m.label} (${who.fullLabel}) • ${det.summary}`);
@@ -1836,6 +2310,17 @@
                                 itemPillTxt = `${m.label} • ${who.fullLabel}`;
                                 itemTitle = det.timeSummary;
                                 itemDetail = det.coveredBy ? `Cobertura: ${det.coveredBy}` : '';
+=======
+                                const line1 = tInfo.compact || m.code;
+                                sub = `<span class="text-[6.5px] font-black leading-none mt-0.5 truncate max-w-[40px] opacity-95 tabular-nums">${escapeHTML(line1)}</span><span class="text-[6.5px] font-extrabold leading-none opacity-85 truncate max-w-[40px]">${escapeHTML(who.shortLabel)}</span>`;
+                                const timeTip = tInfo.summary ? ` • ${tInfo.summary}` : '';
+                                tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • ${m.label} (${who.fullLabel})${timeTip}`);
+                                itemPillCls = m.pillCls;
+                                itemPillTxt = `${m.label} • ${who.fullLabel}`;
+                                itemTitle = `${m.label} — ${who.fullLabel}`;
+                                const baseInfo = `Escala: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+                                itemDetail = tInfo.summary ? `${tInfo.summary} • ${baseInfo}` : baseInfo;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                                 shouldPushCard = true;
                             }
                         } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
@@ -1845,11 +2330,18 @@
                             ring = 'ring-2 ring-inset ring-amber-400 dark:ring-amber-500';
                             badgeDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>';
                             tipParts.push(`${SHIFTS_CONFIG[ovShift].name} (${SHIFTS_CONFIG[ovShift].hours}) • Hora Extra`);
+<<<<<<< HEAD
                             itemCardCls = 'occ-card-he';
                             itemPillCls = 'occ-pill-he';
                             itemPillTxt = `Hora Extra • ${SHIFTS_CONFIG[ovShift].name}`;
                             itemTitle = SHIFTS_CONFIG[ovShift].hours;
                             itemDetail = '';
+=======
+                            itemPillCls = 'occ-pill-he';
+                            itemPillTxt = `Hora Extra (${SHIFTS_CONFIG[ovShift].name})`;
+                            itemTitle = `Hora Extra (${SHIFTS_CONFIG[ovShift].name})`;
+                            itemDetail = SHIFTS_CONFIG[ovShift].hours;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                             shouldPushCard = true;
                         } else {
                             counts[baseShift]++;
@@ -1859,10 +2351,16 @@
                         if (dayNote) {
                             shouldPushCard = true;
                             if (!ovShift && !atInfo) {
+<<<<<<< HEAD
                                 itemCardCls = 'occ-card-note';
                                 itemPillCls = 'occ-pill-note';
                                 itemPillTxt = 'Observação';
                                 itemTitle = '';
+=======
+                                itemPillCls = 'occ-pill-note';
+                                itemPillTxt = 'Observação';
+                                itemTitle = `${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                             }
                         }
 
@@ -1880,7 +2378,10 @@
                                 dateStr: `${String(day).padStart(2, '0')}/${mmStr}`,
                                 dowPretty: DOW_PRETTY[dow],
                                 isRedDay: Boolean(dow === 0 || holi),
+<<<<<<< HEAD
                                 cardCls: itemCardCls,
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                                 pillCls: itemPillCls,
                                 pillTxt: itemPillTxt,
                                 title: itemTitle,
@@ -1910,7 +2411,11 @@
             });
 
             tableEl.innerHTML = `<thead><tr class="bg-slate-100 dark:bg-surfaceBorder/40 border-b border-slate-200 dark:border-surfaceBorder">${headerCells.join('')}</tr></thead><tbody>${bodyRows.join('')}</tbody>`;
+<<<<<<< HEAD
             if (swapDirection && isTeamOrMonthChange) animateTableSwap(tableEl, swapDirection);
+=======
+            if (swapDirection) animateTableSwap(tableEl, swapDirection);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
             ['M', 'T', 'N', 'F'].forEach(k => updateCountAnimated(k, counts[k]));
 
@@ -1930,16 +2435,23 @@
                     }
                     occCont.innerHTML = mainPageItems.map(it => {
                         const dateCls = it.isRedDay ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-100';
+<<<<<<< HEAD
                         const titleHTML = it.title
                             ? `<div class="mt-1.5 text-xs font-extrabold text-slate-700 dark:text-slate-300 tabular-nums">${escapeHTML(it.title)}</div>`
                             : '';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                         const detailHTML = it.detail
                             ? `<div class="mt-2 rounded-xl bg-sky-50/90 dark:bg-sky-950/35 border border-sky-200/80 dark:border-sky-900/50 px-3 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">${escapeHTML(it.detail)}</div>`
                             : '';
                         const obsHTML = it.obs
                             ? `<div class="mt-2 rounded-xl bg-slate-50 dark:bg-surface border border-slate-200/80 dark:border-surfaceBorder px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 leading-snug break-words whitespace-pre-wrap">${escapeHTML(it.obs)}</div>`
                             : '';
+<<<<<<< HEAD
                         return `<div class="occ-card ${it.cardCls} shadow-sm">
+=======
+                        return `<div class="rounded-2xl bg-white dark:bg-oled border border-slate-200/90 dark:border-surfaceBorder p-3 shadow-sm">
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                             <div class="flex items-center justify-between gap-2 flex-wrap">
                                 <div class="flex items-center gap-2 flex-wrap min-w-0">
                                     <span class="text-xs font-black tabular-nums ${dateCls}">${it.dateStr} (${it.dowPretty})</span>
@@ -1947,7 +2459,11 @@
                                 </div>
                                 <button type="button" onclick="openModal('${it.dateKey}')" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0 cursor-pointer">Editar &gt;</button>
                             </div>
+<<<<<<< HEAD
                             ${titleHTML}
+=======
+                            <div class="mt-1.5 text-xs font-extrabold text-slate-700 dark:text-slate-300">${escapeHTML(it.title)}</div>
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                             ${detailHTML}
                             ${obsHTML}
                         </div>`;
@@ -1994,7 +2510,11 @@
     };
 
     /* 7. QUADRO A4 HORIZONTAL (OPERADORES) */
+<<<<<<< HEAD
     window.buildA4Dataset = function () {
+=======
+    window.buildA4Dataset = function (includeChanges) {
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         sanitizeAllState();
         const year = currentDate.getFullYear(), month = currentDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -2012,10 +2532,82 @@
             if (holi) holidaysList.push({ day, dateStr: `${String(day).padStart(2, '0')}/${mmStr}`, dowPretty: DOW_PRETTY[dow], name: holi });
         }
 
+<<<<<<< HEAD
         const teams = TEAM_LETTERS.map((letter, idx) => {
             const counts = { M: 0, T: 0, N: 0, F: 0 };
             const cells = days.map(({ day }) => {
                 const base = getShift(year, month, day, idx);
+=======
+        const extraFlags = { ov: false, td: false, at: false, fa: false, ea: false, sa: false, dm: false, ep: false };
+        const teams = TEAM_LETTERS.map((letter, idx) => {
+            const counts = { M: 0, T: 0, N: 0, F: 0, AT: 0, FA: 0, EA: 0, SA: 0, DM: 0, EP: 0 };
+            const atMap = {};
+            if (includeChanges) {
+                atestadosDb.filter(r => r.turma === idx).forEach(rec => {
+                    const whoInfo = resolveWhoInfo(rec, idx);
+                    const dates = getAtestadoDates(rec);
+                    dates.forEach((d, pos) => {
+                        atMap[d] = { dayIndex: pos + 1, totalDays: dates.length, whoShort: whoInfo.shortLabel };
+                    });
+                });
+            }
+            const cells = days.map(({ day, dateKey }) => {
+                const base = getShift(year, month, day, idx);
+                if (includeChanges) {
+                    const atInfo = atMap[dateKey];
+                    if (atInfo) {
+                        counts.AT++;
+                        extraFlags.at = true;
+                        return { code: 'AT', pal: 'AT', sub: `${atInfo.dayIndex}/${atInfo.totalDays}`, whoShort: atInfo.whoShort, cls: '' };
+                    }
+                    const ov = overridesDb[`${dateKey}_${idx}`];
+                    const ovMeta = getOverrideMeta(dateKey, idx);
+                    if (ov && OCC_META[ov]) {
+                        const m = OCC_META[ov];
+                        const tInfo = formatOccurrenceTimeInfo(ov, ovMeta);
+                        if (ov === 'F') counts.F++;
+                        else if (ov === 'FA') { counts.FA++; extraFlags.fa = true; }
+                        else if (ov === 'EA') { counts.EA++; extraFlags.ea = true; counts[base]++; }
+                        else if (ov === 'SA') { counts.SA++; extraFlags.sa = true; counts[base]++; }
+                        else if (ov === 'DM') { counts.DM++; extraFlags.dm = true; counts[base]++; }
+                        else if (ov === 'EP') { counts.EP++; extraFlags.ep = true; counts[base]++; }
+                        else if (ov === 'TD') { extraFlags.td = true; counts[base]++; }
+                        else { extraFlags.ov = true; counts[base]++; }
+
+                        const whoShort = m.hasWho
+                            ? resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx).shortLabel
+                            : '';
+
+                        if (ov === 'FA') {
+                            return { code: 'FA', pal: 'FA', sub: '', whoShort, cls: '' };
+                        }
+                        if (ov === 'F') {
+                            return { code: 'F', pal: 'F', sub: '', whoShort: '', cls: '' };
+                        }
+                        if (ov === 'TD') {
+                            return { code: base, pal: base, sub: formatSwapDisplay(ovMeta, idx).compactLabel, whoShort: '', cls: 'a4-cell-td' };
+                        }
+                        if (ov === 'EA') {
+                            return { code: base, pal: base, sub: tInfo.compact || 'EA', whoShort, cls: 'a4-cell-ea' };
+                        }
+                        if (ov === 'SA') {
+                            return { code: base, pal: base, sub: tInfo.compact || 'SA', whoShort, cls: 'a4-cell-sa' };
+                        }
+                        if (ov === 'DM') {
+                            return { code: base, pal: base, sub: tInfo.compact || 'DM', whoShort, cls: 'a4-cell-DM' };
+                        }
+                        if (ov === 'EP') {
+                            return { code: base, pal: base, sub: tInfo.compact || 'EP', whoShort, cls: 'a4-cell-EP' };
+                        }
+                        return { code: base, pal: base, sub: tInfo.compact || m.code, whoShort, cls: 'a4-cell-ov' };
+                    }
+                    if (ov === 'M' || ov === 'T' || ov === 'N') {
+                        counts[ov]++;
+                        extraFlags.ov = true;
+                        return { code: ov, pal: ov, sub: 'EX', whoShort: '', cls: 'a4-cell-ov' };
+                    }
+                }
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 counts[base]++;
                 return { code: base, pal: base, sub: '', whoShort: '', cls: '' };
             });
@@ -2024,16 +2616,34 @@
 
         const issued = new Date();
         const issuedStr = `${String(issued.getDate()).padStart(2, '0')}/${String(issued.getMonth() + 1).padStart(2, '0')}/${issued.getFullYear()} às ${String(issued.getHours()).padStart(2, '0')}:${String(issued.getMinutes()).padStart(2, '0')}`;
+<<<<<<< HEAD
         return { year, month, mmStr, daysInMonth, monthLabel, days, holidaysList, teams, issuedStr };
     };
 
     window.buildA4SheetHTML = function (data) {
+=======
+        return { year, month, mmStr, daysInMonth, monthLabel, days, holidaysList, teams, extraFlags, issuedStr, includeChanges };
+    };
+
+    window.buildA4SheetHTML = function (data) {
+        const ef = data.extraFlags;
+        const extraCols = [
+            { flag: ef.at, key: 'AT', color: '#be123c' },
+            { flag: ef.fa, key: 'FA', color: '#b91c1c' },
+            { flag: ef.ea, key: 'EA', color: '#0e7490' },
+            { flag: ef.sa, key: 'SA', color: '#0f766e' },
+            { flag: ef.dm, key: 'DM', color: '#3730a3' },
+            { flag: ef.ep, key: 'EP', color: '#0369a1' }
+        ].filter(c => c.flag);
+
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const headDaysHTML = data.days.map(d => {
             const cls = d.holiday ? ' is-holi' : (d.isSunday ? ' is-sun' : '');
             return `<th class="a4-th-day${cls}"><span class="a4-day-num">${String(d.day).padStart(2, '0')}</span><span class="a4-day-dow">${d.dowLabel}</span></th>`;
         }).join('');
 
         const rowsHTML = data.teams.map(t => {
+<<<<<<< HEAD
             const cellsHTML = t.cells.map(c => `<td class="a4-cell a4-cell-${c.pal}"><span>${c.code}</span></td>`).join('');
             return `<tr><td class="a4-td-team"><div class="a4-team-title"><span class="a4-team-badge">${t.letter}</span><span>Turno ${t.letter}</span></div><span class="a4-team-names">${escapeHTML(t.name)}</span></td>${cellsHTML}</tr>`;
         }).join('');
@@ -2041,11 +2651,38 @@
         const summaryRowsHTML = data.teams.map(t => (
             `<tr><td><strong>Turno ${t.letter}</strong><span class="a4-sum-sub">${escapeHTML(t.name)}</span></td><td style="color:#1e40af">${t.counts.M}</td><td style="color:#9a3412">${t.counts.T}</td><td style="color:#3730a3">${t.counts.N}</td><td style="color:#15803d">${t.counts.F}</td></tr>`
         )).join('');
+=======
+            const cellsHTML = t.cells.map(c => {
+                const subHTML = c.sub ? `<span class="a4-cell-sub">${escapeHTML(c.sub)}</span>` : '';
+                const whoHTML = c.whoShort ? `<span class="a4-cell-who">${escapeHTML(c.whoShort)}</span>` : '';
+                return `<td class="a4-cell a4-cell-${c.pal} ${c.cls}"><span>${c.code}</span>${whoHTML}${subHTML}</td>`;
+            }).join('');
+            return `<tr><td class="a4-td-team"><div class="a4-team-title"><span class="a4-team-badge">${t.letter}</span><span>Turno ${t.letter}</span></div><span class="a4-team-names">${escapeHTML(t.name)}</span></td>${cellsHTML}</tr>`;
+        }).join('');
+
+        const summaryRowsHTML = data.teams.map(t => {
+            const dynCells = extraCols.map(c => `<td style="color:${c.color}">${t.counts[c.key]}</td>`).join('');
+            return `<tr><td><strong>Turno ${t.letter}</strong><span class="a4-sum-sub">${escapeHTML(t.name)}</span></td><td style="color:#1e40af">${t.counts.M}</td><td style="color:#9a3412">${t.counts.T}</td><td style="color:#3730a3">${t.counts.N}</td><td style="color:#15803d">${t.counts.F}</td>${dynCells}</tr>`;
+        }).join('');
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         const holidaysHTML = data.holidaysList.length
             ? `<div class="a4-holi-list">${data.holidaysList.map(h => `<div class="a4-holi-row"><span class="a4-holi-date">${h.dateStr} (${h.dowPretty})</span><span class="a4-holi-name">${escapeHTML(h.name)}</span></div>`).join('')}</div>`
             : `<div class="a4-holi-empty">Nenhum feriado nacional, estadual ou municipal neste mês.</div>`;
 
+<<<<<<< HEAD
+=======
+        const legendNotes = ['<span><strong style="color:#dc2626">■</strong> Dom./Feriado</span>'];
+        if (ef.ov) legendNotes.push('<span><strong style="color:#d97706">□</strong> Extra</span>');
+        if (ef.td) legendNotes.push('<span><strong style="color:#7c3aed">□</strong> Troca</span>');
+        if (ef.at) legendNotes.push('<span><strong style="color:#be123c">AT</strong> Atest.</span>');
+        if (ef.fa) legendNotes.push('<span><strong style="color:#b91c1c">FA</strong> Falta</span>');
+        if (ef.ea) legendNotes.push('<span><strong style="color:#0e7490">EA</strong> Ent. Atr.</span>');
+        if (ef.sa) legendNotes.push('<span><strong style="color:#0f766e">SA</strong> Saí. Adi.</span>');
+        if (ef.dm) legendNotes.push('<span><strong style="color:#3730a3">DM</strong> Decl. Méd.</span>');
+        if (ef.ep) legendNotes.push('<span><strong style="color:#0369a1">EP</strong> Ex. Periód.</span>');
+
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         return `<div class="a4-sheet">
             <div class="a4-header">
                 <div class="a4-brand">
@@ -2077,13 +2714,21 @@
                         <div class="a4-legend-item"><div class="a4-legend-left"><span class="a4-legend-chip a4-cell-N">N</span><span class="a4-legend-name">Noite</span></div><span class="a4-legend-hours">21:00 às 05:00</span></div>
                         <div class="a4-legend-item"><div class="a4-legend-left"><span class="a4-legend-chip a4-cell-F">F</span><span class="a4-legend-name">Folga</span></div><span class="a4-legend-hours">Descanso</span></div>
                     </div>
+<<<<<<< HEAD
                     <div class="a4-legend-extra"><span><strong style="color:#dc2626">■</strong> Dom./Feriado</span></div>
+=======
+                    <div class="a4-legend-extra">${legendNotes.join('')}</div>
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 </div>
 
                 <div class="a4-card">
                     <div class="a4-card-title">Resumo Mensal por Turno</div>
                     <table class="a4-summary-table">
+<<<<<<< HEAD
                         <thead><tr><th>Turno / Equipe</th><th>M</th><th>T</th><th>N</th><th>F</th></tr></thead>
+=======
+                        <thead><tr><th>Turno / Equipe</th><th>M</th><th>T</th><th>N</th><th>F</th>${extraCols.map(c => `<th>${c.key}</th>`).join('')}</tr></thead>
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                         <tbody>${summaryRowsHTML}</tbody>
                     </table>
                 </div>
@@ -2104,7 +2749,20 @@
     async function downloadQuadroA4PNG() {
         haptic();
         showToast('Gerando imagem A4 HD...');
+<<<<<<< HEAD
         const data = buildA4Dataset();
+=======
+        const data = buildA4Dataset(a4IncludeChanges);
+        const ef = data.extraFlags;
+        const extraCols = [
+            { flag: ef.at, key: 'AT', color: '#be123c' },
+            { flag: ef.fa, key: 'FA', color: '#b91c1c' },
+            { flag: ef.ea, key: 'EA', color: '#0e7490' },
+            { flag: ef.sa, key: 'SA', color: '#0f766e' },
+            { flag: ef.dm, key: 'DM', color: '#3730a3' },
+            { flag: ef.ep, key: 'EP', color: '#0369a1' }
+        ].filter(c => c.flag);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         const W = 2338, H = 1654;
         const c = document.createElement('canvas');
@@ -2180,6 +2838,18 @@
             ctx.fillText(d.dowLabel, x + dayColW / 2, tblY + 67);
         });
 
+<<<<<<< HEAD
+=======
+        const borderColorMap = {
+            'a4-cell-ov': '#d97706',
+            'a4-cell-td': '#7c3aed',
+            'a4-cell-ea': '#06b6d4',
+            'a4-cell-sa': '#14b8a6',
+            'a4-cell-DM': '#6366f1',
+            'a4-cell-EP': '#0ea5e9'
+        };
+
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         data.teams.forEach((t, rowIdx) => {
             const y = tblY + headRowH + rowIdx * teamRowH;
             ctx.fillStyle = '#ffffff';
@@ -2202,9 +2872,42 @@
                 const p = PALETTE[cell.pal] || PALETTE.F;
                 ctx.fillStyle = p.bg;
                 ctx.fillRect(x, y, dayColW, teamRowH);
+<<<<<<< HEAD
                 ctx.fillStyle = p.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 ctx.font = `900 31px ${font}`;
                 ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2);
+=======
+
+                if (cell.code === 'AT') {
+                    ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 4;
+                    ctx.strokeRect(x + 2, y + 2, dayColW - 4, teamRowH - 4);
+                } else if (cell.code === 'FA') {
+                    ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 4;
+                    ctx.strokeRect(x + 2, y + 2, dayColW - 4, teamRowH - 4);
+                } else if (borderColorMap[cell.cls]) {
+                    ctx.strokeStyle = borderColorMap[cell.cls]; ctx.lineWidth = 5;
+                    ctx.strokeRect(x + 2.5, y + 2.5, dayColW - 5, teamRowH - 5);
+                }
+
+                ctx.fillStyle = p.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                if (cell.whoShort && cell.sub) {
+                    ctx.font = `900 27px ${font}`;
+                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2 - 26);
+                    ctx.font = `800 13px ${font}`;
+                    ctx.fillText(canvasTruncateText(ctx, cell.whoShort, dayColW - 8), x + dayColW / 2, y + teamRowH / 2 + 6);
+                    ctx.font = `900 13px ${font}`;
+                    ctx.fillText(canvasTruncateText(ctx, cell.sub, dayColW - 6), x + dayColW / 2, y + teamRowH / 2 + 32);
+                } else if (cell.whoShort || cell.sub) {
+                    const bottomTxt = cell.whoShort || cell.sub;
+                    ctx.font = `900 30px ${font}`;
+                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2 - 14);
+                    ctx.font = `800 13px ${font}`;
+                    ctx.fillText(canvasTruncateText(ctx, bottomTxt, dayColW - 8), x + dayColW / 2, y + teamRowH / 2 + 24);
+                } else {
+                    ctx.font = `900 31px ${font}`;
+                    ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2);
+                }
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             });
         });
 
@@ -2268,15 +2971,35 @@
             ctx.fillText(lr.hrs, x1 + w1 - 44, ry + 34);
         });
         ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+<<<<<<< HEAD
         ctx.fillStyle = '#334155'; ctx.font = `800 16px ${font}`;
         ctx.fillText('■ Dom./Feriado', x1 + 26, cardsY + cardsH - 18);
+=======
+        ctx.fillStyle = '#334155'; ctx.font = `800 15px ${font}`;
+        let extraFooter = '■ Dom/Fer';
+        if (ef.ov) extraFooter += ' □ Ext';
+        if (ef.td) extraFooter += ' □ Trc';
+        if (ef.at) extraFooter += ' AT';
+        if (ef.fa) extraFooter += ' FA';
+        if (ef.ea) extraFooter += ' EA';
+        if (ef.sa) extraFooter += ' SA';
+        if (ef.dm) extraFooter += ' DM';
+        if (ef.ep) extraFooter += ' EP';
+        ctx.fillText(canvasTruncateText(ctx, extraFooter, w1 - 52), x1 + 26, cardsY + cardsH - 18);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         drawCardBox(x2, w2, 'RESUMO MENSAL POR TURNO');
         const stX = x2 + 26, stY = cardsY + 74, stW = w2 - 52, stH = cardsH - 96;
         const stHeadH = 54, stRowH = (stH - stHeadH) / 4;
+<<<<<<< HEAD
         const sumHeaders = ['M', 'T', 'N', 'F'];
         const numColW = 74;
         const nameColW = Math.max(150, stW - sumHeaders.length * numColW);
+=======
+        const sumHeaders = ['M', 'T', 'N', 'F'].concat(extraCols.map(c => c.key));
+        const numColW = sumHeaders.length > 7 ? 48 : (sumHeaders.length > 5 ? 56 : (sumHeaders.length > 4 ? 64 : 74));
+        const nameColW = Math.max(145, stW - sumHeaders.length * numColW);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         ctx.save();
         canvasRoundRect(ctx, stX, stY, stW, stH, 13);
@@ -2305,7 +3028,11 @@
                 { v: t.counts.T, c: '#9a3412' },
                 { v: t.counts.N, c: '#3730a3' },
                 { v: t.counts.F, c: '#15803d' }
+<<<<<<< HEAD
             ];
+=======
+            ].concat(extraCols.map(c => ({ v: t.counts[c.key], c: c.color })));
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             ctx.textAlign = 'center'; ctx.font = `900 22px ${font}`;
             vals.forEach((item, vi) => {
                 ctx.fillStyle = item.c;
@@ -2369,7 +3096,11 @@
     }
 
     /* 8. RELATÓRIO DE OCORRÊNCIAS MENSAIS (ENCARREGADO & SUPERVISOR) */
+<<<<<<< HEAD
     function buildSupervisorDataset(teamFilter, sortMode, categoryFilter = 'all') {
+=======
+    function buildSupervisorDataset(teamFilter, sortMode) {
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         sanitizeAllState();
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -2387,21 +3118,46 @@
                 const dates = getAtestadoDates(rec);
                 dates.forEach((d, pos) => {
                     atByTeam[idx][d] = {
+<<<<<<< HEAD
                         record: rec, whoInfo, retInfo,
                         dayIndex: pos + 1, totalDays: dates.length
+=======
+                        record: rec,
+                        whoInfo,
+                        retInfo,
+                        dayIndex: pos + 1,
+                        totalDays: dates.length
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     };
                 });
             });
         }
 
+<<<<<<< HEAD
         const allEntries = [];
+=======
+        const entries = [];
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const perTeamFiltered = [0, 0, 0, 0];
         const perTeamAll = [0, 0, 0, 0];
         const uniqueDaysSet = new Set();
         const seenAtestadoIds = new Set();
 
         const breakdown = {
+<<<<<<< HEAD
             he: 0, at: 0, fa: 0, td: 0, ea: 0, sa: 0, dm: 0, ep: 0, noteOnly: 0, total: 0
+=======
+            he: 0,
+            at: 0,
+            fa: 0,
+            td: 0,
+            ea: 0,
+            sa: 0,
+            dm: 0,
+            ep: 0,
+            noteOnly: 0,
+            total: 0
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         };
 
         for (let day = 1; day <= daysInMonth; day++) {
@@ -2443,12 +3199,18 @@
                 let chipPaletteKey = baseShift;
                 let reasonText = `${baseCfg.name} (Sem ocorrência)`;
                 let subText = baseCfg.hours ? `Horário: ${baseCfg.hours}` : 'Descanso';
+<<<<<<< HEAD
                 let filterGroup = 'other';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
                 if (atInfo) {
                     breakdown.at++;
                     breakdown.total++;
+<<<<<<< HEAD
                     filterGroup = 'at';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     const retCfg = SHIFTS_CONFIG[atInfo.retInfo.returnShiftCode] || SHIFTS_CONFIG.M;
                     chipCode = 'AT';
                     chipPaletteKey = 'AT';
@@ -2456,10 +3218,15 @@
                     subText = `Duração: ${atInfo.totalDays} ${atInfo.totalDays === 1 ? 'dia' : 'dias'} • Volta: ${formatShortDate(atInfo.retInfo.returnDateKey)} (${retCfg.name})`;
                 } else if (ovShift && OCC_META[ovShift]) {
                     const m = OCC_META[ovShift];
+<<<<<<< HEAD
                     const det = buildOccurrenceDetailSummary(ovShift, ovMeta, baseCfg);
                     breakdown.total++;
                     filterGroup = m.filterGroup;
 
+=======
+                    const tInfo = formatOccurrenceTimeInfo(ovShift, ovMeta);
+                    breakdown.total++;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     if (m.countKey === 'he') breakdown.he++;
                     else if (m.countKey === 'fa') breakdown.fa++;
                     else if (m.countKey === 'td') breakdown.td++;
@@ -2473,6 +3240,7 @@
                     chipPaletteKey = m.palette;
                     if (ovShift === 'F') {
                         reasonText = baseShift !== 'F' ? `Folga (Alterado de ${baseCfg.name})` : 'Folga';
+<<<<<<< HEAD
                         subText = det.coveredBy ? `Cobertura: ${det.coveredBy}` : 'Descanso';
                     } else if (m.isSwap) {
                         const swap = formatSwapDisplay(ovMeta, idx);
@@ -2482,11 +3250,25 @@
                         const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                         reasonText = `${m.label} — ${who.fullLabel}`;
                         subText = det.summary;
+=======
+                        subText = 'Descanso';
+                    } else if (m.isSwap) {
+                        const swap = formatSwapDisplay(ovMeta, idx);
+                        reasonText = `${m.label} — ${swap.pairLabel}`;
+                        subText = `Escala: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+                    } else {
+                        const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
+                        reasonText = `${m.label} — ${who.fullLabel}`;
+                        subText = tInfo.summary || `Escala: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     }
                 } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
                     breakdown.he++;
                     breakdown.total++;
+<<<<<<< HEAD
                     filterGroup = 'he';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     const ovCfg = SHIFTS_CONFIG[ovShift];
                     chipCode = ovShift;
                     chipPaletteKey = 'HE';
@@ -2495,13 +3277,17 @@
                 } else {
                     breakdown.noteOnly++;
                     breakdown.total++;
+<<<<<<< HEAD
                     filterGroup = 'other';
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     reasonText = `Observação de Escala (${baseCfg.name})`;
                     subText = baseCfg.hours ? `Horário: ${baseCfg.hours}` : 'Descanso';
                 }
 
                 perTeamFiltered[idx]++;
                 uniqueDaysSet.add(day);
+<<<<<<< HEAD
                 allEntries.push({
                     day, dateKey,
                     dateStr: `${String(day).padStart(2, '0')}/${mmStr}`,
@@ -2512,11 +3298,28 @@
                     teamName: teamNames[idx],
                     chipCode, chipPaletteKey, filterGroup,
                     reasonText, subText,
+=======
+                entries.push({
+                    day,
+                    dateKey,
+                    dateStr: `${String(day).padStart(2, '0')}/${mmStr}`,
+                    dowPretty: DOW_PRETTY[dow],
+                    isSunday,
+                    holiday,
+                    turmaIdx: idx,
+                    letter: TEAM_LETTERS[idx],
+                    teamName: teamNames[idx],
+                    chipCode,
+                    chipPaletteKey,
+                    reasonText,
+                    subText,
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                     text: displayNote
                 });
             }
         }
 
+<<<<<<< HEAD
         const entries = categoryFilter === 'all'
             ? allEntries
             : allEntries.filter(e => e.filterGroup === categoryFilter);
@@ -2534,6 +3337,14 @@
             ? 'Todos os Turnos (A, B, C e D)'
             : `Turno ${TEAM_LETTERS[targetTeams[0]]} (${teamNames[targetTeams[0]]})`;
         const catLabel = catLabels[categoryFilter] || 'Todas as Categorias';
+=======
+        if (sortMode === 'team') entries.sort((a, b) => (a.turmaIdx - b.turmaIdx) || (a.day - b.day));
+        else entries.sort((a, b) => (a.day - b.day) || (a.turmaIdx - b.turmaIdx));
+
+        const scopeLabel = teamFilter === 'all'
+            ? 'Todos os Turnos (A, B, C e D)'
+            : `Turno ${TEAM_LETTERS[targetTeams[0]]} (${teamNames[targetTeams[0]]})`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const sortLabel = sortMode === 'team'
             ? `Agrupado por Turno (A → D) • Dia 1 → ${daysInMonth}`
             : `Ordem Cronológica (Dia 1 → ${daysInMonth})`;
@@ -2542,9 +3353,14 @@
         const issuedStr = `${String(issued.getDate()).padStart(2, '0')}/${String(issued.getMonth() + 1).padStart(2, '0')}/${issued.getFullYear()} às ${String(issued.getHours()).padStart(2, '0')}:${String(issued.getMinutes()).padStart(2, '0')}`;
 
         return {
+<<<<<<< HEAD
             year, month, mmStr, daysInMonth, monthLabel, teamFilter, categoryFilter, sortMode,
             scopeLabel, catLabel, sortLabel, entries,
             shownCount: entries.length,
+=======
+            year, month, mmStr, daysInMonth, monthLabel, teamFilter, sortMode,
+            scopeLabel, sortLabel, entries,
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             totalAllMonth: perTeamAll.reduce((acc, n) => acc + n, 0),
             uniqueDays: uniqueDaysSet.size,
             perTeam: perTeamFiltered,
@@ -2605,8 +3421,11 @@
             }).join('');
         }
 
+<<<<<<< HEAD
         const filterNote = data.categoryFilter !== 'all' ? ` • ${data.catLabel}` : '';
 
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         return `<div class="sup-sheet">
             <div class="a4-header">
                 <div class="a4-brand">
@@ -2618,7 +3437,11 @@
                 </div>
                 <div class="a4-period-box">
                     <span class="a4-month-pill">${escapeHTML(data.monthLabel)}</span>
+<<<<<<< HEAD
                     <span class="a4-cycle-note">${escapeHTML(data.scopeLabel)}${escapeHTML(filterNote)} • ${escapeHTML(data.sortLabel)}</span>
+=======
+                    <span class="a4-cycle-note">${escapeHTML(data.scopeLabel)} • ${escapeHTML(data.sortLabel)}</span>
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 </div>
             </div>
 
@@ -2682,6 +3505,10 @@
         const tabQuadro = document.getElementById('export-tab-quadro');
         const tabSup = document.getElementById('export-tab-supervisor');
         const tabBadge = document.getElementById('sup-tab-badge');
+<<<<<<< HEAD
+=======
+        const quadroOpts = document.getElementById('export-quadro-options');
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const supOpts = document.getElementById('export-supervisor-options');
         const printLbl = document.getElementById('export-print-btn-label');
         const pngLbl = document.getElementById('export-png-btn-label');
@@ -2703,27 +3530,46 @@
         if (sortDateBtn && supData) sortDateBtn.innerText = `Por Data (1 → ${supData.daysInMonth})`;
 
         if (pill) {
+<<<<<<< HEAD
             pill.innerText = 'Gerar / Imprimir Relatório';
+=======
+            pill.innerText = isSup ? 'Fechamento Mensal • Encarregado / Supervisor' : 'Quadro de Avisos • A4 Horizontal';
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             pill.className = isSup
                 ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-wider border border-indigo-200/70 dark:border-indigo-900/50 mb-1.5'
                 : 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-[10px] font-black uppercase tracking-wider border border-blue-200/70 dark:border-blue-900/50 mb-1.5';
         }
+<<<<<<< HEAD
         if (title) title.innerText = 'Gerar / Imprimir Relatório';
         if (sub) sub.innerText = isSup
             ? 'Relatório de ocorrências mensais para encarregado e supervisor.'
             : 'Escala oficial dos 4 turnos, horários, totais e feriados em A4 horizontal.';
+=======
+        if (title) title.innerText = isSup ? 'Relatório de Ocorrências Mensais' : 'Exportar & Imprimir Escala';
+        if (sub) sub.innerText = isSup
+            ? 'Fechamento completo de ocorrências e observações para encarregado e supervisor.'
+            : 'Todos os 4 turnos, horários, totais e feriados — sem observações individuais.';
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         if (caption) caption.innerText = isSup
             ? 'Prévia do Relatório de Ocorrências Mensais (A4 Paisagem)'
             : 'Prévia da Folha A4 (Paisagem • 1 Página)';
 
+<<<<<<< HEAD
+=======
+        quadroOpts?.classList.toggle('hidden', isSup);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         supOpts?.classList.toggle('hidden', !isSup);
         copyBtn?.classList.toggle('hidden', !isSup);
         if (printLbl) printLbl.innerText = isSup ? 'Imprimir / PDF Relatório' : 'Imprimir / Salvar PDF (A4)';
         if (pngLbl) pngLbl.innerText = isSup ? 'Baixar Relatório HD (.PNG)' : 'Baixar Imagem A4 HD (.PNG)';
 
         if (countPill && supData) {
+<<<<<<< HEAD
             const n = supData.shownCount;
             countPill.innerText = `${n} ${n === 1 ? 'registro' : 'registros'}`;
+=======
+            countPill.innerText = `${supData.breakdown.total} ${supData.breakdown.total === 1 ? 'ocorrência' : 'ocorrências'}`;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         }
 
         document.querySelectorAll('.sup-filter-btn').forEach(btn => {
@@ -2732,12 +3578,15 @@
                 ? 'bg-slate-900 border-slate-900 text-white dark:bg-blue-600 dark:border-blue-600'
                 : 'bg-white hover:bg-slate-100 dark:bg-surface dark:hover:bg-zinc-900 border-slate-200 dark:border-surfaceBorder text-slate-600 dark:text-slate-300'}`;
         });
+<<<<<<< HEAD
         document.querySelectorAll('.sup-cat-btn').forEach(btn => {
             const act = btn.getAttribute('data-sup-cat') === supCategoryFilter;
             btn.className = `sup-cat-btn py-1 px-2.5 rounded-lg text-[10.5px] font-extrabold border btn-smooth cursor-pointer ${act
                 ? 'bg-slate-900 border-slate-900 text-white dark:bg-blue-600 dark:border-blue-600'
                 : 'bg-white hover:bg-slate-100 dark:bg-surface dark:hover:bg-zinc-900 border-slate-200 dark:border-surfaceBorder text-slate-600 dark:text-slate-300'}`;
         });
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         document.querySelectorAll('.sup-sort-btn').forEach(btn => {
             const act = btn.getAttribute('data-sup-sort') === supSortMode;
             btn.className = `sup-sort-btn py-1.5 px-3 rounded-lg text-[11px] font-extrabold border btn-smooth cursor-pointer ${act
@@ -2765,12 +3614,24 @@
 
     function refreshAllExportOutputs() {
         upgradeExportModalDOM();
+<<<<<<< HEAD
         const supData = buildSupervisorDataset(supTeamFilter, supSortMode, supCategoryFilter);
+=======
+        const supData = buildSupervisorDataset(supTeamFilter, supSortMode);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         syncExportModeUI(supData);
 
         const printEl = document.getElementById('print-sheet');
         const scaler = document.getElementById('a4-preview-scaler');
         const badge = document.getElementById('export-month-badge');
+<<<<<<< HEAD
+=======
+        const icsSub = document.getElementById('export-ics-subtitle');
+
+        if (icsSub) {
+            icsSub.innerText = `Exporta apenas o Turno ${TEAM_LETTERS[currentTurma]} (${teamNames[currentTurma]}) para Google ou Apple Calendar.`;
+        }
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         if (exportMode === 'supervisor') {
             const html = buildSupervisorSheetHTML(supData);
@@ -2780,7 +3641,11 @@
             requestAnimationFrame(applyScaledPreview);
             return supData;
         } else {
+<<<<<<< HEAD
             const quadroData = buildA4Dataset();
+=======
+            const quadroData = buildA4Dataset(a4IncludeChanges);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             const html = buildA4SheetHTML(quadroData);
             if (printEl) { printEl.classList.remove('is-supervisor-print'); printEl.innerHTML = html; }
             if (scaler) scaler.innerHTML = html;
@@ -2824,7 +3689,11 @@
     async function downloadSupervisorPNG() {
         haptic();
         showToast('Gerando Relatório HD...');
+<<<<<<< HEAD
         const data = buildSupervisorDataset(supTeamFilter, supSortMode, supCategoryFilter);
+=======
+        const data = buildSupervisorDataset(supTeamFilter, supSortMode);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const b = data.breakdown;
         const W = 2338;
         const font = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -2844,7 +3713,11 @@
         });
 
         const headerBottomY = padTop + 114 + 24;
+<<<<<<< HEAD
         const catY = headerBottomY + 24, catH = 104;
+=======
+        const catY = headerBottomY + 24, catH = 110;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const metaY = catY + catH + 16, metaH = 62;
         const tblY = metaY + metaH + 22, tblHeadH = 68;
         const rowsTotalH = measuredRows.length ? measuredRows.reduce((acc, r) => acc + r.rowH, 0) : 260;
@@ -2864,6 +3737,10 @@
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, W, H);
 
+<<<<<<< HEAD
+=======
+        /* 1. Cabeçalho */
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const logoImg = await loadLogoImage();
         const logoSize = 114;
         canvasRoundRect(ctx, padX, padTop, logoSize, logoSize, 22);
@@ -2893,20 +3770,32 @@
 
         ctx.textAlign = 'right'; ctx.textBaseline = 'top';
         ctx.fillStyle = '#475569'; ctx.font = `700 20px ${font}`;
+<<<<<<< HEAD
         const subMetaStr = `${data.scopeLabel}${data.categoryFilter !== 'all' ? ` • ${data.catLabel}` : ''} • ${data.sortLabel}`;
         ctx.fillText(canvasTruncateText(ctx, subMetaStr, 960), W - padX, pillY + pillH + 14);
+=======
+        ctx.fillText(canvasTruncateText(ctx, `${data.scopeLabel} • ${data.sortLabel}`, 940), W - padX, pillY + pillH + 14);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(padX, headerBottomY, contentW, 5);
 
+<<<<<<< HEAD
         const boxGap = 12;
         const totalBoxW = 280;
         const eachBoxW = Math.floor((contentW - totalBoxW - boxGap * 5) / 5);
+=======
+        /* 2. Soma Separada (9 categorias) + Total de Ocorrências */
+        const boxGap = 11;
+        const totalBoxW = 266;
+        const eachBoxW = Math.floor((contentW - totalBoxW - boxGap * 9) / 9);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const catItems = [
             { lbl: 'HORA EXTRA', val: b.he },
             { lbl: 'ATESTADOS', val: b.at },
             { lbl: 'FALTAS', val: b.fa },
             { lbl: 'TROCAS', val: b.td },
+<<<<<<< HEAD
             { lbl: 'ENT. ATRASADA', val: b.ea },
             { lbl: 'SAÍ. ADIANTADA', val: b.sa },
             { lbl: 'DECL. MÉDICA', val: b.dm },
@@ -2952,6 +3841,36 @@
         ctx.fillText('TOTAL DE OCORRÊNCIAS', totX + 18, catY + 15);
         ctx.fillStyle = '#ffffff'; ctx.font = `900 42px ${font}`;
         ctx.fillText(String(b.total), totX + 18, catY + 44);
+=======
+            { lbl: 'ENT. ATRAS.', val: b.ea },
+            { lbl: 'SAÍ. ADIANT.', val: b.sa },
+            { lbl: 'DECL. MÉD.', val: b.dm },
+            { lbl: 'EX. PERIÓD.', val: b.ep },
+            { lbl: 'OBS./OUTRAS', val: b.noteOnly }
+        ];
+
+        catItems.forEach((item, idx) => {
+            const bx = padX + idx * (eachBoxW + boxGap);
+            canvasRoundRect(ctx, bx, catY, eachBoxW, catH, 13);
+            ctx.fillStyle = '#f8fafc'; ctx.fill();
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+            ctx.fillStyle = '#475569'; ctx.font = `900 13px ${font}`;
+            ctx.fillText(canvasTruncateText(ctx, item.lbl, eachBoxW - 18), bx + 9, catY + 15);
+            ctx.fillStyle = '#0f172a'; ctx.font = `900 35px ${font}`;
+            ctx.fillText(String(item.val), bx + 9, catY + 45);
+        });
+
+        const totX = padX + 9 * (eachBoxW + boxGap);
+        const actualTotW = W - padX - totX;
+        canvasRoundRect(ctx, totX, catY, actualTotW, catH, 13);
+        ctx.fillStyle = '#0f172a'; ctx.fill();
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillStyle = '#cbd5e1'; ctx.font = `900 14px ${font}`;
+        ctx.fillText('TOTAL DE OCORRÊNCIAS', totX + 16, catY + 15);
+        ctx.fillStyle = '#ffffff'; ctx.font = `900 40px ${font}`;
+        ctx.fillText(String(b.total), totX + 16, catY + 43);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
 
         const leftMetaW = Math.floor((contentW - 18) * 0.36);
         const rightMetaW = contentW - 18 - leftMetaW;
@@ -2975,6 +3894,10 @@
         ctx.textAlign = 'right'; ctx.fillStyle = '#0f172a'; ctx.font = `900 21px ${font}`;
         ctx.fillText(`A: ${data.perTeam[0]}   •   B: ${data.perTeam[1]}   •   C: ${data.perTeam[2]}   •   D: ${data.perTeam[3]}`, rightMetaX + rightMetaW - 18, metaY + metaH / 2);
 
+<<<<<<< HEAD
+=======
+        /* 3. Tabela */
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const colX0 = padX;
         const colX1 = colX0 + colDateW;
         const colX2 = colX1 + colTeamW;
@@ -3022,6 +3945,10 @@
                 ctx.fillStyle = isRed ? '#ef4444' : '#64748b'; ctx.font = `800 19px ${font}`;
                 ctx.fillText(item.dowPretty.toUpperCase(), colX0 + 22, curY + 58);
 
+<<<<<<< HEAD
+=======
+                /* Somente letra do turno + nomes dos funcionários */
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                 canvasRoundRect(ctx, colX1 + 22, curY + 24, 44, 44, 10);
                 ctx.fillStyle = '#0f172a'; ctx.fill();
                 ctx.fillStyle = '#ffffff'; ctx.font = `900 24px ${font}`;
@@ -3122,13 +4049,21 @@
 
     async function copySupervisorSummary() {
         haptic();
+<<<<<<< HEAD
         const data = buildSupervisorDataset(supTeamFilter, supSortMode, supCategoryFilter);
+=======
+        const data = buildSupervisorDataset(supTeamFilter, supSortMode);
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         const b = data.breakdown;
         const lines = [
             `*RELATÓRIO DE OCORRÊNCIAS MENSAIS*`,
             `Imerys • Britagem ICP 1`,
             `Período: *${data.monthLabel}*`,
+<<<<<<< HEAD
             `Escopo: ${data.scopeLabel}${data.categoryFilter !== 'all' ? ` • ${data.catLabel}` : ''} | ${data.sortLabel}`,
+=======
+            `Escopo: ${data.scopeLabel} | ${data.sortLabel}`,
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             `Hora Extra: ${b.he} • Atestados: ${b.at} • Faltas: ${b.fa} • Trocas: ${b.td} • Ent. Atrasada: ${b.ea} • Saí. Adiantada: ${b.sa} • Decl. Médica: ${b.dm} • Ex. Periódico: ${b.ep} • Obs./Outras: ${b.noteOnly}`,
             `*Total de Ocorrências: ${b.total}* (em ${data.uniqueDays} de ${data.daysInMonth} dias)`,
             `Por turno: A (${data.perTeam[0]}) • B (${data.perTeam[1]}) • C (${data.perTeam[2]}) • D (${data.perTeam[3]})`,
@@ -3147,6 +4082,7 @@
         lines.push(`Emitido em ${data.issuedStr}`);
 
         const payload = lines.join('\n');
+<<<<<<< HEAD
         if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')) {
             try {
                 await navigator.share({ title: `Relatório de Ocorrências Mensais - ${data.monthLabel}`, text: payload });
@@ -3157,6 +4093,8 @@
             }
         }
 
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         let copied = false;
         if (navigator.clipboard && window.isSecureContext) {
             try { await navigator.clipboard.writeText(payload); copied = true; } catch (e) { copied = false; }
@@ -3165,12 +4103,20 @@
         showToast(copied ? 'Relatório copiado! Cole no WhatsApp ou e-mail.' : 'Não foi possível copiar automaticamente.');
     }
 
+<<<<<<< HEAD
     /* 9. BACKUP JSON */
+=======
+    /* 9. BACKUP JSON (v8) E AGENDA .ICS */
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     window.exportBackup = function () {
         haptic();
         sanitizeAllState();
         const payload = {
+<<<<<<< HEAD
             version: 11,
+=======
+            version: 8,
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             exportedAt: new Date().toISOString(),
             turma: currentTurma,
             teams: teamNames,
@@ -3214,7 +4160,20 @@
                 if (data.overrideMeta && typeof data.overrideMeta === 'object' && !Array.isArray(data.overrideMeta)) {
                     Object.entries(data.overrideMeta).forEach(([k, val]) => {
                         if (/^\d{4}-\d{2}-\d{2}_[0-3]$/.test(k) && val && typeof val === 'object') {
+<<<<<<< HEAD
                             overrideMetaDb[k] = normalizeMetaRecord(val);
+=======
+                            const wt = ['0', '1', 'both'].includes(String(val.whoType)) ? String(val.whoType) : 'both';
+                            overrideMetaDb[k] = {
+                                whoType: wt,
+                                whoName: typeof val.whoName === 'string' ? val.whoName.trim().slice(0, 40) : '',
+                                swapWith: typeof val.swapWith === 'string' ? val.swapWith.trim().slice(0, 40) : '',
+                                swapWithTeam: typeof val.swapWithTeam === 'string' ? val.swapWithTeam.trim().slice(0, 2) : '',
+                                entryTime: sanitizeTimeStr(val.entryTime),
+                                exitTime: sanitizeTimeStr(val.exitTime),
+                                arrivalTime: sanitizeTimeStr(val.arrivalTime)
+                            };
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
                         }
                     });
                 }
@@ -3249,6 +4208,80 @@
         reader.readAsText(file);
     };
 
+<<<<<<< HEAD
+=======
+    window.exportICS = function () {
+        haptic();
+        const year = currentDate.getFullYear(), month = currentDate.getMonth(), daysInMonth = new Date(year, month + 1, 0).getDate();
+        const turmaLtr = TEAM_LETTERS[currentTurma], teamLabel = `Turno ${turmaLtr} (${teamNames[currentTurma]})`;
+        showToast(`Exportando agenda do Turno ${turmaLtr}...`);
+        const dtStamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Escala Imerys Britagem ICP1//PT-BR', 'CALSCALE:GREGORIAN'];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = formatDateKey(year, month, day);
+            const atInfo = findAtestadoOnDate(dateKey, currentTurma);
+            if (atInfo) {
+                const whoInfo = resolveWhoInfo(atInfo.record, currentTurma);
+                const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day + 1, 12, 0, 0);
+                const reason = getAtestadoReason(atInfo.record);
+                let desc = `${teamLabel} - Atestado Médico (${whoInfo.fullLabel}) • ${atInfo.dayIndex}/${atInfo.totalDays}`;
+                if (reason) desc += `\nObservação: ${reason}`;
+                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-AT-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:${sanitizeICS(`Imerys - Atestado (${whoInfo.label}) ${atInfo.dayIndex}/${atInfo.totalDays}`)}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
+                continue;
+            }
+            const ov = overridesDb[`${dateKey}_${currentTurma}`] || '';
+            const ovMeta = getOverrideMeta(dateKey, currentTurma);
+            const tInfo = formatOccurrenceTimeInfo(ov, ovMeta);
+            const dayNote = getNote(dateKey, currentTurma).trim();
+            if (ov === 'FA') {
+                const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
+                const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day + 1, 12, 0, 0);
+                let desc = `${teamLabel} - Falta (${who.fullLabel})`;
+                if (dayNote) desc += `\nNota: ${dayNote}`;
+                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-FA-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:${sanitizeICS(`Imerys - Falta (${who.label})`)}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
+                continue;
+            }
+
+            const sCode = getEffectiveShift(dateKey, currentTurma);
+            const isExtra = isExtraOverride(ov);
+            const isTd = ov === 'TD';
+            const isSpecial = ov === 'EA' || ov === 'SA' || ov === 'DM' || ov === 'EP';
+            if (sCode === 'F' && !isExtra && !isTd && !isSpecial) continue;
+
+            const occInfo = OCC_META[ov];
+            let tagSuffix = '';
+            if (ov && occInfo && occInfo.isSwap) {
+                tagSuffix = ` (${occInfo.label}: ${formatSwapDisplay(ovMeta, currentTurma).pairLabel})`;
+            } else if (ov && occInfo && occInfo.hasWho) {
+                const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
+                const tPart = tInfo.summary ? ` [${tInfo.summary}]` : '';
+                tagSuffix = ` (${occInfo.label} - ${who.label}${tPart})`;
+            } else if (occInfo) {
+                tagSuffix = ` (${occInfo.label})`;
+            }
+
+            let desc = `${teamLabel}${tagSuffix}`;
+            if (dayNote) desc += `\nNota: ${dayNote}`;
+
+            if (sCode === 'F') {
+                const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day + 1, 12, 0, 0);
+                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART;VALUE=DATE:${formatICSAllDay(sD)}`, `DTEND;VALUE=DATE:${formatICSAllDay(eD)}`, `SUMMARY:${sanitizeICS(`Imerys - ${occInfo ? occInfo.label : 'Folga'}${tagSuffix}`)}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
+            } else {
+                const sCfg = SHIFTS_CONFIG[sCode], [startHr, endHr] = sCfg.hours.split('-');
+                const sD = new Date(year, month, day, 12, 0, 0), eD = new Date(year, month, day, 12, 0, 0);
+                if (sCode === 'N') eD.setDate(eD.getDate() + 1);
+                lines.push('BEGIN:VEVENT', `UID:imerys-${turmaLtr}-${dateKey}@escala.local`, `DTSTAMP:${dtStamp}`, `DTSTART:${formatICSDate(sD, startHr)}`, `DTEND:${formatICSDate(eD, endHr)}`, `SUMMARY:${sanitizeICS(`Imerys - ${sCfg.name}${tagSuffix}`)}`, `DESCRIPTION:${sanitizeICS(desc)}`, 'END:VEVENT');
+            }
+        }
+        lines.push('END:VCALENDAR');
+        const url = window.URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' }));
+        const a = document.createElement('a'); a.href = url; a.setAttribute('download', `Escala_Turno_${turmaLtr}_${String(month + 1).padStart(2, '0')}_${year}.ics`);
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    };
+
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     /* 10. INTEGRAÇÃO COM EXPORTAÇÃO, IMPRESSÃO E INICIALIZAÇÃO */
     window.switchExportMode = function (mode) {
         if (mode !== 'quadro' && mode !== 'supervisor') return;
@@ -3261,11 +4294,14 @@
         supTeamFilter = String(val);
         refreshAllExportOutputs();
     };
+<<<<<<< HEAD
     window.setSupervisorCategoryFilter = function (cat) {
         haptic();
         supCategoryFilter = String(cat || 'all');
         refreshAllExportOutputs();
     };
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
     window.setSupervisorSortMode = function (mode) {
         haptic();
         supSortMode = mode === 'team' ? 'team' : 'date';
@@ -3279,6 +4315,11 @@
     window.openExportModal = function () {
         haptic();
         upgradeExportModalDOM();
+<<<<<<< HEAD
+=======
+        const cb = document.getElementById('a4-include-changes');
+        if (cb) cb.checked = a4IncludeChanges;
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         refreshAllExportOutputs();
         openAnimatedModal('export', 'export-modal', 'export-modal-content', () => applyScaledPreview());
     };
@@ -3301,7 +4342,10 @@
     };
 
     function prepareModuleBeforeBoot() {
+<<<<<<< HEAD
         checkHostDependencies();
+=======
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
         injectModuleStyles();
         ensureOccurrencesSectionDOM();
         upgradeInfoModalDOM();
@@ -3317,10 +4361,17 @@
             const exportOpen = !document.getElementById('export-modal')?.classList.contains('hidden');
             if (exportOpen && exportMode === 'supervisor') {
                 printEl.classList.add('is-supervisor-print');
+<<<<<<< HEAD
                 printEl.innerHTML = buildSupervisorSheetHTML(buildSupervisorDataset(supTeamFilter, supSortMode, supCategoryFilter));
             } else {
                 printEl.classList.remove('is-supervisor-print');
                 printEl.innerHTML = buildA4SheetHTML(buildA4Dataset());
+=======
+                printEl.innerHTML = buildSupervisorSheetHTML(buildSupervisorDataset(supTeamFilter, supSortMode));
+            } else {
+                printEl.classList.remove('is-supervisor-print');
+                printEl.innerHTML = buildA4SheetHTML(buildA4Dataset(a4IncludeChanges));
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
             }
         });
     }
@@ -3335,4 +4386,8 @@
         bindAfterBoot();
         renderApp(true);
     }
+<<<<<<< HEAD
 })();
+=======
+})();
+>>>>>>> 0c74c70399039e4aa43c490bbda15ddff69b06c0
