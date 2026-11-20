@@ -20,7 +20,7 @@
         'haptic', 'openAnimatedModal', 'closeModal', 'closeInfoModal', 'closeExportModal',
         'markModalDirty', 'updateStorageHealthUI', 'updateCountAnimated', 'animateTableSwap',
         'scrollToTodayColumn', 'updateTableScrollHint', 'loadLogoImage', 'canvasRoundRect',
-        'canvasTruncateText',
+        'canvasTruncateText', 'formatICSAllDay', 'formatICSDate', 'sanitizeICS'
     ];
 
     function checkHostDependencies() {
