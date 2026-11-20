@@ -1,5 +1,5 @@
 /* ============================================================================
-   MÓDULO COMPLETO: OCORRÊNCIAS POR FUNCIONÁRIO, TROCA DE DIA E RELATÓRIO
+   MÓDULO COMPLETO: OBSERVAÇÕES NA TELA PRINCIPAL, OCORRÊNCIAS E RELATÓRIO
    Escala Imerys • Britagem ICP 1 (iOS Safari/PWA, Android Chrome e PC 60-144Hz)
    ============================================================================ */
 (function () {
@@ -21,6 +21,7 @@
     let modalSwapWith = '';
     let modalSwapWithTeam = '';
 
+    /* Adiciona categoria Falta (FA) ao mapa global de estilos */
     if (typeof SHIFTS_CONFIG === 'object' && SHIFTS_CONFIG) {
         SHIFTS_CONFIG.FA = {
             name: 'Falta',
@@ -51,7 +52,7 @@
         TD: { bg: '#f3e8ff', fg: '#6b21a8' }
     };
 
-    /* 1. PERSISTÊNCIA ESTENDIDA (overrideMetaDb em localStorage + IndexedDB) */
+    /* 1. PERSISTÊNCIA ESTENDIDA (localStorage + IndexedDB) */
     function loadOverrideMetaFromDB() {
         overrideMetaDb = safeParseJSON(DB.get(META_STORAGE_KEY), {}, 'object');
     }
@@ -476,7 +477,56 @@
         document.head.appendChild(style);
     }
 
-    /* 4. ATUALIZAÇÃO DOS MODAIS (LEGENDA, OBSERVAÇÕES E EXPORTAÇÃO) */
+    /* 4. PAINEL EXPLÍCITO DE OBSERVAÇÕES NA PÁGINA PRINCIPAL */
+    function ensureObservationsCardDOM() {
+        const grid = document.getElementById('bottom-cards-grid');
+        if (!grid || document.getElementById('observations-summary-section')) return;
+
+        const sec = document.createElement('section');
+        sec.id = 'observations-summary-section';
+        sec.className = 'hidden bg-blue-50/60 dark:bg-surface border border-blue-200/80 dark:border-surfaceBorder rounded-2xl p-4 md:p-5';
+        sec.innerHTML = `
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <h3 class="text-[11px] font-black uppercase tracking-widest text-blue-700 dark:text-blue-400 flex items-center gap-2 min-w-0">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span id="observations-summary-title" class="truncate">Observações do Mês</span>
+                </h3>
+                <span id="observations-summary-badge" class="px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 text-[10px] font-black shrink-0 tabular-nums"></span>
+            </div>
+            <div id="observations-summary-container" class="grid grid-cols-1 gap-2.5"></div>
+        `;
+        grid.insertBefore(sec, grid.firstChild);
+    }
+
+    function syncThreeBottomCardsLayout(hasObs, hasAtestados, hasHolidays) {
+        const obsSec = document.getElementById('observations-summary-section');
+        const obsCont = document.getElementById('observations-summary-container');
+        const atSec = document.getElementById('atestado-summary-section');
+        const hEl = document.getElementById('holidays-list');
+        const grid = document.getElementById('bottom-cards-grid');
+        if (!grid) return;
+
+        const visibleCount = (hasObs ? 1 : 0) + (hasAtestados ? 1 : 0) + (hasHolidays ? 1 : 0);
+        grid.classList.toggle('hidden', visibleCount === 0);
+
+        /* Observações ocupa largura total no PC quando estiver sozinha ou quando todos os 3 cards estiverem ativos */
+        const obsFullWidth = hasObs && (visibleCount === 1 || visibleCount === 3);
+        if (obsSec) {
+            obsSec.classList.toggle('hidden', !hasObs);
+            obsSec.classList.toggle('lg:col-span-2', obsFullWidth);
+        }
+        if (obsCont) {
+            obsCont.classList.toggle('lg:grid-cols-2', obsFullWidth);
+        }
+        if (atSec) {
+            atSec.classList.toggle('lg:col-span-2', hasAtestados && visibleCount === 1);
+        }
+        if (hEl) {
+            hEl.classList.toggle('lg:col-span-2', hasHolidays && visibleCount === 1);
+        }
+    }
+
+    /* 5. ATUALIZAÇÃO DOS MODAIS (LEGENDA, OBSERVAÇÕES E EXPORTAÇÃO) */
     function upgradeInfoModalDOM() {
         const panel = document.getElementById('info-modal-content');
         if (!panel || panel.dataset.v3Upgraded === '1') return;
@@ -732,7 +782,7 @@
         });
     }
 
-    /* 5. PAINÉIS INTERATIVOS DO MODAL DE OBSERVAÇÕES (HE, FALTA, TROCA E ATESTADO) */
+    /* 6. PAINÉIS INTERATIVOS DO MODAL DE OBSERVAÇÕES (HE, FALTA, TROCA E ATESTADO) */
     function renderAtestadoWhoButtons() {
         const group = document.getElementById('atestado-who-group');
         if (!group) return;
@@ -834,7 +884,6 @@
             return `<button type="button" onclick="selectOverrideWho('${opt.val}')" class="py-2 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer ${act ? theme.act : theme.idle}" title="${escapeHTML(opt.label)}">${escapeHTML(opt.label)}</button>`;
         }).join('');
 
-        /* Painel "Troca com quem?" exclusivo da Troca de Dia */
         if (swapSec && swapGroup && swapInput) {
             swapSec.classList.toggle('hidden', !isTD);
             if (isTD) {
@@ -1011,8 +1060,7 @@
         document.getElementById('modal-date-title').innerHTML = `Dia ${dt.getDate()} de ${MONTH_SHORT[dt.getMonth()]} <br><span class="text-[13px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Turno ${TEAM_LETTERS[currentTurma]} • ${escapeHTML(baseCfg.name)}${escapeHTML(badge)}</span>`;
         document.getElementById('note-text').value = getNote(dateKey, currentTurma);
 
-        /* Restaura seleção de funcionário e parceiro de troca */
-        modalOverrideWho = (activeMeta && activeMeta.whoType) ? String(activeMeta.whoType) : (members.length >= 2 ? '0' : '0');
+        modalOverrideWho = (activeMeta && activeMeta.whoType) ? String(activeMeta.whoType) : '0';
         modalSwapWith = (activeMeta && activeMeta.swapWith) ? String(activeMeta.swapWith) : '';
         modalSwapWithTeam = (activeMeta && activeMeta.swapWithTeam) ? String(activeMeta.swapWithTeam) : '';
 
@@ -1120,7 +1168,161 @@
         saveNote(true);
     };
 
-    /* 6. RENDERIZAÇÃO PRINCIPAL DA ESCALA GERAL */
+    /* 7. MONTAGEM DA LISTA DE OBSERVAÇÕES DO TURNO NO MÊS (TELA PRINCIPAL) */
+    function buildMonthObservationsForTeam(year, month, daysInMonth, turmaIdx, atestadoDayMap, holidays) {
+        const mmStr = String(month + 1).padStart(2, '0');
+        const items = [];
+        const seenAtestadoIds = new Set();
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = `${year}-${mmStr}-${String(day).padStart(2, '0')}`;
+            const dow = new Date(year, month, day, 12, 0, 0).getDay();
+            const isSunday = dow === 0;
+            const holiday = holidays[day] || '';
+            const rawNote = getNote(dateKey, turmaIdx).trim();
+            const ovShift = overridesDb[`${dateKey}_${turmaIdx}`] || '';
+            const ovMeta = getOverrideMeta(dateKey, turmaIdx);
+            const atInfo = atestadoDayMap[dateKey] || null;
+            const baseShift = getShift(year, month, day, turmaIdx);
+            const baseCfg = SHIFTS_CONFIG[baseShift] || SHIFTS_CONFIG.M;
+
+            let include = false;
+            let text = rawNote;
+            let editDateKey = dateKey;
+
+            if (atInfo) {
+                const isFirstInMonth = !seenAtestadoIds.has(atInfo.record.id);
+                if (isFirstInMonth) {
+                    seenAtestadoIds.add(atInfo.record.id);
+                    include = true;
+                    text = getAtestadoReason(atInfo.record) || rawNote;
+                    editDateKey = atInfo.record.startDate;
+                } else if (rawNote && rawNote !== getNote(atInfo.record.startDate, turmaIdx).trim()) {
+                    include = true;
+                    text = rawNote;
+                }
+            } else if (rawNote || ovShift) {
+                include = true;
+            }
+
+            if (!include) continue;
+
+            let pillText = `${baseCfg.name}${baseCfg.hours ? ` • ${baseCfg.hours}` : ''}`;
+            let pillCls = 'bg-slate-100 dark:bg-surfaceBorder text-slate-700 dark:text-slate-200 border-slate-200 dark:border-zinc-700';
+            let subInfo = '';
+
+            if (atInfo) {
+                const retInfo = computeReturnInfo(atInfo.record.startDate, atInfo.record.days, turmaIdx, atInfo.record.id);
+                const retCfg = SHIFTS_CONFIG[retInfo.returnShiftCode] || SHIFTS_CONFIG.M;
+                const periodTxt = atInfo.record.days === 1
+                    ? formatShortDate(atInfo.record.startDate)
+                    : `${formatShortDate(atInfo.record.startDate)} a ${formatShortDate(retInfo.endDate)}`;
+                pillText = `Atestado (${atInfo.totalDays}d) • ${atInfo.whoInfo.fullLabel}`;
+                pillCls = 'bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-200 border-rose-200 dark:border-rose-900/60';
+                subInfo = `Período: ${periodTxt} • Volta: ${formatShortDate(retInfo.returnDateKey)} (${retCfg.name})`;
+            } else if (ovShift === 'FA') {
+                const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: turmaIdx } : { turma: turmaIdx, whoType: 'both' }, turmaIdx);
+                pillText = `Falta • ${who.fullLabel}`;
+                pillCls = 'bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-200 border-red-200 dark:border-red-900/60';
+                subInfo = `Escala do dia: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+            } else if (ovShift === 'HE50' || ovShift === 'HE75' || ovShift === 'HE110') {
+                const meta = OVERRIDE_META[ovShift];
+                const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: turmaIdx } : { turma: turmaIdx, whoType: 'both' }, turmaIdx);
+                pillText = `${meta.label} • ${who.fullLabel}`;
+                pillCls = 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-900/60';
+                subInfo = `Escala do dia: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+            } else if (ovShift === 'TD') {
+                const swap = formatSwapDisplay(ovMeta, turmaIdx);
+                pillText = `Troca • ${swap.fullLabel}`;
+                pillCls = 'bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-900/60';
+                subInfo = `Escala do dia: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+            } else if (ovShift === 'F') {
+                pillText = baseShift !== 'F' ? 'Folga (Alterado)' : 'Folga';
+                pillCls = 'bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-300 border-green-200 dark:border-green-900/50';
+                if (baseShift !== 'F') subInfo = `Escala original: ${baseCfg.name}`;
+            } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
+                const ovCfg = SHIFTS_CONFIG[ovShift];
+                pillText = `Hora Extra (${ovCfg.name})`;
+                pillCls = 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-900/60';
+                subInfo = `Horário: ${ovCfg.hours}`;
+            } else {
+                const shiftPillStyles = {
+                    M: 'bg-blue-100 dark:bg-blue-950/70 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-900/60',
+                    T: 'bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-900/60',
+                    N: 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-200 border-indigo-200 dark:border-indigo-900/60',
+                    F: 'bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-300 border-green-200 dark:border-green-900/50'
+                };
+                pillCls = shiftPillStyles[baseShift] || pillCls;
+            }
+
+            items.push({
+                dateKey,
+                editDateKey,
+                dateLabel: `${String(day).padStart(2, '0')}/${mmStr}`,
+                dowPretty: DOW_PRETTY[dow],
+                isRedDate: isSunday || Boolean(holiday),
+                holiday,
+                pillText,
+                pillCls,
+                subInfo,
+                text
+            });
+        }
+
+        return items;
+    }
+
+    function renderObservationsMainCard(items) {
+        ensureObservationsCardDOM();
+        const titleEl = document.getElementById('observations-summary-title');
+        const badgeEl = document.getElementById('observations-summary-badge');
+        const contEl = document.getElementById('observations-summary-container');
+        if (!contEl) return false;
+
+        if (titleEl) {
+            titleEl.innerText = `Observações do Mês • Turno ${TEAM_LETTERS[currentTurma]}`;
+        }
+        if (!items.length) {
+            contEl.innerHTML = '';
+            return false;
+        }
+
+        if (badgeEl) {
+            badgeEl.innerText = `${items.length} ${items.length === 1 ? 'registro' : 'registros'}`;
+        }
+
+        contEl.innerHTML = items.map(item => {
+            const dateColor = item.isRedDate
+                ? 'bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200/80 dark:border-red-900/50'
+                : 'bg-slate-100 dark:bg-surface text-slate-700 dark:text-slate-200 border-slate-200 dark:border-surfaceBorder';
+            const holiTag = item.holiday
+                ? `<span class="text-[10px] font-bold text-red-500 dark:text-red-400 truncate max-w-[140px]" title="${escapeHTML(item.holiday)}">• ${escapeHTML(item.holiday)}</span>`
+                : '';
+            const textBlock = item.text
+                ? `<p class="mt-2 text-xs sm:text-[13px] font-medium text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap break-words">${escapeHTML(item.text)}</p>`
+                : '';
+            const subBlock = item.subInfo
+                ? `<div class="${item.text ? 'mt-2 pt-2 border-t border-slate-100 dark:border-surfaceBorder' : 'mt-1.5'} text-[11px] font-semibold text-slate-500 dark:text-slate-400">${escapeHTML(item.subInfo)}</div>`
+                : '';
+
+            return `<div class="rounded-2xl bg-white/90 dark:bg-oled/80 border border-slate-200/90 dark:border-surfaceBorder p-3 shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                        <span class="px-2 py-0.5 rounded-lg border text-[11px] font-black tabular-nums shrink-0 ${dateColor}">${item.dateLabel} • ${item.dowPretty}</span>
+                        <span class="px-2 py-0.5 rounded-lg border text-[10.5px] font-extrabold leading-tight ${item.pillCls}">${escapeHTML(item.pillText)}</span>
+                        ${holiTag}
+                    </div>
+                    <button type="button" onclick="openModal('${item.editDateKey}')" class="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0 pt-0.5 cursor-pointer">Editar &gt;</button>
+                </div>
+                ${textBlock}
+                ${subBlock}
+            </div>`;
+        }).join('');
+
+        return true;
+    }
+
+    /* 8. RENDERIZAÇÃO PRINCIPAL DA ESCALA GERAL */
     window.renderApp = function (shouldScrollToday = false, swapDirection = 0) {
         try {
             const sc = document.getElementById('table-scroll-wrap');
@@ -1286,6 +1488,11 @@
 
             ['M', 'T', 'N', 'F'].forEach(k => updateCountAnimated(k, counts[k]));
 
+            /* Card explícito: todas as observações e ocorrências do mês do turno selecionado */
+            const monthObsItems = buildMonthObservationsForTeam(year, month, daysInMonth, currentTurma, atestadoDayMap, holidays);
+            const hasObs = renderObservationsMainCard(monthObsItems);
+
+            /* Card de Atestado Médico & Retorno */
             const atSec = document.getElementById('atestado-summary-section');
             const atCont = document.getElementById('atestado-summary-container');
             const atBadge = document.getElementById('atestado-summary-badge');
@@ -1306,12 +1513,13 @@
                 atSec.classList.add('hidden');
             }
 
+            /* Card de Feriados do Mês */
             const hEl = document.getElementById('holidays-list');
             const hasHolidays = hListParts.length > 0;
             if (hasHolidays) { document.getElementById('holidays-container').innerHTML = hListParts.join(''); hEl.classList.remove('hidden'); }
             else { hEl.classList.add('hidden'); }
 
-            syncBottomCardsLayout(hasAtestados, hasHolidays);
+            syncThreeBottomCardsLayout(hasObs, hasAtestados, hasHolidays);
             if (shouldScrollToday && isCMonth) scrollToTodayColumn();
             else if (sc) sc.scrollLeft = prevScroll;
             requestAnimationFrame(updateTableScrollHint);
@@ -1321,7 +1529,7 @@
         }
     };
 
-    /* 7. QUADRO A4 HORIZONTAL (OPERADORES) */
+    /* 9. QUADRO A4 HORIZONTAL (OPERADORES) */
     window.buildA4Dataset = function (includeChanges) {
         const year = currentDate.getFullYear(), month = currentDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -1794,7 +2002,7 @@
         }, 'image/png');
     }
 
-    /* 8. RELATÓRIO DO SUPERVISOR (INCLUI TODAS AS OBSERVAÇÕES E OCORRÊNCIAS DA ESCALA GERAL) */
+    /* 10. RELATÓRIO DO SUPERVISOR (INCLUI TODAS AS OBSERVAÇÕES E OCORRÊNCIAS DA ESCALA GERAL) */
     function buildSupervisorDataset(teamFilter, sortMode) {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -1850,7 +2058,6 @@
                         includeEntry = true;
                         displayNote = getAtestadoReason(atInfo.record) || rawNote;
                     } else if (rawNote && rawNote !== getNote(atInfo.record.startDate, idx).trim()) {
-                        /* Inclui dia posterior do atestado apenas se tiver anotação própria diferente */
                         includeEntry = true;
                         displayNote = rawNote;
                     }
@@ -1870,7 +2077,7 @@
                 let chipPaletteKey = baseShift;
                 let shiftLabel = baseCfg.name;
                 let shiftSub = baseCfg.hours || 'Descanso';
-                let personBadge = null; // { text, pillCls, bg, bd, fg }
+                let personBadge = null;
 
                 if (atInfo) {
                     atestadosCount++;
@@ -2576,7 +2783,7 @@
         showToast(copied ? 'Relatório copiado! Cole no WhatsApp ou e-mail.' : 'Não foi possível copiar automaticamente.');
     }
 
-    /* 9. BACKUP JSON (v6 — PRESERVA FUNCIONÁRIO DE HE/FALTA E TROCA DE DIA) E AGENDA .ICS */
+    /* 11. BACKUP JSON (v6) E AGENDA .ICS */
     window.exportBackup = function () {
         haptic();
         const payload = {
@@ -2733,7 +2940,7 @@
         setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     };
 
-    /* 10. INTEGRAÇÃO COM EXPORTAÇÃO, IMPRESSÃO E INICIALIZAÇÃO */
+    /* 12. INTEGRAÇÃO COM EXPORTAÇÃO, IMPRESSÃO E INICIALIZAÇÃO */
     window.switchExportMode = function (mode) {
         if (mode !== 'quadro' && mode !== 'supervisor') return;
         haptic();
@@ -2797,6 +3004,7 @@
 
     function initUpgradeModule() {
         injectModuleStyles();
+        ensureObservationsCardDOM();
         upgradeInfoModalDOM();
         upgradeNoteModalDOM();
         upgradeExportModalDOM();
