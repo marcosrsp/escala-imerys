@@ -20,6 +20,9 @@
     let modalOverrideWho = 'both'; // '0' | '1' | 'both'
     let modalSwapWith = '';
     let modalSwapWithTeam = '';
+    let modalEntryTime = '';
+    let modalExitTime = '';
+    let modalArrivalTime = '';
 
     if (typeof SHIFTS_CONFIG === 'object' && SHIFTS_CONFIG) {
         SHIFTS_CONFIG.FA = {
@@ -30,17 +33,69 @@
     }
 
     const OCC_META = {
-        HE50:  { code: '50%',  chip: '50%',  label: 'Hora Extra 50%',    short: 'HE 50%',  palette: 'HE', ring: 'ring-2 ring-inset ring-amber-400 dark:ring-amber-500',   dot: 'bg-amber-500',   pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e', hasWho: true,  isSwap: false, countKey: 'he' },
-        HE75:  { code: '75%',  chip: '75%',  label: 'Hora Extra 75%',    short: 'HE 75%',  palette: 'HE', ring: 'ring-2 ring-inset ring-amber-400 dark:ring-amber-500',   dot: 'bg-amber-500',   pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e', hasWho: true,  isSwap: false, countKey: 'he' },
-        HE110: { code: '110%', chip: '110%', label: 'Hora Extra 110%',   short: 'HE 110%', palette: 'HE', ring: 'ring-2 ring-inset ring-amber-600 dark:ring-amber-400',   dot: 'bg-amber-600',   pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e', hasWho: true,  isSwap: false, countKey: 'he' },
-        TD:    { code: 'TD',   chip: 'TD',   label: 'Troca de Dia',      short: 'Troca',   palette: 'TD', ring: 'ring-2 ring-inset ring-purple-500 dark:ring-purple-400', dot: 'bg-purple-500',  pillCls: 'sup-pill-td', pillBg: '#f3e8ff', pillBd: '#ddd6fe', pillFg: '#6b21a8', hasWho: true,  isSwap: true,  countKey: 'td' },
-        F:     { code: 'F',    chip: 'F',    label: 'Folga',             short: 'Folga',   palette: 'F',  ring: 'ring-2 ring-inset ring-emerald-500 dark:ring-emerald-400',dot: 'bg-emerald-500', pillCls: 'sup-pill-f',  pillBg: '#dcfce7', pillBd: '#bbf7d0', pillFg: '#15803d', hasWho: false, isSwap: false, countKey: 'other' },
-        FA:    { code: 'FA',   chip: 'FA',   label: 'Falta',             short: 'Falta',   palette: 'FA', ring: 'ring-2 ring-inset ring-red-600 dark:ring-red-400',       dot: 'bg-red-600',     pillCls: 'sup-pill-fa', pillBg: '#fee2e2', pillBd: '#fecaca', pillFg: '#b91c1c', hasWho: true,  isSwap: false, countKey: 'fa' },
-        EA:    { code: 'EA',   chip: 'EA',   label: 'Entrada Atrasada',  short: 'Ent. Atr.',palette: 'EA',ring: 'ring-2 ring-inset ring-cyan-500 dark:ring-cyan-400',     dot: 'bg-cyan-500',    pillCls: 'sup-pill-ea', pillBg: '#cffafe', pillBd: '#a5f3fc', pillFg: '#0e7490', hasWho: true,  isSwap: false, countKey: 'ea' },
-        SA:    { code: 'SA',   chip: 'SA',   label: 'Saída Adiantada',   short: 'Saí. Adi.',palette: 'SA',ring: 'ring-2 ring-inset ring-teal-500 dark:ring-teal-400',     dot: 'bg-teal-500',    pillCls: 'sup-pill-sa', pillBg: '#ccfbf1', pillBd: '#99f6e4', pillFg: '#0f766e', hasWho: true,  isSwap: false, countKey: 'sa' }
+        HE50: {
+            code: '50%', chip: '50%', label: 'Hora Extra 50%', short: 'HE 50%',
+            palette: 'HE', ring: 'ring-2 ring-inset ring-amber-400 dark:ring-amber-500', dot: 'bg-amber-500',
+            pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e',
+            hasWho: true, isSwap: false, timeFields: ['entry', 'exit'], countKey: 'he'
+        },
+        HE75: {
+            code: '75%', chip: '75%', label: 'Hora Extra 75%', short: 'HE 75%',
+            palette: 'HE', ring: 'ring-2 ring-inset ring-amber-400 dark:ring-amber-500', dot: 'bg-amber-500',
+            pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e',
+            hasWho: true, isSwap: false, timeFields: ['entry', 'exit'], countKey: 'he'
+        },
+        HE110: {
+            code: '110%', chip: '110%', label: 'Hora Extra 110%', short: 'HE 110%',
+            palette: 'HE', ring: 'ring-2 ring-inset ring-amber-600 dark:ring-amber-400', dot: 'bg-amber-600',
+            pillCls: 'sup-pill-he', pillBg: '#fef3c7', pillBd: '#fde68a', pillFg: '#92400e',
+            hasWho: true, isSwap: false, timeFields: ['entry', 'exit'], countKey: 'he'
+        },
+        TD: {
+            code: 'TD', chip: 'TD', label: 'Troca de Dia', short: 'Troca',
+            palette: 'TD', ring: 'ring-2 ring-inset ring-purple-500 dark:ring-purple-400', dot: 'bg-purple-500',
+            pillCls: 'sup-pill-td', pillBg: '#f3e8ff', pillBd: '#ddd6fe', pillFg: '#6b21a8',
+            hasWho: true, isSwap: true, timeFields: [], countKey: 'td'
+        },
+        F: {
+            code: 'F', chip: 'F', label: 'Folga', short: 'Folga',
+            palette: 'F', ring: 'ring-2 ring-inset ring-emerald-500 dark:ring-emerald-400', dot: 'bg-emerald-500',
+            pillCls: 'sup-pill-f', pillBg: '#dcfce7', pillBd: '#bbf7d0', pillFg: '#15803d',
+            hasWho: false, isSwap: false, timeFields: [], countKey: 'other'
+        },
+        FA: {
+            code: 'FA', chip: 'FA', label: 'Falta', short: 'Falta',
+            palette: 'FA', ring: 'ring-2 ring-inset ring-red-600 dark:ring-red-400', dot: 'bg-red-600',
+            pillCls: 'sup-pill-fa', pillBg: '#fee2e2', pillBd: '#fecaca', pillFg: '#b91c1c',
+            hasWho: true, isSwap: false, timeFields: [], countKey: 'fa'
+        },
+        EA: {
+            code: 'EA', chip: 'EA', label: 'Entrada Atrasada', short: 'Ent. Atr.',
+            palette: 'EA', ring: 'ring-2 ring-inset ring-cyan-500 dark:ring-cyan-400', dot: 'bg-cyan-500',
+            pillCls: 'sup-pill-ea', pillBg: '#cffafe', pillBd: '#a5f3fc', pillFg: '#0e7490',
+            hasWho: true, isSwap: false, timeFields: ['entry'], countKey: 'ea'
+        },
+        SA: {
+            code: 'SA', chip: 'SA', label: 'Saída Adiantada', short: 'Saí. Adi.',
+            palette: 'SA', ring: 'ring-2 ring-inset ring-teal-500 dark:ring-teal-400', dot: 'bg-teal-500',
+            pillCls: 'sup-pill-sa', pillBg: '#ccfbf1', pillBd: '#99f6e4', pillFg: '#0f766e',
+            hasWho: true, isSwap: false, timeFields: ['exit'], countKey: 'sa'
+        },
+        DM: {
+            code: 'DM', chip: 'DM', label: 'Declaração Médica', short: 'Decl. Méd.',
+            palette: 'DM', ring: 'ring-2 ring-inset ring-indigo-500 dark:ring-indigo-400', dot: 'bg-indigo-500',
+            pillCls: 'sup-pill-dm', pillBg: '#e0e7ff', pillBd: '#c7d2fe', pillFg: '#3730a3',
+            hasWho: true, isSwap: false, timeFields: ['exit', 'entry'], countKey: 'dm'
+        },
+        EP: {
+            code: 'EP', chip: 'EP', label: 'Exame Periódico', short: 'Ex. Periód.',
+            palette: 'EP', ring: 'ring-2 ring-inset ring-sky-500 dark:ring-sky-400', dot: 'bg-sky-500',
+            pillCls: 'sup-pill-ep', pillBg: '#e0f2fe', pillBd: '#bae6fd', pillFg: '#0369a1',
+            hasWho: true, isSwap: false, timeFields: ['arrival'], countKey: 'ep'
+        }
     };
 
-    const VALID_OVERRIDES = ['HE50', 'HE75', 'HE110', 'TD', 'F', 'FA', 'EA', 'SA', 'M', 'T', 'N'];
+    const VALID_OVERRIDES = ['HE50', 'HE75', 'HE110', 'TD', 'F', 'FA', 'EA', 'SA', 'DM', 'EP', 'M', 'T', 'N'];
 
     const PALETTE = {
         M:  { bg: '#dbeafe', fg: '#1e40af' },
@@ -52,10 +107,20 @@
         HE: { bg: '#fef3c7', fg: '#92400e' },
         TD: { bg: '#f3e8ff', fg: '#6b21a8' },
         EA: { bg: '#cffafe', fg: '#0e7490' },
-        SA: { bg: '#ccfbf1', fg: '#0f766e' }
+        SA: { bg: '#ccfbf1', fg: '#0f766e' },
+        DM: { bg: '#e0e7ff', fg: '#3730a3' },
+        EP: { bg: '#e0f2fe', fg: '#0369a1' }
     };
 
     /* 1. SANITIZAÇÃO E PERSISTÊNCIA (localStorage + IndexedDB) */
+    function sanitizeTimeStr(raw) {
+        if (typeof raw !== 'string') return '';
+        const clean = raw.trim();
+        const m = clean.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+        if (!m) return '';
+        return `${String(parseInt(m[1], 10)).padStart(2, '0')}:${m[2]}`;
+    }
+
     function sanitizeAllState() {
         const tNum = parseInt(currentTurma, 10);
         currentTurma = (!isNaN(tNum) && tNum >= 0 && tNum <= 3) ? tNum : 2;
@@ -91,7 +156,10 @@
                     whoType: wt,
                     whoName: typeof v.whoName === 'string' ? v.whoName.trim().slice(0, 40) : '',
                     swapWith: typeof v.swapWith === 'string' ? v.swapWith.trim().slice(0, 40) : '',
-                    swapWithTeam: typeof v.swapWithTeam === 'string' ? v.swapWithTeam.trim().slice(0, 2) : ''
+                    swapWithTeam: typeof v.swapWithTeam === 'string' ? v.swapWithTeam.trim().slice(0, 2) : '',
+                    entryTime: sanitizeTimeStr(v.entryTime),
+                    exitTime: sanitizeTimeStr(v.exitTime),
+                    arrivalTime: sanitizeTimeStr(v.arrivalTime)
                 };
             }
         });
@@ -144,7 +212,7 @@
         return getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), turmaIdx);
     };
 
-    /* 2. HELPERS DE EQUIPE, TRABALHADORES E TROCAS */
+    /* 2. HELPERS DE EQUIPE, TRABALHADORES, HORÁRIOS E TROCAS */
     function parseTeamMembers(teamStr) {
         const clean = String(teamStr || '').trim();
         if (!clean) return [];
@@ -232,6 +300,45 @@
         return { who, target, targetTeam, targetFull, targetShort, compactLabel, pairLabel };
     }
 
+    function formatOccurrenceTimeInfo(code, meta) {
+        const fields = (OCC_META[code] && Array.isArray(OCC_META[code].timeFields)) ? OCC_META[code].timeFields : [];
+        const entry = sanitizeTimeStr(meta && meta.entryTime);
+        const exit = sanitizeTimeStr(meta && meta.exitTime);
+        const arrival = sanitizeTimeStr(meta && meta.arrivalTime);
+        const parts = [];
+
+        fields.forEach(f => {
+            if (f === 'entry' && entry) {
+                parts.push(code === 'EA' ? `Entrada às ${entry}` : `Entrou ${entry}`);
+            } else if (f === 'exit' && exit) {
+                parts.push(code === 'SA' ? `Saída às ${exit}` : `Saiu ${exit}`);
+            } else if (f === 'arrival' && arrival) {
+                parts.push(`Chegou ${arrival}`);
+            }
+        });
+
+        let compact = '';
+        if (code === 'EA' && entry) compact = entry;
+        else if (code === 'SA' && exit) compact = exit;
+        else if (code === 'EP' && arrival) compact = arrival;
+        else if (code === 'DM') {
+            if (exit && entry) compact = `${exit}-${entry}`;
+            else compact = exit || entry || '';
+        } else if (fields.includes('entry') && fields.includes('exit')) {
+            if (entry && exit) compact = `${entry}-${exit}`;
+            else compact = entry || exit || '';
+        }
+
+        return {
+            entry,
+            exit,
+            arrival,
+            parts,
+            summary: parts.join(' • '),
+            compact
+        };
+    }
+
     function isExtraOverride(ov) {
         return ov === 'HE50' || ov === 'HE75' || ov === 'HE110' || ov === 'M' || ov === 'T' || ov === 'N';
     }
@@ -247,6 +354,8 @@
             .a4-cell-TD { background: #f3e8ff; color: #6b21a8; }
             .a4-cell-EA { background: #cffafe; color: #0e7490; }
             .a4-cell-SA { background: #ccfbf1; color: #0f766e; }
+            .a4-cell-DM { background: #e0e7ff; color: #3730a3; box-shadow: inset 0 0 0 2px #6366f1; }
+            .a4-cell-EP { background: #e0f2fe; color: #0369a1; box-shadow: inset 0 0 0 2px #0ea5e9; }
             .a4-cell-td { box-shadow: inset 0 0 0 2.5px #7c3aed; }
             .a4-cell-ea { box-shadow: inset 0 0 0 2.5px #06b6d4; }
             .a4-cell-sa { box-shadow: inset 0 0 0 2.5px #14b8a6; }
@@ -281,6 +390,8 @@
             .occ-pill-fa   { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
             .occ-pill-ea   { background: #cffafe; color: #0e7490; border-color: #a5f3fc; }
             .occ-pill-sa   { background: #ccfbf1; color: #0f766e; border-color: #99f6e4; }
+            .occ-pill-dm   { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+            .occ-pill-ep   { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
             .occ-pill-at   { background: #ffe4e6; color: #be123c; border-color: #fecdd3; }
 
             @media (prefers-color-scheme: dark) {
@@ -291,6 +402,8 @@
                 .occ-pill-fa   { background: rgba(127, 29, 29, 0.5); color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); }
                 .occ-pill-ea   { background: rgba(22, 78, 99, 0.5); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35); }
                 .occ-pill-sa   { background: rgba(19, 78, 74, 0.5); color: #5eead4; border-color: rgba(20, 184, 166, 0.35); }
+                .occ-pill-dm   { background: rgba(49, 46, 129, 0.5); color: #a5b4fc; border-color: rgba(99, 102, 241, 0.35); }
+                .occ-pill-ep   { background: rgba(12, 74, 110, 0.5); color: #7dd3fc; border-color: rgba(14, 165, 233, 0.35); }
                 .occ-pill-at   { background: rgba(136, 19, 55, 0.5); color: #fda4af; border-color: rgba(244, 63, 94, 0.4); }
             }
 
@@ -320,14 +433,14 @@
             .sup-breakdown-wrap {
                 margin-top: 12px;
                 display: grid;
-                grid-template-columns: repeat(7, 1fr) 1.25fr;
-                gap: 8px;
+                grid-template-columns: repeat(9, 1fr) 1.25fr;
+                gap: 6px;
             }
             .sup-cat-box {
                 border: 1.2px solid #cbd5e1;
-                border-radius: 10px;
+                border-radius: 9px;
                 background: #f8fafc;
-                padding: 8px 9px;
+                padding: 7px 7px;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
@@ -338,23 +451,23 @@
                 color: #ffffff;
             }
             .sup-cat-lbl {
-                font-size: 8.5px;
+                font-size: 7.8px;
                 font-weight: 900;
-                letter-spacing: 0.04em;
+                letter-spacing: 0.03em;
                 text-transform: uppercase;
                 color: #475569;
                 line-height: 1.15;
             }
             .sup-cat-box.is-total .sup-cat-lbl { color: #cbd5e1; }
             .sup-cat-num {
-                font-size: 21px;
+                font-size: 19px;
                 font-weight: 900;
                 color: #0f172a;
                 line-height: 1.1;
                 margin-top: 4px;
                 font-variant-numeric: tabular-nums;
             }
-            .sup-cat-box.is-total .sup-cat-num { color: #ffffff; font-size: 23px; }
+            .sup-cat-box.is-total .sup-cat-num { color: #ffffff; font-size: 21px; }
 
             .sup-meta-row {
                 margin-top: 8px;
@@ -431,9 +544,9 @@
             .sup-table tbody tr:nth-child(even) { background: #f8fafc; }
             .sup-table tbody tr:nth-child(odd) { background: #ffffff; }
 
-            .sup-col-date { width: 90px; }
-            .sup-col-team { width: 205px; }
-            .sup-col-shift { width: 255px; }
+            .sup-col-date { width: 88px; }
+            .sup-col-team { width: 196px; }
+            .sup-col-occ { width: 274px; }
 
             .sup-date-main {
                 display: block;
@@ -455,33 +568,26 @@
             .sup-is-red .sup-date-dow { color: #ef4444; }
 
             .sup-team-cell { display: flex; align-items: flex-start; gap: 8px; }
-            .sup-team-badge {
-                width: 22px;
-                height: 22px;
+            .sup-team-letter-badge {
+                width: 24px;
+                height: 24px;
                 border-radius: 6px;
                 background: #0f172a;
                 color: #ffffff;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 900;
                 flex-shrink: 0;
                 margin-top: 1px;
             }
-            .sup-team-title {
-                display: block;
-                font-size: 12px;
-                font-weight: 900;
-                color: #0f172a;
-                line-height: 1.15;
-            }
             .sup-team-names {
                 display: block;
-                font-size: 10.5px;
-                font-weight: 700;
-                color: #475569;
-                margin-top: 2px;
+                font-size: 11.5px;
+                font-weight: 800;
+                color: #0f172a;
+                line-height: 1.25;
                 word-break: break-word;
             }
 
@@ -601,8 +707,8 @@
 
     function upgradeInfoModalDOM() {
         const panel = document.getElementById('info-modal-content');
-        if (!panel || panel.dataset.v4Upgraded === '1') return;
-        panel.dataset.v4Upgraded = '1';
+        if (!panel || panel.dataset.v5Upgraded === '1') return;
+        panel.dataset.v5Upgraded = '1';
 
         panel.innerHTML = `
             <div class="flex justify-between items-center mb-4">
@@ -619,8 +725,10 @@
                 <div class="flex items-center justify-between p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-black text-[11px]">AT</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Atestado</span></div><span class="font-black text-rose-700 dark:text-rose-400 text-xs uppercase">Afastamento</span></div>
                 <div class="flex items-center justify-between p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300 font-black text-[11px]">FA</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Falta</span></div><span class="font-black text-red-700 dark:text-red-400 text-xs uppercase">Ausência</span></div>
                 <div class="grid grid-cols-2 gap-1.5 pt-0.5">
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-900/40"><div class="flex items-center gap-2"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-200 font-black text-[10px]">EA</span><span class="text-xs font-bold text-cyan-900 dark:text-cyan-200">Entrada Atrasada</span></div></div>
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/40"><div class="flex items-center gap-2"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-teal-100 dark:bg-teal-900/50 text-teal-800 dark:text-teal-200 font-black text-[10px]">SA</span><span class="text-xs font-bold text-teal-900 dark:text-teal-200">Saída Adiantada</span></div></div>
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-900/40"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-200 font-black text-[10px]">EA</span><span class="text-xs font-bold text-cyan-900 dark:text-cyan-200">Entrada Atrasada</span></div>
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/40"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-teal-100 dark:bg-teal-900/50 text-teal-800 dark:text-teal-200 font-black text-[10px]">SA</span><span class="text-xs font-bold text-teal-900 dark:text-teal-200">Saída Adiantada</span></div>
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/40"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200 font-black text-[10px]">DM</span><span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">Declaração Médica</span></div>
+                    <div class="flex items-center gap-2 p-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40"><span class="w-6 h-6 flex items-center justify-center rounded-md bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-200 font-black text-[10px]">EP</span><span class="text-xs font-bold text-sky-900 dark:text-sky-200">Exame Periódico</span></div>
                 </div>
                 <div class="grid grid-cols-3 gap-1.5 pt-0.5">
                     <div class="flex items-center gap-1.5 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span><span class="text-[10.5px] font-bold text-amber-800 dark:text-amber-300 leading-tight">Hora Extra</span></div>
@@ -642,8 +750,8 @@
 
     function upgradeNoteModalDOM() {
         const panel = document.getElementById('modal-content');
-        if (!panel || panel.dataset.v4Upgraded === '1') return;
-        panel.dataset.v4Upgraded = '1';
+        if (!panel || panel.dataset.v5Upgraded === '1') return;
+        panel.dataset.v5Upgraded = '1';
 
         panel.innerHTML = `
             <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
@@ -654,7 +762,7 @@
                 </button>
             </div>
 
-            <!-- Ocorrências Unificadas (Hora Extra, Troca, Folga, Falta, Entrada Atrasada, Saída Adiantada e Atestado) -->
+            <!-- Ocorrências Unificadas -->
             <div class="mb-4">
                 <div class="flex items-center justify-between gap-2 mb-2">
                     <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Tipo de Ocorrência</span>
@@ -669,15 +777,35 @@
                     <button type="button" data-ov="FA" onclick="selectOverride('FA')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Falta</button>
                     <button type="button" data-ov="EA" onclick="selectOverride('EA')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Entrada Atrasada</button>
                     <button type="button" data-ov="SA" onclick="selectOverride('SA')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Saída Adiantada</button>
-                    <button type="button" id="ov-atestado-btn" onclick="toggleAtestadoMode()" class="py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Atestado Médico</button>
+                    <button type="button" data-ov="DM" onclick="selectOverride('DM')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Declaração Médica</button>
+                    <button type="button" data-ov="EP" onclick="selectOverride('EP')" class="ov-btn py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Exame Periódico</button>
+                    <button type="button" id="ov-atestado-btn" onclick="toggleAtestadoMode()" class="col-span-2 sm:col-span-2 py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Atestado Médico</button>
                 </div>
 
-                <!-- Painel de Funcionário e Troca de Dia (HE, Falta, EA, SA, Troca) -->
+                <!-- Painel Dinâmico de Funcionário, Horários e Troca de Dia -->
                 <div id="override-details-box" class="hidden mt-3 rounded-2xl border p-3.5 space-y-3">
                     <div>
                         <span id="override-who-label" class="block text-[11px] font-extrabold mb-1.5"></span>
                         <div id="override-who-group" class="grid grid-cols-3 gap-1.5"></div>
                     </div>
+
+                    <!-- Campos de Horário Específicos por Ocorrência -->
+                    <div id="override-times-wrap" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-black/10 dark:border-white/10">
+                        <div id="time-field-entry" class="hidden">
+                            <label id="time-label-entry" for="occ-time-entry" class="block text-[11px] font-extrabold mb-1">Hora que entrou</label>
+                            <input type="time" id="occ-time-entry" oninput="onOccTimeChange('entry', this.value)" class="w-full px-3 py-2 text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl outline-none focus:ring-2 focus:ring-blue-500 tabular-nums">
+                        </div>
+                        <div id="time-field-exit" class="hidden">
+                            <label id="time-label-exit" for="occ-time-exit" class="block text-[11px] font-extrabold mb-1">Hora que saiu</label>
+                            <input type="time" id="occ-time-exit" oninput="onOccTimeChange('exit', this.value)" class="w-full px-3 py-2 text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl outline-none focus:ring-2 focus:ring-blue-500 tabular-nums">
+                        </div>
+                        <div id="time-field-arrival" class="hidden sm:col-span-2">
+                            <label id="time-label-arrival" for="occ-time-arrival" class="block text-[11px] font-extrabold mb-1">Hora que chegou</label>
+                            <input type="time" id="occ-time-arrival" oninput="onOccTimeChange('arrival', this.value)" class="w-full px-3 py-2 text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl outline-none focus:ring-2 focus:ring-blue-500 tabular-nums">
+                        </div>
+                    </div>
+
+                    <!-- Parceiro de Troca de Dia -->
                     <div id="swap-target-section" class="hidden pt-2.5 border-t border-purple-200/70 dark:border-purple-900/50 space-y-2">
                         <span class="block text-[11px] font-extrabold text-purple-900 dark:text-purple-200">Troca com quem?</span>
                         <div id="swap-presets-group" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
@@ -685,7 +813,7 @@
                     </div>
                 </div>
 
-                <!-- Painel de Atestado Médico (Funcionário, Dias e Retorno) -->
+                <!-- Painel de Atestado Médico -->
                 <div id="atestado-controls" class="hidden mt-3 rounded-2xl border border-rose-200/90 dark:border-rose-900/60 bg-rose-50/75 dark:bg-rose-950/25 p-3.5 space-y-3">
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-xs font-black text-rose-800 dark:text-rose-200">Configuração do Atestado Médico</span>
@@ -736,8 +864,8 @@
 
     function upgradeExportModalDOM() {
         const panel = document.getElementById('export-modal-content');
-        if (!panel || panel.dataset.v4Upgraded === '1') return;
-        panel.dataset.v4Upgraded = '1';
+        if (!panel || panel.dataset.v5Upgraded === '1') return;
+        panel.dataset.v5Upgraded = '1';
 
         panel.innerHTML = `
             <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
@@ -836,13 +964,15 @@
 
     function upgradeDesktopInlineLegend() {
         const legendRow = document.querySelector('section .hidden.md\\:flex.items-center.gap-3');
-        if (!legendRow || legendRow.dataset.v4Legend === '1') return;
-        legendRow.dataset.v4Legend = '1';
+        if (!legendRow || legendRow.dataset.v5Legend === '1') return;
+        legendRow.dataset.v5Legend = '1';
         [
             { cls: 'bg-red-600', label: 'Falta' },
             { cls: 'bg-purple-500', label: 'Troca' },
             { cls: 'bg-cyan-500', label: 'Ent. Atrasada' },
-            { cls: 'bg-teal-500', label: 'Saí. Adiantada' }
+            { cls: 'bg-teal-500', label: 'Saí. Adiantada' },
+            { cls: 'bg-indigo-500', label: 'Decl. Médica' },
+            { cls: 'bg-sky-500', label: 'Ex. Periódico' }
         ].forEach(it => {
             const span = document.createElement('span');
             span.className = 'flex items-center gap-1';
@@ -851,7 +981,7 @@
         });
     }
 
-    /* 5. INTERAÇÕES DO MODAL DE OCORRÊNCIAS E ATESTADO */
+    /* 5. INTERAÇÕES DO MODAL DE OCORRÊNCIAS, HORÁRIOS E ATESTADO */
     function renderAtestadoWhoButtons() {
         const group = document.getElementById('atestado-who-group');
         if (!group) return;
@@ -891,6 +1021,52 @@
                 ? 'bg-purple-600 border-purple-600 text-white shadow-sm'
                 : 'bg-white hover:bg-purple-100/60 dark:bg-oled dark:hover:bg-purple-950/40 border-purple-200 dark:border-purple-900/50 text-purple-900 dark:text-purple-200'}`;
         });
+    }
+
+    function renderOverrideTimeFieldsUI(code, meta, labelCls) {
+        const wrap = document.getElementById('override-times-wrap');
+        const entryBox = document.getElementById('time-field-entry');
+        const exitBox = document.getElementById('time-field-exit');
+        const arrivalBox = document.getElementById('time-field-arrival');
+        const entryLbl = document.getElementById('time-label-entry');
+        const exitLbl = document.getElementById('time-label-exit');
+        const arrivalLbl = document.getElementById('time-label-arrival');
+        const entryInp = document.getElementById('occ-time-entry');
+        const exitInp = document.getElementById('occ-time-exit');
+        const arrivalInp = document.getElementById('occ-time-arrival');
+        if (!wrap || !entryBox || !exitBox || !arrivalBox) return;
+
+        const fields = (meta && Array.isArray(meta.timeFields)) ? meta.timeFields : [];
+        if (!fields.length) {
+            wrap.classList.add('hidden');
+            return;
+        }
+
+        wrap.classList.remove('hidden');
+        const showEntry = fields.includes('entry');
+        const showExit = fields.includes('exit');
+        const showArrival = fields.includes('arrival');
+
+        entryBox.classList.toggle('hidden', !showEntry);
+        exitBox.classList.toggle('hidden', !showExit);
+        arrivalBox.classList.toggle('hidden', !showArrival);
+
+        if (entryLbl) {
+            entryLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`;
+            entryLbl.innerText = code === 'EA' ? 'Hora que entrou' : 'Quando entrou';
+        }
+        if (exitLbl) {
+            exitLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`;
+            exitLbl.innerText = code === 'SA' ? 'Hora que saiu' : 'Quando saiu';
+        }
+        if (arrivalLbl) {
+            arrivalLbl.className = `block text-[11px] font-extrabold mb-1 ${labelCls}`;
+            arrivalLbl.innerText = 'Hora que chegou';
+        }
+
+        if (entryInp && document.activeElement !== entryInp) entryInp.value = modalEntryTime;
+        if (exitInp && document.activeElement !== exitInp) exitInp.value = modalExitTime;
+        if (arrivalInp && document.activeElement !== arrivalInp) arrivalInp.value = modalArrivalTime;
     }
 
     function renderOverrideDetailsUI() {
@@ -946,6 +1122,20 @@
                 act: 'bg-teal-600 border-teal-600 text-white shadow-sm',
                 idle: 'bg-white hover:bg-teal-100/60 dark:bg-oled dark:hover:bg-teal-950/40 border-teal-200 dark:border-teal-900/50 text-teal-900 dark:text-teal-200',
                 title: 'Quem teve Saída Adiantada?'
+            },
+            DM: {
+                box: 'border-indigo-200/90 dark:border-indigo-900/60 bg-indigo-50/75 dark:bg-indigo-950/20',
+                lbl: 'text-indigo-900 dark:text-indigo-200',
+                act: 'bg-indigo-600 border-indigo-600 text-white shadow-sm',
+                idle: 'bg-white hover:bg-indigo-100/60 dark:bg-oled dark:hover:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-200',
+                title: 'Quem apresentou Declaração Médica?'
+            },
+            EP: {
+                box: 'border-sky-200/90 dark:border-sky-900/60 bg-sky-50/75 dark:bg-sky-950/20',
+                lbl: 'text-sky-900 dark:text-sky-200',
+                act: 'bg-sky-600 border-sky-600 text-white shadow-sm',
+                idle: 'bg-white hover:bg-sky-100/60 dark:bg-oled dark:hover:bg-sky-950/40 border-sky-200 dark:border-sky-900/50 text-sky-900 dark:text-sky-200',
+                title: 'Quem fez Exame Periódico?'
             }
         };
         const th = themes[meta.palette] || themes.HE;
@@ -974,6 +1164,8 @@
             const act = modalOverrideWho === opt.val;
             return `<button type="button" onclick="selectOverrideWho('${opt.val}')" class="py-2 px-2 rounded-xl text-[11px] font-extrabold border truncate active:scale-95 btn-smooth cursor-pointer ${act ? th.act : th.idle}" title="${escapeHTML(opt.label)}">${escapeHTML(opt.label)}</button>`;
         }).join('');
+
+        renderOverrideTimeFieldsUI(code, meta, th.lbl);
 
         if (swapSec && swapGroup && swapInput) {
             swapSec.classList.toggle('hidden', !meta.isSwap);
@@ -1008,7 +1200,9 @@
             F:     'bg-green-600 border-green-600 text-white shadow-sm',
             FA:    'bg-red-600 border-red-600 text-white shadow-sm',
             EA:    'bg-cyan-600 border-cyan-600 text-white shadow-sm',
-            SA:    'bg-teal-600 border-teal-600 text-white shadow-sm'
+            SA:    'bg-teal-600 border-teal-600 text-white shadow-sm',
+            DM:    'bg-indigo-600 border-indigo-600 text-white shadow-sm',
+            EP:    'bg-sky-600 border-sky-600 text-white shadow-sm'
         };
         const idleStyle = 'bg-slate-50 hover:bg-slate-100 dark:bg-oled dark:hover:bg-zinc-900 border-slate-200 dark:border-surfaceBorder text-slate-600 dark:text-slate-300';
 
@@ -1020,7 +1214,7 @@
 
         const atBtn = document.getElementById('ov-atestado-btn');
         if (atBtn) {
-            atBtn.className = `py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer ${modalAtestadoEnabled
+            atBtn.className = `col-span-2 sm:col-span-2 py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer ${modalAtestadoEnabled
                 ? 'bg-rose-600 border-rose-600 text-white shadow-sm'
                 : 'bg-rose-50/70 hover:bg-rose-100/70 dark:bg-rose-950/25 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300'}`;
         }
@@ -1037,6 +1231,14 @@
         if (!silent) { haptic(); markModalDirty(); }
         modalOverrideWho = String(val || 'both');
         renderOverrideDetailsUI();
+    };
+
+    window.onOccTimeChange = function (field, val) {
+        markModalDirty();
+        const clean = sanitizeTimeStr(val) || String(val || '').slice(0, 5);
+        if (field === 'entry') modalEntryTime = clean;
+        else if (field === 'exit') modalExitTime = clean;
+        else if (field === 'arrival') modalArrivalTime = clean;
     };
 
     window.selectSwapPreset = function (tIdx, mIdx) {
@@ -1149,6 +1351,9 @@
         modalOverrideWho = (activeMeta && activeMeta.whoType) ? String(activeMeta.whoType) : (members.length >= 2 ? '0' : '0');
         modalSwapWith = (activeMeta && activeMeta.swapWith) ? String(activeMeta.swapWith) : '';
         modalSwapWithTeam = (activeMeta && activeMeta.swapWithTeam) ? String(activeMeta.swapWithTeam) : '';
+        modalEntryTime = sanitizeTimeStr(activeMeta && activeMeta.entryTime);
+        modalExitTime = sanitizeTimeStr(activeMeta && activeMeta.exitTime);
+        modalArrivalTime = sanitizeTimeStr(activeMeta && activeMeta.arrivalTime);
 
         const originNotice = document.getElementById('atestado-origin-notice');
         if (existingAt) {
@@ -1223,11 +1428,18 @@
                 if (meta && meta.hasWho) {
                     const who = getSelectionWhoInfo(modalOverrideWho, currentTurma);
                     const cleanSwap = String(modalSwapWith || '').trim().slice(0, 40);
+                    const entryInp = sanitizeTimeStr(document.getElementById('occ-time-entry')?.value) || sanitizeTimeStr(modalEntryTime);
+                    const exitInp = sanitizeTimeStr(document.getElementById('occ-time-exit')?.value) || sanitizeTimeStr(modalExitTime);
+                    const arrivalInp = sanitizeTimeStr(document.getElementById('occ-time-arrival')?.value) || sanitizeTimeStr(modalArrivalTime);
+
                     overrideMetaDb[ovKey] = {
                         whoType: who.whoType,
                         whoName: who.whoName,
                         swapWith: meta.isSwap ? cleanSwap : '',
-                        swapWithTeam: meta.isSwap && cleanSwap ? String(modalSwapWithTeam || '').trim().slice(0, 2) : ''
+                        swapWithTeam: meta.isSwap && cleanSwap ? String(modalSwapWithTeam || '').trim().slice(0, 2) : '',
+                        entryTime: meta.timeFields.includes('entry') ? entryInp : '',
+                        exitTime: meta.timeFields.includes('exit') ? exitInp : '',
+                        arrivalTime: meta.timeFields.includes('arrival') ? arrivalInp : ''
                     };
                 } else {
                     delete overrideMetaDb[ovKey];
@@ -1250,6 +1462,9 @@
         currentSelectedOverride = '';
         modalSwapWith = '';
         modalSwapWithTeam = '';
+        modalEntryTime = '';
+        modalExitTime = '';
+        modalArrivalTime = '';
         modalAtestadoEnabled = false;
         saveNote(true);
     };
@@ -1277,8 +1492,7 @@
                 if (descEl) descEl.innerText = teamNames[i];
             });
 
-            const returnDateMap = {}, atestadoDayMap = {}, monthAtestados = [];
-            const monthStartKey = formatDateKey(year, month, 1), monthEndKey = formatDateKey(year, month, daysInMonth);
+            const returnDateMap = {}, atestadoDayMap = {};
             atestadosDb.filter(r => r.turma === currentTurma).sort((a, b) => a.startDate.localeCompare(b.startDate)).forEach(rec => {
                 const dates = getAtestadoDates(rec);
                 const whoInfo = resolveWhoInfo(rec, currentTurma);
@@ -1287,9 +1501,6 @@
                 });
                 const retInfo = computeReturnInfo(rec.startDate, rec.days, currentTurma, rec.id);
                 returnDateMap[retInfo.returnDateKey] = { rec, whoInfo, retInfo };
-                if ((rec.startDate <= monthEndKey && retInfo.endDate >= monthStartKey) || (retInfo.returnDateKey >= monthStartKey && retInfo.returnDateKey <= monthEndKey)) {
-                    monthAtestados.push({ rec, whoInfo, retInfo });
-                }
             });
 
             const holidays = getHolidays(year, month);
@@ -1380,6 +1591,8 @@
                             else if (ovShift === 'FA') { /* Falta não soma como dia trabalhado nem folga */ }
                             else counts[baseShift]++;
 
+                            const tInfo = formatOccurrenceTimeInfo(ovShift, ovMeta);
+
                             if (ovShift === 'FA') {
                                 code = 'FA';
                                 style = SHIFTS_CONFIG.FA.style;
@@ -1388,7 +1601,7 @@
                                 tipParts.push(`Falta • ${who.fullLabel} (Escala: ${baseCfg.name})`);
                                 itemPillCls = m.pillCls;
                                 itemPillTxt = `${m.label} • ${who.fullLabel}`;
-                                itemTitle = `${m.label} (${who.fullLabel})`;
+                                itemTitle = `${m.label} — ${who.fullLabel}`;
                                 itemDetail = `Escala do dia: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
                                 shouldPushCard = true;
                             } else if (ovShift === 'F') {
@@ -1420,12 +1633,15 @@
                                 const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                                 ring = m.ring;
                                 badgeDot = `<span class="absolute top-1 left-1 w-1.5 h-1.5 ${m.dot} rounded-full"></span>`;
-                                sub = `<span class="text-[7px] font-black leading-none mt-0.5 truncate max-w-[40px] opacity-95">${escapeHTML(who.shortLabel)}</span>`;
-                                tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • ${m.label} (${who.fullLabel})`);
+                                const line1 = tInfo.compact || m.code;
+                                sub = `<span class="text-[6.5px] font-black leading-none mt-0.5 truncate max-w-[40px] opacity-95 tabular-nums">${escapeHTML(line1)}</span><span class="text-[6.5px] font-extrabold leading-none opacity-85 truncate max-w-[40px]">${escapeHTML(who.shortLabel)}</span>`;
+                                const timeTip = tInfo.summary ? ` • ${tInfo.summary}` : '';
+                                tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • ${m.label} (${who.fullLabel})${timeTip}`);
                                 itemPillCls = m.pillCls;
                                 itemPillTxt = `${m.label} • ${who.fullLabel}`;
                                 itemTitle = `${m.label} — ${who.fullLabel}`;
-                                itemDetail = `Escala: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+                                const baseInfo = `Escala: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+                                itemDetail = tInfo.summary ? `${tInfo.summary} • ${baseInfo}` : baseInfo;
                                 shouldPushCard = true;
                             }
                         } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
@@ -1579,6 +1795,7 @@
 
     /* 7. QUADRO A4 HORIZONTAL (OPERADORES) */
     window.buildA4Dataset = function (includeChanges) {
+        sanitizeAllState();
         const year = currentDate.getFullYear(), month = currentDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const monthLabel = currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
@@ -1595,9 +1812,9 @@
             if (holi) holidaysList.push({ day, dateStr: `${String(day).padStart(2, '0')}/${mmStr}`, dowPretty: DOW_PRETTY[dow], name: holi });
         }
 
-        const extraFlags = { ov: false, td: false, at: false, fa: false, ea: false, sa: false };
+        const extraFlags = { ov: false, td: false, at: false, fa: false, ea: false, sa: false, dm: false, ep: false };
         const teams = TEAM_LETTERS.map((letter, idx) => {
-            const counts = { M: 0, T: 0, N: 0, F: 0, AT: 0, FA: 0, EA: 0, SA: 0 };
+            const counts = { M: 0, T: 0, N: 0, F: 0, AT: 0, FA: 0, EA: 0, SA: 0, DM: 0, EP: 0 };
             const atMap = {};
             if (includeChanges) {
                 atestadosDb.filter(r => r.turma === idx).forEach(rec => {
@@ -1621,40 +1838,42 @@
                     const ovMeta = getOverrideMeta(dateKey, idx);
                     if (ov && OCC_META[ov]) {
                         const m = OCC_META[ov];
+                        const tInfo = formatOccurrenceTimeInfo(ov, ovMeta);
                         if (ov === 'F') counts.F++;
                         else if (ov === 'FA') { counts.FA++; extraFlags.fa = true; }
                         else if (ov === 'EA') { counts.EA++; extraFlags.ea = true; counts[base]++; }
                         else if (ov === 'SA') { counts.SA++; extraFlags.sa = true; counts[base]++; }
+                        else if (ov === 'DM') { counts.DM++; extraFlags.dm = true; counts[base]++; }
+                        else if (ov === 'EP') { counts.EP++; extraFlags.ep = true; counts[base]++; }
                         else if (ov === 'TD') { extraFlags.td = true; counts[base]++; }
                         else { extraFlags.ov = true; counts[base]++; }
 
-                        let sub = '';
-                        let whoShort = '';
-                        let cellCls = '';
+                        const whoShort = m.hasWho
+                            ? resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx).shortLabel
+                            : '';
+
                         if (ov === 'FA') {
-                            whoShort = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx).shortLabel;
                             return { code: 'FA', pal: 'FA', sub: '', whoShort, cls: '' };
                         }
                         if (ov === 'F') {
                             return { code: 'F', pal: 'F', sub: '', whoShort: '', cls: '' };
                         }
                         if (ov === 'TD') {
-                            sub = formatSwapDisplay(ovMeta, idx).compactLabel;
-                            cellCls = 'a4-cell-td';
-                        } else if (ov === 'EA') {
-                            sub = 'EA';
-                            whoShort = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx).shortLabel;
-                            cellCls = 'a4-cell-ea';
-                        } else if (ov === 'SA') {
-                            sub = 'SA';
-                            whoShort = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx).shortLabel;
-                            cellCls = 'a4-cell-sa';
-                        } else {
-                            sub = m.code;
-                            whoShort = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx).shortLabel;
-                            cellCls = 'a4-cell-ov';
+                            return { code: base, pal: base, sub: formatSwapDisplay(ovMeta, idx).compactLabel, whoShort: '', cls: 'a4-cell-td' };
                         }
-                        return { code: base, pal: base, sub, whoShort, cls: cellCls };
+                        if (ov === 'EA') {
+                            return { code: base, pal: base, sub: tInfo.compact || 'EA', whoShort, cls: 'a4-cell-ea' };
+                        }
+                        if (ov === 'SA') {
+                            return { code: base, pal: base, sub: tInfo.compact || 'SA', whoShort, cls: 'a4-cell-sa' };
+                        }
+                        if (ov === 'DM') {
+                            return { code: base, pal: base, sub: tInfo.compact || 'DM', whoShort, cls: 'a4-cell-DM' };
+                        }
+                        if (ov === 'EP') {
+                            return { code: base, pal: base, sub: tInfo.compact || 'EP', whoShort, cls: 'a4-cell-EP' };
+                        }
+                        return { code: base, pal: base, sub: tInfo.compact || m.code, whoShort, cls: 'a4-cell-ov' };
                     }
                     if (ov === 'M' || ov === 'T' || ov === 'N') {
                         counts[ov]++;
@@ -1679,7 +1898,9 @@
             { flag: ef.at, key: 'AT', color: '#be123c' },
             { flag: ef.fa, key: 'FA', color: '#b91c1c' },
             { flag: ef.ea, key: 'EA', color: '#0e7490' },
-            { flag: ef.sa, key: 'SA', color: '#0f766e' }
+            { flag: ef.sa, key: 'SA', color: '#0f766e' },
+            { flag: ef.dm, key: 'DM', color: '#3730a3' },
+            { flag: ef.ep, key: 'EP', color: '#0369a1' }
         ].filter(c => c.flag);
 
         const headDaysHTML = data.days.map(d => {
@@ -1712,6 +1933,8 @@
         if (ef.fa) legendNotes.push('<span><strong style="color:#b91c1c">FA</strong> Falta</span>');
         if (ef.ea) legendNotes.push('<span><strong style="color:#0e7490">EA</strong> Ent. Atr.</span>');
         if (ef.sa) legendNotes.push('<span><strong style="color:#0f766e">SA</strong> Saí. Adi.</span>');
+        if (ef.dm) legendNotes.push('<span><strong style="color:#3730a3">DM</strong> Decl. Méd.</span>');
+        if (ef.ep) legendNotes.push('<span><strong style="color:#0369a1">EP</strong> Ex. Periód.</span>');
 
         return `<div class="a4-sheet">
             <div class="a4-header">
@@ -1777,7 +2000,9 @@
             { flag: ef.at, key: 'AT', color: '#be123c' },
             { flag: ef.fa, key: 'FA', color: '#b91c1c' },
             { flag: ef.ea, key: 'EA', color: '#0e7490' },
-            { flag: ef.sa, key: 'SA', color: '#0f766e' }
+            { flag: ef.sa, key: 'SA', color: '#0f766e' },
+            { flag: ef.dm, key: 'DM', color: '#3730a3' },
+            { flag: ef.ep, key: 'EP', color: '#0369a1' }
         ].filter(c => c.flag);
 
         const W = 2338, H = 1654;
@@ -1858,7 +2083,9 @@
             'a4-cell-ov': '#d97706',
             'a4-cell-td': '#7c3aed',
             'a4-cell-ea': '#06b6d4',
-            'a4-cell-sa': '#14b8a6'
+            'a4-cell-sa': '#14b8a6',
+            'a4-cell-DM': '#6366f1',
+            'a4-cell-EP': '#0ea5e9'
         };
 
         data.teams.forEach((t, rowIdx) => {
@@ -1901,8 +2128,8 @@
                     ctx.fillText(cell.code, x + dayColW / 2, y + teamRowH / 2 - 26);
                     ctx.font = `800 13px ${font}`;
                     ctx.fillText(canvasTruncateText(ctx, cell.whoShort, dayColW - 8), x + dayColW / 2, y + teamRowH / 2 + 6);
-                    ctx.font = `900 14px ${font}`;
-                    ctx.fillText(cell.sub, x + dayColW / 2, y + teamRowH / 2 + 32);
+                    ctx.font = `900 13px ${font}`;
+                    ctx.fillText(canvasTruncateText(ctx, cell.sub, dayColW - 6), x + dayColW / 2, y + teamRowH / 2 + 32);
                 } else if (cell.whoShort || cell.sub) {
                     const bottomTxt = cell.whoShort || cell.sub;
                     ctx.font = `900 30px ${font}`;
@@ -1976,22 +2203,24 @@
             ctx.fillText(lr.hrs, x1 + w1 - 44, ry + 34);
         });
         ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-        ctx.fillStyle = '#334155'; ctx.font = `800 16px ${font}`;
+        ctx.fillStyle = '#334155'; ctx.font = `800 15px ${font}`;
         let extraFooter = '■ Dom/Fer';
-        if (ef.ov) extraFooter += '  □ Extra';
-        if (ef.td) extraFooter += '  □ Troca';
-        if (ef.at) extraFooter += '  AT';
-        if (ef.fa) extraFooter += '  FA';
-        if (ef.ea) extraFooter += '  EA';
-        if (ef.sa) extraFooter += '  SA';
+        if (ef.ov) extraFooter += ' □ Ext';
+        if (ef.td) extraFooter += ' □ Trc';
+        if (ef.at) extraFooter += ' AT';
+        if (ef.fa) extraFooter += ' FA';
+        if (ef.ea) extraFooter += ' EA';
+        if (ef.sa) extraFooter += ' SA';
+        if (ef.dm) extraFooter += ' DM';
+        if (ef.ep) extraFooter += ' EP';
         ctx.fillText(canvasTruncateText(ctx, extraFooter, w1 - 52), x1 + 26, cardsY + cardsH - 18);
 
         drawCardBox(x2, w2, 'RESUMO MENSAL POR TURNO');
         const stX = x2 + 26, stY = cardsY + 74, stW = w2 - 52, stH = cardsH - 96;
         const stHeadH = 54, stRowH = (stH - stHeadH) / 4;
         const sumHeaders = ['M', 'T', 'N', 'F'].concat(extraCols.map(c => c.key));
-        const numColW = sumHeaders.length > 6 ? 54 : (sumHeaders.length > 4 ? 64 : 74);
-        const nameColW = Math.max(150, stW - sumHeaders.length * numColW);
+        const numColW = sumHeaders.length > 7 ? 48 : (sumHeaders.length > 5 ? 56 : (sumHeaders.length > 4 ? 64 : 74));
+        const nameColW = Math.max(145, stW - sumHeaders.length * numColW);
 
         ctx.save();
         canvasRoundRect(ctx, stX, stY, stW, stH, 13);
@@ -2125,6 +2354,8 @@
             td: 0,
             ea: 0,
             sa: 0,
+            dm: 0,
+            ep: 0,
             noteOnly: 0,
             total: 0
         };
@@ -2179,12 +2410,15 @@
                     subText = `Duração: ${atInfo.totalDays} ${atInfo.totalDays === 1 ? 'dia' : 'dias'} • Volta: ${formatShortDate(atInfo.retInfo.returnDateKey)} (${retCfg.name})`;
                 } else if (ovShift && OCC_META[ovShift]) {
                     const m = OCC_META[ovShift];
+                    const tInfo = formatOccurrenceTimeInfo(ovShift, ovMeta);
                     breakdown.total++;
                     if (m.countKey === 'he') breakdown.he++;
                     else if (m.countKey === 'fa') breakdown.fa++;
                     else if (m.countKey === 'td') breakdown.td++;
                     else if (m.countKey === 'ea') breakdown.ea++;
                     else if (m.countKey === 'sa') breakdown.sa++;
+                    else if (m.countKey === 'dm') breakdown.dm++;
+                    else if (m.countKey === 'ep') breakdown.ep++;
                     else breakdown.noteOnly++;
 
                     chipCode = m.chip;
@@ -2199,7 +2433,7 @@
                     } else {
                         const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                         reasonText = `${m.label} — ${who.fullLabel}`;
-                        subText = `Escala: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
+                        subText = tInfo.summary || `Escala: ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}`;
                     }
                 } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
                     breakdown.he++;
@@ -2270,6 +2504,8 @@
             { lbl: 'Trocas', val: b.td },
             { lbl: 'Ent. Atrasada', val: b.ea },
             { lbl: 'Saí. Adiantada', val: b.sa },
+            { lbl: 'Decl. Médica', val: b.dm },
+            { lbl: 'Ex. Periódico', val: b.ep },
             { lbl: 'Obs. / Outras', val: b.noteOnly }
         ];
         const catHTML = catCards.map(c => (
@@ -2293,11 +2529,8 @@
                     </td>
                     <td>
                         <div class="sup-team-cell">
-                            <span class="sup-team-badge">${item.letter}</span>
-                            <div>
-                                <span class="sup-team-title">Turno ${item.letter}</span>
-                                <span class="sup-team-names">${escapeHTML(item.teamName)}</span>
-                            </div>
+                            <span class="sup-team-letter-badge">${item.letter}</span>
+                            <span class="sup-team-names">${escapeHTML(item.teamName)}</span>
                         </div>
                     </td>
                     <td>
@@ -2359,7 +2592,7 @@
                         <tr>
                             <th class="sup-col-date">Data</th>
                             <th class="sup-col-team">Turno / Equipe</th>
-                            <th class="sup-col-shift">Escala do Dia</th>
+                            <th class="sup-col-occ">Ocorrência</th>
                             <th>Observação Registrada</th>
                         </tr>
                     </thead>
@@ -2537,7 +2770,7 @@
         const font = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
         const padX = 58, padTop = 50, contentW = W - padX * 2;
-        const colDateW = 188, colTeamW = 410, colShiftW = 540;
+        const colDateW = 186, colTeamW = 392, colShiftW = 582;
         const colObsW = contentW - colDateW - colTeamW - colShiftW;
 
         const mCanvas = document.createElement('canvas');
@@ -2551,7 +2784,7 @@
         });
 
         const headerBottomY = padTop + 114 + 24;
-        const catY = headerBottomY + 24, catH = 114;
+        const catY = headerBottomY + 24, catH = 110;
         const metaY = catY + catH + 16, metaH = 62;
         const tblY = metaY + metaH + 22, tblHeadH = 68;
         const rowsTotalH = measuredRows.length ? measuredRows.reduce((acc, r) => acc + r.rowH, 0) : 260;
@@ -2606,43 +2839,44 @@
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(padX, headerBottomY, contentW, 5);
 
-        /* 2. Soma Separada + Total de Ocorrências */
-        const boxGap = 14;
-        const totalBoxW = 290;
-        const eachBoxW = Math.floor((contentW - totalBoxW - boxGap * 7) / 7);
+        /* 2. Soma Separada (9 categorias) + Total de Ocorrências */
+        const boxGap = 11;
+        const totalBoxW = 266;
+        const eachBoxW = Math.floor((contentW - totalBoxW - boxGap * 9) / 9);
         const catItems = [
             { lbl: 'HORA EXTRA', val: b.he },
             { lbl: 'ATESTADOS', val: b.at },
             { lbl: 'FALTAS', val: b.fa },
             { lbl: 'TROCAS', val: b.td },
-            { lbl: 'ENT. ATRASADA', val: b.ea },
-            { lbl: 'SAÍ. ADIANTADA', val: b.sa },
-            { lbl: 'OBS. / OUTRAS', val: b.noteOnly }
+            { lbl: 'ENT. ATRAS.', val: b.ea },
+            { lbl: 'SAÍ. ADIANT.', val: b.sa },
+            { lbl: 'DECL. MÉD.', val: b.dm },
+            { lbl: 'EX. PERIÓD.', val: b.ep },
+            { lbl: 'OBS./OUTRAS', val: b.noteOnly }
         ];
 
         catItems.forEach((item, idx) => {
             const bx = padX + idx * (eachBoxW + boxGap);
-            canvasRoundRect(ctx, bx, catY, eachBoxW, catH, 14);
+            canvasRoundRect(ctx, bx, catY, eachBoxW, catH, 13);
             ctx.fillStyle = '#f8fafc'; ctx.fill();
             ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
             ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-            ctx.fillStyle = '#475569'; ctx.font = `900 15px ${font}`;
-            ctx.fillText(canvasTruncateText(ctx, item.lbl, eachBoxW - 24), bx + 12, catY + 16);
-            ctx.fillStyle = '#0f172a'; ctx.font = `900 38px ${font}`;
-            ctx.fillText(String(item.val), bx + 12, catY + 46);
+            ctx.fillStyle = '#475569'; ctx.font = `900 13px ${font}`;
+            ctx.fillText(canvasTruncateText(ctx, item.lbl, eachBoxW - 18), bx + 9, catY + 15);
+            ctx.fillStyle = '#0f172a'; ctx.font = `900 35px ${font}`;
+            ctx.fillText(String(item.val), bx + 9, catY + 45);
         });
 
-        const totX = padX + 7 * (eachBoxW + boxGap);
+        const totX = padX + 9 * (eachBoxW + boxGap);
         const actualTotW = W - padX - totX;
-        canvasRoundRect(ctx, totX, catY, actualTotW, catH, 14);
+        canvasRoundRect(ctx, totX, catY, actualTotW, catH, 13);
         ctx.fillStyle = '#0f172a'; ctx.fill();
         ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-        ctx.fillStyle = '#cbd5e1'; ctx.font = `900 16px ${font}`;
-        ctx.fillText('TOTAL DE OCORRÊNCIAS', totX + 18, catY + 16);
-        ctx.fillStyle = '#ffffff'; ctx.font = `900 42px ${font}`;
-        ctx.fillText(String(b.total), totX + 18, catY + 44);
+        ctx.fillStyle = '#cbd5e1'; ctx.font = `900 14px ${font}`;
+        ctx.fillText('TOTAL DE OCORRÊNCIAS', totX + 16, catY + 15);
+        ctx.fillStyle = '#ffffff'; ctx.font = `900 40px ${font}`;
+        ctx.fillText(String(b.total), totX + 16, catY + 43);
 
-        /* Linha complementar: Dias com registro + Por Turno */
         const leftMetaW = Math.floor((contentW - 18) * 0.36);
         const rightMetaW = contentW - 18 - leftMetaW;
         const rightMetaX = padX + leftMetaW + 18;
@@ -2663,7 +2897,7 @@
         ctx.fillStyle = '#64748b'; ctx.font = `800 16px ${font}`;
         ctx.fillText('POR TURNO', rightMetaX + 18, metaY + metaH / 2);
         ctx.textAlign = 'right'; ctx.fillStyle = '#0f172a'; ctx.font = `900 21px ${font}`;
-        ctx.fillText(`Turno A: ${data.perTeam[0]}   •   Turno B: ${data.perTeam[1]}   •   Turno C: ${data.perTeam[2]}   •   Turno D: ${data.perTeam[3]}`, rightMetaX + rightMetaW - 18, metaY + metaH / 2);
+        ctx.fillText(`A: ${data.perTeam[0]}   •   B: ${data.perTeam[1]}   •   C: ${data.perTeam[2]}   •   D: ${data.perTeam[3]}`, rightMetaX + rightMetaW - 18, metaY + metaH / 2);
 
         /* 3. Tabela */
         const colX0 = padX;
@@ -2683,7 +2917,7 @@
         const thMidY = tblY + tblHeadH / 2 + 1;
         ctx.fillText('DATA', colX0 + 22, thMidY);
         ctx.fillText('TURNO / EQUIPE', colX1 + 22, thMidY);
-        ctx.fillText('ESCALA DO DIA', colX2 + 22, thMidY);
+        ctx.fillText('OCORRÊNCIA', colX2 + 22, thMidY);
         ctx.fillText('OBSERVAÇÃO REGISTRADA', colX3 + 22, thMidY);
 
         let curY = tblY + tblHeadH;
@@ -2713,17 +2947,16 @@
                 ctx.fillStyle = isRed ? '#ef4444' : '#64748b'; ctx.font = `800 19px ${font}`;
                 ctx.fillText(item.dowPretty.toUpperCase(), colX0 + 22, curY + 58);
 
-                canvasRoundRect(ctx, colX1 + 22, curY + 22, 42, 42, 10);
+                /* Somente letra do turno + nomes dos funcionários */
+                canvasRoundRect(ctx, colX1 + 22, curY + 24, 44, 44, 10);
                 ctx.fillStyle = '#0f172a'; ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.font = `900 22px ${font}`;
+                ctx.fillStyle = '#ffffff'; ctx.font = `900 24px ${font}`;
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText(item.letter, colX1 + 43, curY + 44);
+                ctx.fillText(item.letter, colX1 + 44, curY + 46);
 
-                ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-                ctx.fillStyle = '#0f172a'; ctx.font = `900 23px ${font}`;
-                ctx.fillText(`Turno ${item.letter}`, colX1 + 78, curY + 20);
-                ctx.fillStyle = '#475569'; ctx.font = `700 20px ${font}`;
-                ctx.fillText(canvasTruncateText(ctx, item.teamName, colTeamW - 96), colX1 + 78, curY + 50);
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#0f172a'; ctx.font = `800 22px ${font}`;
+                ctx.fillText(canvasTruncateText(ctx, item.teamName, colTeamW - 96), colX1 + 78, curY + 46);
 
                 const pal = PALETTE[item.chipPaletteKey] || PALETTE.M;
                 const chipW = item.chipCode.length >= 4 ? 76 : 62;
@@ -2822,7 +3055,7 @@
             `Imerys • Britagem ICP 1`,
             `Período: *${data.monthLabel}*`,
             `Escopo: ${data.scopeLabel} | ${data.sortLabel}`,
-            `Hora Extra: ${b.he} • Atestados: ${b.at} • Faltas: ${b.fa} • Trocas: ${b.td} • Ent. Atrasada: ${b.ea} • Saí. Adiantada: ${b.sa} • Obs./Outras: ${b.noteOnly}`,
+            `Hora Extra: ${b.he} • Atestados: ${b.at} • Faltas: ${b.fa} • Trocas: ${b.td} • Ent. Atrasada: ${b.ea} • Saí. Adiantada: ${b.sa} • Decl. Médica: ${b.dm} • Ex. Periódico: ${b.ep} • Obs./Outras: ${b.noteOnly}`,
             `*Total de Ocorrências: ${b.total}* (em ${data.uniqueDays} de ${data.daysInMonth} dias)`,
             `Por turno: A (${data.perTeam[0]}) • B (${data.perTeam[1]}) • C (${data.perTeam[2]}) • D (${data.perTeam[3]})`,
             `----------------------------------------`
@@ -2832,7 +3065,7 @@
             lines.push('Nenhuma ocorrência ou observação registrada para o filtro selecionado neste mês.');
         } else {
             data.entries.forEach(item => {
-                lines.push(`• *${item.dateStr} (${item.dowPretty})* — *Turno ${item.letter}* (${item.teamName}) — ${item.reasonText} [${item.subText}]`);
+                lines.push(`• *${item.dateStr} (${item.dowPretty})* — *${item.letter}* (${item.teamName}) — ${item.reasonText} [${item.subText}]`);
                 if (item.text) lines.push(`  ${item.text.replace(/\r?\n/g, '\n  ')}`);
             });
         }
@@ -2848,12 +3081,12 @@
         showToast(copied ? 'Relatório copiado! Cole no WhatsApp ou e-mail.' : 'Não foi possível copiar automaticamente.');
     }
 
-    /* 9. BACKUP JSON (v7) E AGENDA .ICS */
+    /* 9. BACKUP JSON (v8) E AGENDA .ICS */
     window.exportBackup = function () {
         haptic();
         sanitizeAllState();
         const payload = {
-            version: 7,
+            version: 8,
             exportedAt: new Date().toISOString(),
             turma: currentTurma,
             teams: teamNames,
@@ -2902,7 +3135,10 @@
                                 whoType: wt,
                                 whoName: typeof val.whoName === 'string' ? val.whoName.trim().slice(0, 40) : '',
                                 swapWith: typeof val.swapWith === 'string' ? val.swapWith.trim().slice(0, 40) : '',
-                                swapWithTeam: typeof val.swapWithTeam === 'string' ? val.swapWithTeam.trim().slice(0, 2) : ''
+                                swapWithTeam: typeof val.swapWithTeam === 'string' ? val.swapWithTeam.trim().slice(0, 2) : '',
+                                entryTime: sanitizeTimeStr(val.entryTime),
+                                exitTime: sanitizeTimeStr(val.exitTime),
+                                arrivalTime: sanitizeTimeStr(val.arrivalTime)
                             };
                         }
                     });
@@ -2960,6 +3196,7 @@
             }
             const ov = overridesDb[`${dateKey}_${currentTurma}`] || '';
             const ovMeta = getOverrideMeta(dateKey, currentTurma);
+            const tInfo = formatOccurrenceTimeInfo(ov, ovMeta);
             const dayNote = getNote(dateKey, currentTurma).trim();
             if (ov === 'FA') {
                 const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
@@ -2973,7 +3210,7 @@
             const sCode = getEffectiveShift(dateKey, currentTurma);
             const isExtra = isExtraOverride(ov);
             const isTd = ov === 'TD';
-            const isSpecial = ov === 'EA' || ov === 'SA';
+            const isSpecial = ov === 'EA' || ov === 'SA' || ov === 'DM' || ov === 'EP';
             if (sCode === 'F' && !isExtra && !isTd && !isSpecial) continue;
 
             const occInfo = OCC_META[ov];
@@ -2982,7 +3219,8 @@
                 tagSuffix = ` (${occInfo.label}: ${formatSwapDisplay(ovMeta, currentTurma).pairLabel})`;
             } else if (ov && occInfo && occInfo.hasWho) {
                 const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
-                tagSuffix = ` (${occInfo.label} - ${who.label})`;
+                const tPart = tInfo.summary ? ` [${tInfo.summary}]` : '';
+                tagSuffix = ` (${occInfo.label} - ${who.label}${tPart})`;
             } else if (occInfo) {
                 tagSuffix = ` (${occInfo.label})`;
             }
