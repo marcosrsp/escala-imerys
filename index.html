@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <title>Escala Imerys</title>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link id="pwa-manifest" rel="manifest">
+    <link id="app-favicon" rel="icon" type="image/png" href="./icon-192.png">
+    <link id="apple-icon" rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Escala Imerys">
+    <script>
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                darkMode: 'media',
+                theme: {
+                    extend: {
+                        colors: { oled: '#000000', surface: '#0a0a0a', surfaceBorder: '#1a1a1a' },
+                        fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
+                        animation: {
+                            'pulse-slow': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                            'fade-in': 'fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                            'bounce-subtle': 'bounceSubtle 2.2s ease-in-out infinite'
+                        },
+                        keyframes: {
+                            fadeIn: { '0%': { opacity: '0', transform: 'translate3d(0, 8px, 0)' }, '100%': { opacity: '1', transform: 'translate3d(0, 0, 0)' } },
+                            bounceSubtle: { '0%, 100%': { transform: 'translate3d(0, 0, 0)' }, '50%': { transform: 'translate3d(0, -3px, 0)' } }
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        html { text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+        body {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            overscroll-behavior-y: none;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #000000; color: #f8fafc; }
+        }
+
+        /* Proteção iOS/Android contra seleção indesejada preservando inputs */
+        .ios-no-callout { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+
+        /* Remove setinhas nativas do input numérico no Chrome, Safari, Edge e Firefox (PC) */
+        input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* Foco acessível limpo para navegação por teclado no PC */
+        :focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+        input:focus-visible, textarea:focus-visible { outline: none; }
+
+        /* Safe Areas (iPhone Notch / Dynamic Island / Gesture Bar) */
+        .pt-safe { padding-top: 1rem; }
+        .pb-safe { padding-bottom: 1.25rem; }
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .pt-safe { padding-top: calc(env(safe-area-inset-top) + 0.85rem); }
+            .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1.25rem); }
+        }
+
+        /* Isolamento de layout para telas de 60Hz/90Hz/120Hz/144Hz */
+        .contain-section { contain: layout style; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass-header {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+        }
+        .table-scroll {
+            touch-action: pan-x pan-y;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+            scrollbar-width: none;
+            contain: layout style;
+        }
+        .table-scroll::-webkit-scrollbar { display: none; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .app-shell { overflow-x: clip; }
+
+        /* Coluna fixa promovida à GPU */
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 20;
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* Barra fina e discreta na tabela em telas de PC */
+        @media (min-width: 768px) {
+            .table-scroll { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.45) transparent; }
+            .table-scroll::-webkit-scrollbar { display: block; height: 7px; }
+            .table-scroll::-webkit-scrollbar-track { background: transparent; }
+            .table-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.42); border-radius: 9999px; }
+            .table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.68); }
+            @media (prefers-color-scheme: dark) {
+                .table-scroll { scrollbar-color: rgba(82, 82, 91, 0.65) transparent; }
+                .table-scroll::-webkit-scrollbar-thumb { background: rgba(63, 63, 70, 0.7); }
+                .table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(113, 113, 122, 0.9); }
+            }
+        }
+
+        /* Modais acelerados 100% no compositor GPU */
+        .modal-backdrop {
+            transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+            overscroll-behavior: contain;
+        }
+        .modal-sheet {
+            transform: translate3d(0, 100%, 0);
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+            overscroll-behavior: contain;
+            contain: layout style;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .modal-sheet.is-open { transform: translate3d(0, 0, 0); }
+        @media (min-width: 768px) {
+            .modal-sheet {
+                transform: translate3d(0, 14px, 0) scale3d(0.96, 0.96, 1);
+                opacity: 0;
+            }
+            .modal-sheet.is-open {
+                transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+                opacity: 1;
+            }
+        }
+        .modal-dialog {
+            transform: translate3d(0, 10px, 0) scale3d(0.95, 0.95, 1);
+            opacity: 0;
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+            overscroll-behavior: contain;
+            contain: layout style;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .modal-dialog.is-open {
+            transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+            opacity: 1;
+        }
+
+        /* Transições direcionadas sem repaint de sombra */
+        .btn-smooth {
+            transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+        }
+        .cell-smooth {
+            transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease;
+        }
+        .cell-active { isolation: isolate; }
+        .cell-active::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-color: rgba(15, 23, 42, 0.06);
+            opacity: 0;
+            transition: opacity 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @media (prefers-color-scheme: dark) {
+            .cell-active::after { background-color: rgba(255, 255, 255, 0.09); }
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .cell-active:hover::after { opacity: 1; }
+        }
+
+        /* =========================================================
+           FOLHA A4 HORIZONTAL (PRÉVIA EM TELA + IMPRESSÃO NATIVA)
+           ========================================================= */
+        #print-sheet { display: none; }
+        .a4-preview-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 297 / 210;
+            background: #ffffff;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.18);
+        }
+        @media (prefers-color-scheme: dark) {
+            .a4-preview-frame { border-color: #27272a; box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.7); }
+        }
+        .a4-preview-scaler {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1122px;
+            height: 793px;
+            transform-origin: top left;
+            pointer-events: none;
+        }
+
+        .a4-sheet {
+            width: 1122px;
+            height: 793px;
+            box-sizing: border-box;
+            background: #ffffff;
+            color: #0f172a;
+            padding: 26px 28px 22px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .a4-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2.5px solid #0f172a;
+        }
+        .a4-brand { display: flex; align-items: center; gap: 14px; }
+        .a4-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            background: #ffffff;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .a4-title {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            color: #0f172a;
+            line-height: 1.05;
+            margin: 0;
+        }
+        .a4-subtitle {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #475569;
+            margin-top: 4px;
+        }
+        .a4-period-box {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .a4-month-pill {
+            display: inline-block;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 6px 18px;
+            border-radius: 10px;
+            line-height: 1.1;
+        }
+        .a4-cycle-note {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .a4-table-wrap {
+            margin-top: 12px;
+            border: 1.5px solid #334155;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .a4-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .a4-table th, .a4-table td {
+            border-right: 1px solid #cbd5e1;
+            border-bottom: 1px solid #cbd5e1;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+        .a4-table tr > *:last-child { border-right: none; }
+        .a4-table tbody tr:last-child > * { border-bottom: none; }
+
+        .a4-th-team {
+            width: 158px;
+            background: #f1f5f9;
+            color: #0f172a;
+            text-align: left !important;
+            padding: 8px 12px !important;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-right: 2px solid #475569 !important;
+            border-bottom: 2px solid #475569 !important;
+        }
+        .a4-th-day {
+            background: #f8fafc;
+            border-bottom: 2px solid #475569 !important;
+            padding: 6px 1px !important;
+            height: 44px;
+            position: relative;
+        }
+        .a4-th-day.is-sun { background: #fef2f2; }
+        .a4-th-day.is-holi { background: #fee2e2; box-shadow: inset 0 3px 0 #dc2626; }
+        .a4-day-num {
+            display: block;
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #0f172a;
+            font-variant-numeric: tabular-nums;
+        }
+        .a4-day-dow {
+            display: block;
+            font-size: 8px;
+            font-weight: 800;
+            line-height: 1.1;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .a4-th-day.is-sun .a4-day-num, .a4-th-day.is-sun .a4-day-dow { color: #dc2626; }
+        .a4-th-day.is-holi .a4-day-num, .a4-th-day.is-holi .a4-day-dow { color: #b91c1c; }
+
+        .a4-td-team {
+            text-align: left !important;
+            padding: 8px 12px !important;
+            background: #ffffff;
+            border-right: 2px solid #475569 !important;
+            height: 66px;
+        }
+        .a4-team-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1.15;
+        }
+        .a4-team-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+        .a4-team-names {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #475569;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 134px;
+        }
+
+        .a4-cell {
+            height: 66px;
+            font-size: 15px;
+            font-weight: 900;
+            position: relative;
+        }
+        .a4-cell-M { background: #dbeafe; color: #1e40af; }
+        .a4-cell-T { background: #ffedd5; color: #9a3412; }
+        .a4-cell-N { background: #e0e7ff; color: #3730a3; }
+        .a4-cell-F { background: #dcfce7; color: #15803d; }
+        .a4-cell-AT { background: #ffe4e6; color: #be123c; box-shadow: inset 0 0 0 2px #f43f5e; }
+        .a4-cell-ov { box-shadow: inset 0 0 0 2.5px #d97706; }
+        .a4-cell-sub {
+            display: block;
+            font-size: 7.5px;
+            font-weight: 900;
+            line-height: 1;
+            margin-top: 2px;
+            letter-spacing: -0.02em;
+        }
+
+        .a4-bottom-grid {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 1.05fr 1.25fr 1.1fr;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+        }
+        .a4-card {
+            border: 1.2px solid #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+            padding: 11px 13px;
+            display: flex;
+            flex-direction: column;
+        }
+        .a4-card-title {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #334155;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .a4-legend-list { display: flex; flex-direction: column; gap: 6px; }
+        .a4-legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            padding: 5px 8px;
+        }
+        .a4-legend-left { display: flex; align-items: center; gap: 8px; }
+        .a4-legend-chip {
+            width: 24px;
+            height: 22px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .a4-legend-name { font-size: 11.5px; font-weight: 800; color: #0f172a; }
+        .a4-legend-hours { font-size: 11px; font-weight: 800; color: #334155; font-variant-numeric: tabular-nums; }
+        .a4-legend-extra {
+            margin-top: auto;
+            padding-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .a4-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            overflow: hidden;
+        }
+        .a4-summary-table th {
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 9.5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 6px 6px;
+            text-align: center;
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .a4-summary-table th:first-child { text-align: left; padding-left: 9px; }
+        .a4-summary-table td {
+            padding: 7px 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            font-variant-numeric: tabular-nums;
+        }
+        .a4-summary-table tr:last-child td { border-bottom: none; }
+        .a4-summary-table td:first-child { text-align: left; padding-left: 9px; color: #0f172a; }
+        .a4-sum-sub { display: block; font-size: 9px; font-weight: 600; color: #64748b; max-width: 155px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .a4-holi-list { display: flex; flex-direction: column; gap: 6px; }
+        .a4-holi-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #fecaca;
+            border-left: 3.5px solid #dc2626;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 11px;
+        }
+        .a4-holi-date { font-weight: 900; color: #b91c1c; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .a4-holi-name { font-weight: 700; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .a4-holi-empty {
+            margin: auto 0;
+            text-align: center;
+            padding: 18px 10px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #64748b;
+            background: #ffffff;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+        }
+
+        .a4-footer {
+            margin-top: 10px;
+            padding-top: 7px;
+            border-top: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        /* Regras de Impressão A4 Horizontal (Chrome, Edge, Firefox, Safari macOS/iOS e Android) */
+        @page {
+            size: A4 landscape;
+            margin: 6mm;
+        }
+        @media print {
+            html, body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                display: block !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .app-shell { display: none !important; }
+            #print-sheet {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #print-sheet .a4-sheet {
+                width: 100% !important;
+                height: 196mm !important;
+                max-height: 196mm !important;
+                padding: 3mm 4mm 2mm 4mm !important;
+                margin: 0 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+            #print-sheet .a4-td-team,
+            #print-sheet .a4-cell {
+                height: 15.5mm !important;
+            }
+        }
+
+        /* Acessibilidade de movimento reduzido */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex justify-center w-full min-h-[100dvh] md:py-5 md:px-5 lg:py-6 lg:px-6">
+    <!-- Folha Exclusiva de Impressão A4 Horizontal -->
+    <div id="print-sheet" aria-hidden="true"></div>
+
+    <div class="ios-no-callout app-shell w-full max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-[1400px] bg-white dark:bg-oled min-h-[100dvh] md:min-h-[calc(100dvh-2.5rem)] lg:min-h-[calc(100dvh-3rem)] md:rounded-[2rem] md:border md:border-slate-200/90 dark:md:border-surfaceBorder relative pb-safe md:pb-6 shadow-2xl flex flex-col">
+
+        <!-- Cabeçalho Fixo -->
+        <header class="sticky top-0 z-40 w-full bg-slate-50/90 dark:bg-surface/90 glass-header border-b border-slate-200 dark:border-surfaceBorder px-5 md:px-7 pb-3.5 pt-safe md:py-4 md:rounded-t-[2rem] contain-section">
+            <div class="flex justify-between items-center gap-3">
+                <div class="flex items-center gap-3 md:gap-3.5 min-w-0">
+                    <img id="header-brand-icon" alt="Imerys" width="44" height="44" decoding="async" class="w-10 h-10 md:w-11 md:h-11 rounded-[11px] md:rounded-xl bg-white shadow-sm border border-slate-200/80 dark:border-surfaceBorder shrink-0 object-contain">
+                    <div class="flex flex-col min-w-0">
+                        <div class="flex items-center gap-2.5">
+                            <h1 class="text-[20px] md:text-[22px] font-black tracking-tight leading-none text-slate-900 dark:text-white truncate">Escala Geral</h1>
+                            <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200/70 dark:border-blue-900/50">Revezamento 3×1</span>
+                        </div>
+                        <p class="text-[10px] md:text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400 mt-1 truncate">Imerys • Britagem ICP 1</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 md:gap-2.5 shrink-0">
+                    <button id="install-btn" type="button" onclick="installApp()" title="Instalar aplicativo" class="hidden p-2.5 md:px-3.5 md:py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white active:scale-95 btn-smooth animate-bounce-subtle shadow-lg shadow-blue-500/30 flex items-center gap-1.5 cursor-pointer" aria-label="Adicionar à Tela Inicial">
+                        <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        <span class="hidden md:inline text-xs font-extrabold">Instalar</span>
+                    </button>
+                    <button type="button" onclick="openInfoModal()" title="Legenda e Backup" class="p-2.5 md:px-3.5 md:py-2 rounded-full bg-slate-200/90 hover:bg-slate-300/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 active:scale-95 btn-smooth flex items-center gap-1.5 cursor-pointer" aria-label="Legenda e Backup">
+                        <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="hidden md:inline text-xs font-bold">Legenda &amp; Backup</span>
+                    </button>
+                    <button type="button" onclick="openExportModal()" title="Gerar ou Imprimir Relatório A4" class="p-2.5 md:px-3.5 md:py-2 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white active:scale-95 btn-smooth flex items-center gap-1.5 shadow-sm cursor-pointer" aria-label="Gerar ou Imprimir Relatório">
+                        <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <span class="hidden md:inline text-xs font-extrabold">Gerar / Imprimir Relatório</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow p-3 md:p-6 lg:p-7 space-y-5 md:space-y-6 animate-fade-in">
+            <!-- Alerta de Ambiente Temporário -->
+            <div id="storage-warning-banner" class="hidden rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300/80 dark:border-amber-800/60 p-3.5 md:p-4 text-left shadow-sm contain-section">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div class="flex items-start gap-2.5 min-w-0">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path></svg>
+                        <div class="min-w-0">
+                            <p class="text-xs font-black text-amber-800 dark:text-amber-300 leading-tight">Modo Temporário Detectado</p>
+                            <p id="storage-warning-text" class="text-[11px] font-medium text-amber-700/90 dark:text-amber-200/80 mt-1 leading-snug"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 pl-7 md:pl-0 shrink-0">
+                        <button type="button" onclick="exportBackup()" class="px-3 py-1.5 rounded-lg text-[11px] font-extrabold bg-amber-600 hover:bg-amber-700 text-white active:scale-95 btn-smooth cursor-pointer">Salvar Backup</button>
+                        <button type="button" onclick="document.getElementById('backup-file-input').click()" class="px-3 py-1.5 rounded-lg text-[11px] font-extrabold bg-white dark:bg-oled border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 hover:bg-amber-100/60 dark:hover:bg-amber-950/50 active:scale-95 btn-smooth cursor-pointer">Restaurar</button>
+                        <button type="button" onclick="dismissStorageWarning()" class="p-1.5 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-200/40 dark:hover:bg-amber-900/30 shrink-0 cursor-pointer" aria-label="Fechar aviso">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel Superior Responsivo: Navegação de Mês + Seletor de Turnos -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-end contain-section">
+                <!-- Navegação de Mês e Atalho Hoje -->
+                <div class="lg:col-span-4 flex flex-col">
+                    <div class="hidden lg:flex items-center justify-between mb-2 px-1">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Período de Consulta</span>
+                        <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Teclas ← →</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-100 dark:bg-surface p-2 md:p-2.5 rounded-2xl border border-slate-200 dark:border-surfaceBorder shadow-sm lg:min-h-[64px]">
+                        <button type="button" onclick="changeMonth(-1)" title="Mês anterior (Seta Esquerda)" class="p-2.5 bg-white dark:bg-oled hover:bg-slate-50 dark:hover:bg-zinc-900 rounded-xl shadow-sm border border-slate-100 dark:border-surfaceBorder active:scale-90 text-slate-600 dark:text-slate-400 btn-smooth cursor-pointer" aria-label="Mês anterior">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <div class="flex flex-col items-center justify-center min-w-[150px] px-2">
+                            <button type="button" onclick="goToToday()" title="Voltar para o mês atual (Tecla T)" class="font-black text-base md:text-[17px] uppercase tracking-wide text-slate-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 active:scale-95 btn-smooth cursor-pointer" id="current-month-display"></button>
+                            <button type="button" id="btn-today" onclick="goToToday()" class="hidden mt-0.5 px-2.5 py-0.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-wider active:scale-95 btn-smooth shadow-sm cursor-pointer">Ir para Hoje</button>
+                        </div>
+                        <button type="button" onclick="changeMonth(1)" title="Próximo mês (Seta Direita)" class="p-2.5 bg-white dark:bg-oled hover:bg-slate-50 dark:hover:bg-zinc-900 rounded-xl shadow-sm border border-slate-100 dark:border-surfaceBorder active:scale-90 text-slate-600 dark:text-slate-400 btn-smooth cursor-pointer" aria-label="Próximo mês">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Seletor de Turno + Edição de Equipes -->
+                <section class="lg:col-span-8">
+                    <div class="flex items-center justify-between gap-2 mb-2 px-1">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <svg class="w-4 h-4 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"></path></svg>
+                            <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 truncate">Destacar Turno na Tabela</h2>
+                        </div>
+                        <button type="button" onclick="openTeamsModal()" class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200/80 dark:bg-surface dark:hover:bg-surfaceBorder border border-slate-200 dark:border-surfaceBorder text-[10px] font-extrabold text-blue-600 dark:text-blue-400 active:scale-95 btn-smooth shrink-0 cursor-pointer" aria-label="Editar nomes dos turnos">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <span>Editar nomes</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-2.5" id="team-selector">
+                        <button type="button" onclick="setTurma(0)" class="team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center btn-smooth active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px]"><span class="font-extrabold text-base leading-tight">Turno A</span><span id="team-desc-0" class="text-[10px] md:text-[11px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Rolly e Aníbal</span></button>
+                        <button type="button" onclick="setTurma(1)" class="team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center btn-smooth active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px]"><span class="font-extrabold text-base leading-tight">Turno B</span><span id="team-desc-1" class="text-[10px] md:text-[11px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Marquinho e Matozo</span></button>
+                        <button type="button" onclick="setTurma(2)" class="team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center btn-smooth active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px]"><span class="font-extrabold text-base leading-tight">Turno C</span><span id="team-desc-2" class="text-[10px] md:text-[11px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Marcos e Socó</span></button>
+                        <button type="button" onclick="setTurma(3)" class="team-btn p-2 lg:py-2.5 rounded-xl border flex flex-col items-center justify-center btn-smooth active:scale-95 min-w-0 cursor-pointer lg:min-h-[64px]"><span class="font-extrabold text-base leading-tight">Turno D</span><span id="team-desc-3" class="text-[10px] md:text-[11px] font-semibold mt-0.5 opacity-80 truncate max-w-full px-1">Alex e Tita</span></button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tabela Geral Unificada -->
+            <section class="relative contain-section">
+                <div class="flex items-center justify-between gap-2 px-1 mb-2">
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Visão Completa do Mês</span>
+                        <div class="hidden md:flex items-center gap-3 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>Manhã</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-500"></span>Tarde</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-500"></span>Noite</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span>Folga</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Atestado</span>
+                        </div>
+                    </div>
+                    <span id="table-scroll-hint" class="text-[10px] font-bold text-blue-500 animate-pulse-slow">← Deslize →</span>
+                </div>
+                <div id="table-scroll-wrap" class="overflow-x-auto table-scroll rounded-2xl border border-slate-200 dark:border-surfaceBorder shadow-sm bg-white dark:bg-surface">
+                    <table class="w-full text-center border-collapse whitespace-nowrap" id="main-table"></table>
+                </div>
+                <p class="text-[10px] md:text-[11px] font-medium text-slate-400 dark:text-slate-500 text-center md:text-left md:px-1 mt-2">
+                    <span class="md:hidden">Dica: Toque num dia do seu turno para registrar ocorrências, observações ou atestado.</span>
+                    <span class="hidden md:inline">Dica: Clique em qualquer dia do seu turno destacado para registrar ocorrências, observações ou atestado médico. Pressione Ctrl+P para imprimir o relatório.</span>
+                </p>
+            </section>
+
+            <!-- Resumo Mensal -->
+            <section class="grid grid-cols-4 gap-2 md:gap-4 pt-1 contain-section">
+                <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:flex md:items-center md:justify-between md:text-left transition-colors">
+                    <div>
+                        <div class="text-[10px] md:text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide">Manhãs</div>
+                        <div class="hidden md:block text-[11px] font-semibold text-blue-600/70 dark:text-blue-300/60 mt-0.5">05:00 – 13:00</div>
+                    </div>
+                    <div id="count-M" class="text-xl md:text-3xl font-black text-blue-800 dark:text-blue-300 tabular-nums">0</div>
+                </div>
+                <div class="bg-orange-50 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900/50 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:flex md:items-center md:justify-between md:text-left transition-colors">
+                    <div>
+                        <div class="text-[10px] md:text-xs font-bold text-orange-700 dark:text-orange-400 uppercase tracking-wide">Tardes</div>
+                        <div class="hidden md:block text-[11px] font-semibold text-orange-600/70 dark:text-orange-300/60 mt-0.5">13:00 – 21:00</div>
+                    </div>
+                    <div id="count-T" class="text-xl md:text-3xl font-black text-orange-800 dark:text-orange-300 tabular-nums">0</div>
+                </div>
+                <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:flex md:items-center md:justify-between md:text-left transition-colors">
+                    <div>
+                        <div class="text-[10px] md:text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wide">Noites</div>
+                        <div class="hidden md:block text-[11px] font-semibold text-indigo-600/70 dark:text-indigo-300/60 mt-0.5">21:00 – 05:00</div>
+                    </div>
+                    <div id="count-N" class="text-xl md:text-3xl font-black text-indigo-800 dark:text-indigo-300 tabular-nums">0</div>
+                </div>
+                <div class="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900/50 rounded-xl md:rounded-2xl p-2.5 md:p-4 text-center md:flex md:items-center md:justify-between md:text-left transition-colors">
+                    <div>
+                        <div class="text-[10px] md:text-xs font-bold text-green-700 dark:text-green-400 uppercase tracking-wide">Folgas</div>
+                        <div class="hidden md:block text-[11px] font-semibold text-green-600/70 dark:text-green-300/60 mt-0.5">Descanso</div>
+                    </div>
+                    <div id="count-F" class="text-xl md:text-3xl font-black text-green-800 dark:text-green-300 tabular-nums">0</div>
+                </div>
+            </section>
+
+            <!-- Grade Inferior Responsiva: Ocorrências & Feriados -->
+            <div id="bottom-cards-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 items-start contain-section">
+                <section id="atestado-summary-section" class="hidden bg-rose-50/80 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4 md:p-5">
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <h3 class="text-[11px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            Atestado Médico &amp; Retorno
+                        </h3>
+                        <span id="atestado-summary-badge" class="px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-[10px] font-black"></span>
+                    </div>
+                    <div id="atestado-summary-container" class="space-y-2.5"></div>
+                </section>
+
+                <section id="holidays-list" class="bg-slate-50 dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-2xl p-4 md:p-5 hidden">
+                    <h3 class="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Feriados do Mês
+                    </h3>
+                    <div id="holidays-container" class="space-y-2"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Rodapé Discreto Exclusivo para PC -->
+        <footer class="hidden md:flex items-center justify-between px-7 pt-3 mt-auto border-t border-slate-100 dark:border-surfaceBorder text-[11px] font-medium text-slate-400 dark:text-slate-500">
+            <span>Escala Imerys • Britagem ICP 1 • Dados salvos localmente no dispositivo</span>
+            <div class="flex items-center gap-3">
+                <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">←</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">→</kbd> Meses</span>
+                <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">T</kbd> Hoje</span>
+                <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surfaceBorder text-slate-600 dark:text-slate-300 font-bold text-[10px]">Ctrl+P</kbd> Relatório</span>
+            </div>
+        </footer>
+
+        <!-- Modal Central: Gerar / Imprimir Relatório (Gerenciado por relatorio-supervisor.js) -->
+        <div id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title" onclick="if(event.target===this) closeExportModal()" class="modal-backdrop fixed inset-0 bg-slate-900/65 dark:bg-black/85 backdrop-blur-sm z-50 hidden flex-col justify-end md:justify-center md:items-center md:p-5 opacity-0">
+            <div id="export-modal-content" class="modal-sheet bg-white dark:bg-surface border-t md:border border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] md:rounded-[2rem] p-5 md:p-6 w-full max-w-md md:max-w-3xl mx-auto shadow-2xl pb-safe md:pb-6 max-h-[92dvh] overflow-y-auto no-scrollbar"></div>
+        </div>
+
+        <!-- Modal Editar Nomes das Equipes -->
+        <div id="teams-modal" role="dialog" aria-modal="true" aria-labelledby="teams-modal-title" onclick="if(event.target===this) closeTeamsModal()" class="modal-backdrop fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end md:justify-center md:items-center md:p-6 opacity-0">
+            <div id="teams-modal-content" class="modal-sheet bg-white dark:bg-surface border-t md:border border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] md:rounded-[2rem] p-6 w-full max-w-md md:max-w-lg mx-auto shadow-2xl pb-safe md:pb-6 max-h-[90dvh] overflow-y-auto no-scrollbar">
+                <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <h3 id="teams-modal-title" class="text-lg font-black text-slate-800 dark:text-white leading-tight">Editar Equipes dos Turnos</h3>
+                    <button type="button" onclick="closeTeamsModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer btn-smooth" aria-label="Fechar editor de equipes">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-4">Atualize os nomes em casos de férias, substituições ou trocas de turno.</p>
+
+                <form onsubmit="event.preventDefault(); saveTeamNames();" class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label for="team-input-0" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno A</label>
+                            <input id="team-input-0" type="text" maxlength="40" autocomplete="off" placeholder="Rolly e Aníbal" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                        </div>
+                        <div>
+                            <label for="team-input-1" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno B</label>
+                            <input id="team-input-1" type="text" maxlength="40" autocomplete="off" placeholder="Marquinho e Matozo" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                        </div>
+                        <div>
+                            <label for="team-input-2" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno C</label>
+                            <input id="team-input-2" type="text" maxlength="40" autocomplete="off" placeholder="Marcos e Socó" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                        </div>
+                        <div>
+                            <label for="team-input-3" class="block text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Turno D</label>
+                            <input id="team-input-3" type="text" maxlength="40" autocomplete="off" placeholder="Alex e Tita" class="w-full px-3.5 py-2.5 text-base font-semibold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder rounded-xl focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-3 pb-2 md:pb-0">
+                        <button type="button" onclick="resetTeamNames()" class="w-2/5 py-3.5 rounded-2xl font-bold text-xs text-slate-700 dark:text-slate-300 bg-slate-100 hover:bg-slate-200/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 border border-slate-200 dark:border-surfaceBorder active:scale-95 btn-smooth cursor-pointer">Padrão</button>
+                        <button type="submit" class="w-3/5 py-3.5 rounded-2xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 active:scale-95 btn-smooth cursor-pointer">Salvar Equipes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Instalação iOS -->
+        <div id="ios-install-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) closeIosInstallPrompt()" class="modal-backdrop fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[70] hidden flex-col justify-end md:justify-center items-center opacity-0 px-4 pb-8 md:pb-4">
+            <div id="ios-install-content" class="modal-sheet bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-sm shadow-2xl text-center">
+                <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
+                <img id="ios-modal-icon" alt="Ícone Escala Imerys" width="64" height="64" decoding="async" class="w-16 h-16 mx-auto mb-3 rounded-[16px] bg-white shadow-md border border-slate-200 dark:border-surfaceBorder object-contain">
+                <h3 class="text-xl font-black text-slate-800 dark:text-white mb-1.5">Instalar no iPhone</h3>
+                <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-5">Adicione à tela inicial com o ícone oficial da Imerys.</p>
+                <div class="flex flex-col gap-4 text-left bg-slate-50 dark:bg-oled border border-slate-100 dark:border-surfaceBorder rounded-xl p-4">
+                    <div class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                        <span class="flex items-center justify-center min-w-[32px] h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-black">1</span>
+                        <span class="text-sm">Toque em <b>Compartilhar</b> <svg class="w-5 h-5 inline-block mx-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> na barra do Safari.</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                        <span class="flex items-center justify-center min-w-[32px] h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-black">2</span>
+                        <span class="text-sm">Role e toque em <b>"Adicionar à Tela de Início"</b>.</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeIosInstallPrompt()" class="mt-5 w-full py-3.5 rounded-2xl font-bold text-slate-700 dark:text-slate-200 bg-slate-200 hover:bg-slate-300/80 dark:bg-surfaceBorder dark:hover:bg-zinc-800 active:scale-95 btn-smooth cursor-pointer">Entendi</button>
+            </div>
+        </div>
+
+        <!-- Modal Legenda e Backup -->
+        <div id="info-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) closeInfoModal()" class="modal-backdrop fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-center items-center opacity-0 px-4">
+            <div id="info-modal-content" class="modal-dialog bg-white dark:bg-surface border border-slate-200 dark:border-surfaceBorder rounded-[2rem] p-6 w-full max-w-xs md:max-w-md shadow-2xl max-h-[88dvh] overflow-y-auto no-scrollbar">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-black text-slate-800 dark:text-white leading-tight">Legenda</h3>
+                    <button type="button" onclick="closeInfoModal()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-surfaceBorder dark:hover:bg-zinc-800 rounded-full text-slate-500 dark:text-slate-300 cursor-pointer btn-smooth" aria-label="Fechar legenda">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div id="storage-status-box" class="mb-3 rounded-xl px-3 py-2.5 border border-slate-200 dark:border-surfaceBorder bg-slate-50 dark:bg-oled flex items-center gap-2.5">
+                    <span id="storage-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0"></span>
+                    <div class="min-w-0 flex-1">
+                        <span id="storage-status-title" class="block text-[11px] font-black text-slate-700 dark:text-slate-200 leading-tight">Verificando salvamento...</span>
+                        <span id="storage-status-detail" class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 leading-tight"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Ocorrências, Notas e Atestado (Gerenciado por relatorio-supervisor.js) -->
+        <div id="note-modal" role="dialog" aria-modal="true" onclick="if(event.target===this) requestCloseModal()" class="modal-backdrop fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 hidden flex-col justify-end md:justify-center md:items-center md:p-6 opacity-0">
+            <div id="modal-content" class="modal-sheet bg-white dark:bg-surface border-t md:border border-slate-200 dark:border-surfaceBorder rounded-t-[2rem] md:rounded-[2rem] p-6 w-full max-w-md md:max-w-lg mx-auto shadow-2xl pb-safe md:pb-6 max-h-[90dvh] overflow-y-auto no-scrollbar"></div>
+        </div>
+
+        <!-- Toast -->
+        <div id="toast" role="status" aria-live="polite" class="fixed top-20 left-1/2 -translate-x-1/2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 px-5 py-3 rounded-full shadow-2xl z-[80] flex items-center gap-2 transition-[transform,opacity] duration-250 ease-out opacity-0 pointer-events-none -translate-y-5 max-w-[90vw]">
+            <svg class="w-5 h-5 text-blue-400 dark:text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            <span id="toast-msg" class="font-bold text-xs sm:text-sm tracking-wide truncate"></span>
+        </div>
+    </div>
+
+    <script>
+        /* 0. UTILITÁRIOS DE FLUIDEZ ADAPTATIVA */
+        const reducedMotionMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+        function prefersReducedMotion() { return Boolean(reducedMotionMQ && reducedMotionMQ.matches); }
+
+        /* 1. MOTOR DE ÍCONE OFICIAL IMERYS HD */
+        const IMERYS_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+            <defs>
+                <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f2f6fc"/></linearGradient>
+                <radialGradient id="disc" cx="68%" cy="28%" r="72%" fx="74%" fy="22%"><stop offset="0%" stop-color="#ffffff"/><stop offset="18%" stop-color="#a8ccff"/><stop offset="48%" stop-color="#2b64c6"/><stop offset="80%" stop-color="#143d8f"/><stop offset="100%" stop-color="#081b45"/></radialGradient>
+                <radialGradient id="dot" cx="62%" cy="28%" r="72%"><stop offset="0%" stop-color="#ffffff"/><stop offset="28%" stop-color="#93c5fd"/><stop offset="66%" stop-color="#235cc2"/><stop offset="100%" stop-color="#0b2358"/></radialGradient>
+                <linearGradient id="stem" x1="0%" y1="35%" x2="100%" y2="55%"><stop offset="0%" stop-color="#9ca3af"/><stop offset="22%" stop-color="#ffffff"/><stop offset="42%" stop-color="#d1d5db"/><stop offset="56%" stop-color="#1f2937"/><stop offset="70%" stop-color="#000000"/><stop offset="100%" stop-color="#050505"/></linearGradient>
+                <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="-2" dy="6" stdDeviation="5" flood-color="#0a1938" flood-opacity="0.22"/></filter>
+            </defs>
+            <rect width="512" height="512" fill="url(#bg)"/>
+            <g filter="url(#sh)">
+                <ellipse cx="253" cy="245" rx="108" ry="67" transform="rotate(-37 253 245)" fill="#07183b"/>
+                <ellipse cx="256" cy="239" rx="106" ry="65" transform="rotate(-37 256 239)" fill="url(#disc)"/>
+            </g>
+            <path d="M206 177 Q246 149 289 155 Q272 183 238 190 Q214 195 206 177 Z" fill="url(#bg)"/>
+            <path d="M224 185 C216 212 218 242 229 257 C242 271 272 263 281 244 C272 222 270 198 275 170 C260 183 240 190 224 185 Z" fill="url(#stem)"/>
+            <path d="M227 254 C239 269 270 263 281 245" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2.5" stroke-linecap="round"/>
+            <ellipse cx="261" cy="134" rx="35" ry="16" transform="rotate(-34 261 134)" fill="#0a2050"/>
+            <ellipse cx="262" cy="131" rx="34" ry="15" transform="rotate(-34 262 131)" fill="url(#dot)"/>
+            <g fill="#0a0d14" font-family="Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-weight="800" font-size="44" text-anchor="middle">
+                <text x="148" y="398">I</text><text x="188" y="398">M</text><text x="234" y="398">E</text>
+                <text x="276" y="398">R</text><text x="318" y="398">Y</text><text x="360" y="398">S</text>
+            </g>
+        </svg>`;
+
+        const IMERYS_SVG_URI = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(IMERYS_ICON_SVG);
+        const iconPngCache = {};
+
+        function renderIconPNG(size) {
+            if (iconPngCache[size]) return Promise.resolve(iconPngCache[size]);
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const c = document.createElement('canvas');
+                        c.width = size; c.height = size;
+                        const ctx = c.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, size, size);
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(img, 0, 0, size, size);
+                        iconPngCache[size] = c.toDataURL('image/png');
+                        resolve(iconPngCache[size]);
+                    } catch (e) { resolve(IMERYS_SVG_URI); }
+                };
+                img.onerror = () => resolve(IMERYS_SVG_URI);
+                img.src = IMERYS_SVG_URI;
+            });
+        }
+
+        async function checkStaticAsset(path) {
+            if (!window.location.protocol.startsWith('http')) return false;
+            try {
+                const r = await fetch(path, { method: 'HEAD', cache: 'no-store' });
+                return r.ok;
+            } catch (e) { return false; }
+        }
+
+        function setBrandImages(src) {
+            ['header-brand-icon', 'ios-modal-icon'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.src = src;
+            });
+        }
+
+        function applyManifest(icon192Href, icon512Href) {
+            const manifestData = {
+                name: 'Escala Imerys',
+                short_name: 'Escala Imerys',
+                description: 'Escala de Revezamento 3x1 - Britagem ICP 1',
+                start_url: window.location.protocol.startsWith('http') ? window.location.href : '.',
+                display: 'standalone',
+                background_color: '#000000',
+                theme_color: '#000000',
+                icons: [
+                    { src: icon192Href, sizes: '192x192', type: 'image/png', purpose: 'any' },
+                    { src: icon512Href, sizes: '512x512', type: 'image/png', purpose: 'any' },
+                    { src: icon512Href, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+                ]
+            };
+            try {
+                document.getElementById('pwa-manifest').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData));
+            } catch (e) {}
+        }
+
+        async function initAppIcons() {
+            setBrandImages(IMERYS_SVG_URI);
+            const isHttp = window.location.protocol.startsWith('http');
+            const baseUrl = isHttp ? new URL('./', window.location.href).href : '';
+            if (isHttp) applyManifest(`${baseUrl}icon-192.png`, `${baseUrl}icon-512.png`);
+
+            const [hasApple, has192, has512] = await Promise.all([
+                checkStaticAsset('./apple-touch-icon.png'),
+                checkStaticAsset('./icon-192.png'),
+                checkStaticAsset('./icon-512.png')
+            ]);
+
+            const appleHref = hasApple ? `${baseUrl}apple-touch-icon.png` : await renderIconPNG(180);
+            const icon192Href = has192 ? `${baseUrl}icon-192.png` : await renderIconPNG(192);
+            const icon512Href = has512 ? `${baseUrl}icon-512.png` : await renderIconPNG(512);
+
+            const appleLink = document.getElementById('apple-icon');
+            if (appleLink) appleLink.href = appleHref;
+            const favLink = document.getElementById('app-favicon');
+            if (favLink) favLink.href = icon192Href;
+
+            if (!isHttp || !has192 || !has512) applyManifest(icon192Href, icon512Href);
+        }
+
+        /* 2. CONTROLE CENTRAL DE MODAIS */
+        const modalTimers = { note: null, info: null, ios: null, teams: null, export: null };
+        const modalRafs = { note: [0, 0], info: [0, 0], ios: [0, 0], teams: [0, 0], export: [0, 0] };
+
+        function cancelModalFrames(key) {
+            if (modalTimers[key]) { clearTimeout(modalTimers[key]); modalTimers[key] = null; }
+            if (modalRafs[key][0]) { cancelAnimationFrame(modalRafs[key][0]); modalRafs[key][0] = 0; }
+            if (modalRafs[key][1]) { cancelAnimationFrame(modalRafs[key][1]); modalRafs[key][1] = 0; }
+        }
+        function isAnyModalOpen() {
+            return ['note-modal', 'info-modal', 'ios-install-modal', 'teams-modal', 'export-modal'].some(id => {
+                const el = document.getElementById(id);
+                return el && !el.classList.contains('hidden');
+            });
+        }
+        function syncBodyScrollLock() {
+            if (isAnyModalOpen()) {
+                if (!document.body.classList.contains('overflow-hidden')) {
+                    const sbWidth = window.innerWidth - document.documentElement.clientWidth;
+                    if (sbWidth > 0) document.body.style.paddingRight = `${sbWidth}px`;
+                    document.body.classList.add('overflow-hidden');
+                }
+            } else {
+                document.body.classList.remove('overflow-hidden');
+                document.body.style.paddingRight = '';
+            }
+        }
+        function openAnimatedModal(key, backdropId, panelId, onReady) {
+            cancelModalFrames(key);
+            const md = document.getElementById(backdropId), ct = document.getElementById(panelId);
+            ct.style.willChange = 'transform, opacity';
+            md.classList.remove('hidden'); md.classList.add('flex');
+            syncBodyScrollLock();
+            modalRafs[key][0] = requestAnimationFrame(() => {
+                modalRafs[key][0] = 0;
+                if (typeof onReady === 'function') onReady();
+                modalRafs[key][1] = requestAnimationFrame(() => {
+                    modalRafs[key][1] = 0;
+                    md.classList.replace('opacity-0', 'opacity-100');
+                    ct.classList.add('is-open');
+                    modalTimers[key] = setTimeout(() => { ct.style.willChange = 'auto'; modalTimers[key] = null; }, 360);
+                });
+            });
+        }
+        function closeAnimatedModal(key, backdropId, panelId) {
+            cancelModalFrames(key);
+            const md = document.getElementById(backdropId), ct = document.getElementById(panelId);
+            ct.style.willChange = 'transform, opacity';
+            md.classList.replace('opacity-100', 'opacity-0');
+            ct.classList.remove('is-open');
+            modalTimers[key] = setTimeout(() => {
+                md.classList.add('hidden'); md.classList.remove('flex');
+                ct.style.willChange = 'auto';
+                modalTimers[key] = null; syncBodyScrollLock();
+            }, 320);
+        }
+
+        /* 3. INSTALAÇÃO PWA */
+        function isIosDevice() {
+            const ua = window.navigator.userAgent.toLowerCase();
+            return /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+        function isInStandaloneMode() {
+            return (('standalone' in window.navigator) && window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+        }
+        let deferredPrompt = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            if (isIosDevice() && !isInStandaloneMode()) document.getElementById('install-btn')?.classList.remove('hidden');
+        });
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); deferredPrompt = e;
+            document.getElementById('install-btn')?.classList.remove('hidden');
+        });
+        async function installApp() {
+            haptic();
+            if (isIosDevice() && !isInStandaloneMode()) { openIosInstallPrompt(); }
+            else if (deferredPrompt) {
+                try {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') document.getElementById('install-btn').classList.add('hidden');
+                } catch (e) {}
+                deferredPrompt = null;
+            } else { showToast('App já instalado ou use o menu do navegador.'); }
+        }
+        function openIosInstallPrompt() { haptic(); openAnimatedModal('ios', 'ios-install-modal', 'ios-install-content'); }
+        function closeIosInstallPrompt() { haptic(); closeAnimatedModal('ios', 'ios-install-modal', 'ios-install-content'); }
+
+        /* 4. PERSISTÊNCIA EM DUPLA CAMADA (localStorage + IndexedDB) */
+        const STORAGE_KEYS = ['imerys_turma', 'imerys_notes', 'imerys_overrides', 'imerys_atestados', 'imerys_teams'];
+        const IDB_NAME = 'EscalaImerysStorage', IDB_STORE = 'kv';
+
+        function safeParseJSON(raw, fallback, expectedType) {
+            if (!raw) return fallback;
+            try {
+                const parsed = JSON.parse(raw);
+                if (expectedType === 'array') return Array.isArray(parsed) ? parsed : fallback;
+                if (expectedType === 'object') return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : fallback;
+                return parsed;
+            } catch (e) { return fallback; }
+        }
+
+        const DB = {
+            memory: {}, lsAvailable: false, idbAvailable: false, idbInstance: null, persistedGranted: false, warningDismissed: false,
+            testLocalStorage() {
+                try {
+                    localStorage.setItem('__imerys_probe__', '1');
+                    this.lsAvailable = localStorage.getItem('__imerys_probe__') === '1';
+                    localStorage.removeItem('__imerys_probe__');
+                } catch (e) { this.lsAvailable = false; }
+                return this.lsAvailable;
+            },
+            openIDB() {
+                return new Promise((resolve) => {
+                    if (typeof indexedDB === 'undefined') { this.idbAvailable = false; return resolve(null); }
+                    try {
+                        const req = indexedDB.open(IDB_NAME, 1);
+                        req.onupgradeneeded = (ev) => {
+                            const db = ev.target.result;
+                            if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+                        };
+                        req.onsuccess = (ev) => { this.idbInstance = ev.target.result; this.idbAvailable = true; resolve(this.idbInstance); };
+                        req.onerror = () => { this.idbAvailable = false; resolve(null); };
+                    } catch (e) { this.idbAvailable = false; resolve(null); }
+                });
+            },
+            idbSet(k, v) {
+                if (!this.idbInstance) return Promise.resolve(false);
+                return new Promise((resolve) => {
+                    try {
+                        const tx = this.idbInstance.transaction(IDB_STORE, 'readwrite');
+                        tx.objectStore(IDB_STORE).put(String(v), k);
+                        tx.oncomplete = () => resolve(true);
+                        tx.onerror = () => resolve(false);
+                    } catch (e) { resolve(false); }
+                });
+            },
+            idbGetAll() {
+                if (!this.idbInstance) return Promise.resolve({});
+                return new Promise((resolve) => {
+                    try {
+                        const tx = this.idbInstance.transaction(IDB_STORE, 'readonly');
+                        const store = tx.objectStore(IDB_STORE), result = {};
+                        let pending = STORAGE_KEYS.length;
+                        STORAGE_KEYS.forEach((k) => {
+                            const req = store.get(k);
+                            req.onsuccess = () => { if (req.result !== undefined && req.result !== null) result[k] = String(req.result); if (--pending === 0) resolve(result); };
+                            req.onerror = () => { if (--pending === 0) resolve(result); };
+                        });
+                    } catch (e) { resolve({}); }
+                });
+            },
+            get(k) {
+                if (this.lsAvailable) {
+                    try { const val = localStorage.getItem(k); if (val !== null) { this.memory[k] = val; return val; } } catch (e) {}
+                }
+                return Object.prototype.hasOwnProperty.call(this.memory, k) ? this.memory[k] : null;
+            },
+            set(k, v) {
+                const strVal = String(v);
+                this.memory[k] = strVal;
+                let lsSaved = false;
+                try { localStorage.setItem(k, strVal); lsSaved = localStorage.getItem(k) === strVal; this.lsAvailable = lsSaved; }
+                catch (e) { this.lsAvailable = false; }
+                if (this.idbAvailable && this.idbInstance) this.idbSet(k, strVal);
+                return lsSaved || this.idbAvailable;
+            },
+            flushAll() {
+                return [
+                    this.set('imerys_turma', currentTurma),
+                    this.set('imerys_notes', JSON.stringify(notesDb)),
+                    this.set('imerys_overrides', JSON.stringify(overridesDb)),
+                    this.set('imerys_atestados', JSON.stringify(atestadosDb)),
+                    this.set('imerys_teams', JSON.stringify(teamNames))
+                ].every(Boolean);
+            },
+            isEphemeralEnvironment() {
+                const p = window.location.protocol;
+                return (p === 'file:' || p === 'content:' || p === 'blob:' || p === 'about:' || !window.origin || window.origin === 'null' || (!this.lsAvailable && !this.idbAvailable));
+            }
+        };
+        DB.testLocalStorage();
+
+        /* 5. MOTOR DE ESCALA, FERIADOS E ATESTADOS */
+        const CYCLE = ['M', 'M', 'M', 'F', 'T', 'T', 'T', 'F', 'N', 'N', 'N', 'F'];
+        const SHIFTS_CONFIG = {
+            M: { name: 'Manhã', hours: '05:00-13:00', style: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-black' },
+            T: { name: 'Tarde', hours: '13:00-21:00', style: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 font-black' },
+            N: { name: 'Noite', hours: '21:00-05:00', style: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 font-black' },
+            F: { name: 'Folga', hours: '', style: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-black' },
+            AT: { name: 'Atestado Médico', hours: '', style: 'bg-rose-100 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 font-black ring-2 ring-inset ring-rose-500/80 dark:ring-rose-500/70' }
+        };
+        const BASE_DATE = Date.UTC(2026, 10, 1);
+        const TEAM_LETTERS = ['A', 'B', 'C', 'D'];
+        const DEFAULT_TEAM_DESC = ['Rolly e Aníbal', 'Marquinho e Matozo', 'Marcos e Socó', 'Alex e Tita'];
+        const TEAM_OFFSETS = [0, 3, 6, 9];
+        const DOW_NAMES = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+        const DOW_PRETTY = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const MONTH_SHORT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+        let currentTurma = 2;
+        const now = new Date();
+        let currentDate = new Date(now.getFullYear(), now.getMonth(), 1, 12, 0, 0);
+        let teamNames = [...DEFAULT_TEAM_DESC];
+        let notesDb = {}, overridesDb = {}, atestadosDb = [];
+        let currentModalDateStr = null, currentSelectedOverride = '', modalAtestadoEnabled = false;
+        let modalAtestadoStartDate = null, modalEditingAtestadoId = null, modalDirty = false, toastTimer = null;
+        let lastCounts = { M: null, T: null, N: null, F: null };
+        let wheelTargetX = null, wheelRaf = 0, wheelLastTs = 0;
+        const holidaysYearCache = {};
+
+        function stopSmoothWheel() {
+            if (wheelRaf) { cancelAnimationFrame(wheelRaf); wheelRaf = 0; }
+            wheelTargetX = null;
+        }
+        function sanitizeTeamList(rawList) {
+            return DEFAULT_TEAM_DESC.map((fallback, idx) => {
+                if (!Array.isArray(rawList) || typeof rawList[idx] !== 'string') return fallback;
+                const clean = rawList[idx].trim().slice(0, 40);
+                return clean || fallback;
+            });
+        }
+        function getNoteKey(dateKey, turmaIdx) { return `${dateKey}_${turmaIdx}`; }
+        function getNote(dateKey, turmaIdx) { return notesDb[getNoteKey(dateKey, turmaIdx)] || ''; }
+        function setNote(dateKey, turmaIdx, val) {
+            const k = getNoteKey(dateKey, turmaIdx);
+            const clean = String(val || '').trim();
+            if (clean) notesDb[k] = clean; else delete notesDb[k];
+        }
+        function migrateLegacyNotes() {
+            let changed = false;
+            Object.keys(notesDb).forEach((k) => {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(k)) {
+                    const text = String(notesDb[k] || '').trim();
+                    if (text) {
+                        const matchAt = atestadosDb.find(r => getAtestadoDates(r).includes(k));
+                        const targetTurma = matchAt ? matchAt.turma : currentTurma;
+                        const scopedKey = getNoteKey(k, targetTurma);
+                        if (!notesDb[scopedKey]) notesDb[scopedKey] = text;
+                    }
+                    delete notesDb[k];
+                    changed = true;
+                }
+            });
+            if (changed) DB.set('imerys_notes', JSON.stringify(notesDb));
+        }
+
+        function hydrateStateFromDB() {
+            const parsedTurma = parseInt(DB.get('imerys_turma'), 10);
+            currentTurma = (!isNaN(parsedTurma) && parsedTurma >= 0 && parsedTurma <= 3) ? parsedTurma : 2;
+            teamNames = sanitizeTeamList(safeParseJSON(DB.get('imerys_teams'), DEFAULT_TEAM_DESC, 'array'));
+            notesDb = safeParseJSON(DB.get('imerys_notes'), {}, 'object');
+            overridesDb = safeParseJSON(DB.get('imerys_overrides'), {}, 'object');
+            atestadosDb = safeParseJSON(DB.get('imerys_atestados'), [], 'array');
+            migrateLegacyNotes();
+        }
+        hydrateStateFromDB();
+
+        function haptic() { try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) {} }
+        function escapeHTML(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+        function formatDateKey(y, mZero, d) { return `${y}-${String(mZero + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`; }
+        function parseDateKey(k) { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2], 12, 0, 0); }
+        function addDaysToKey(k, delta) { const dt = parseDateKey(k); dt.setDate(dt.getDate() + delta); return formatDateKey(dt.getFullYear(), dt.getMonth(), dt.getDate()); }
+        function formatShortDate(k) { const p = k.split('-'); return `${p[2]}/${p[1]}`; }
+        function formatReturnDateLabel(k) { return `${DOW_PRETTY[parseDateKey(k).getDay()]}, ${formatShortDate(k)}`; }
+
+        function getEaster(year) {
+            const a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4;
+            const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+            return new Date(year, Math.floor((h + l - 7 * m + 114) / 31) - 1, ((h + l - 7 * m + 114) % 31) + 1, 12, 0, 0);
+        }
+        function getHolidays(year, month) {
+            if (!holidaysYearCache[year]) {
+                const map = {};
+                const addH = (k, name) => { map[k] = map[k] ? `${map[k]} / ${name}` : name; };
+                const easter = getEaster(year);
+                const addD = (d, n) => { const nd = new Date(d.getTime()); nd.setDate(nd.getDate() + n); return nd; };
+                const mk = (d) => `${d.getDate()}/${d.getMonth()}`;
+                addH('1/0', 'Ano Novo');
+                addH('21/3', 'Tiradentes');
+                addH('1/4', 'Dia do Trabalho');
+                addH('29/5', 'Dia de São Pedro (Cachoeiro)');
+                addH('7/8', 'Independência do Brasil');
+                addH('12/9', 'Nossa Sra. Aparecida');
+                addH('2/10', 'Finados');
+                addH('15/10', 'Proc. da República');
+                addH('20/10', 'Consciência Negra');
+                addH('25/11', 'Natal');
+                addH(mk(addD(easter, -47)), 'Carnaval');
+                addH(mk(addD(easter, -2)), 'Paixão de Cristo');
+                addH(mk(easter), 'Páscoa');
+                addH(mk(addD(easter, 8)), 'Nossa Sra. da Penha (ES)');
+                addH(mk(addD(easter, 60)), 'Corpus Christi');
+                holidaysYearCache[year] = map;
+            }
+            const res = {}, suffix = `/${month}`;
+            for (const [k, v] of Object.entries(holidaysYearCache[year])) { if (k.endsWith(suffix)) res[k.split('/')[0]] = v; }
+            return res;
+        }
+        function getShift(year, month, day, turmaIdx) {
+            let idx = (Math.floor((Date.UTC(year, month, day) - BASE_DATE) / 86400000) + TEAM_OFFSETS[turmaIdx]) % 12;
+            if (idx < 0) idx += 12;
+            return CYCLE[idx];
+        }
+        function getEffectiveShift(dateKey, turmaIdx) {
+            const ov = overridesDb[`${dateKey}_${turmaIdx}`];
+            if (ov) return ov;
+            const dt = parseDateKey(dateKey);
+            return getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), turmaIdx);
+        }
+        function getAtestadoDates(rec) {
+            const list = [], total = Math.max(1, parseInt(rec.days, 10) || 1);
+            for (let i = 0; i < total; i++) list.push(addDaysToKey(rec.startDate, i));
+            return list;
+        }
+        function getAtestadoReason(rec) {
+            const seen = new Set(), parts = [];
+            getAtestadoDates(rec).forEach((d) => {
+                const txt = getNote(d, rec.turma).trim();
+                if (txt && !seen.has(txt)) { seen.add(txt); parts.push(txt); }
+            });
+            return parts.join(' • ');
+        }
+        function findAtestadoOnDate(dateKey, turmaIdx) {
+            for (const rec of atestadosDb) {
+                if (rec.turma !== turmaIdx) continue;
+                const dates = getAtestadoDates(rec), idx = dates.indexOf(dateKey);
+                if (idx !== -1) return { record: rec, dayIndex: idx + 1, totalDays: dates.length, endDate: dates[dates.length - 1] };
+            }
+            return null;
+        }
+        function computeReturnInfo(startDate, days, turmaIdx, ignoreId = null) {
+            const total = Math.max(1, parseInt(days, 10) || 1), endDate = addDaysToKey(startDate, total - 1);
+            const otherBlocked = new Set();
+            atestadosDb.forEach(r => { if (r.turma === turmaIdx && r.id !== ignoreId) getAtestadoDates(r).forEach(d => otherBlocked.add(d)); });
+            let candidate = addDaysToKey(startDate, total), skippedFolgas = 0;
+            for (let step = 0; step < 60; step++) {
+                if (!otherBlocked.has(candidate)) {
+                    const eff = getEffectiveShift(candidate, turmaIdx);
+                    if (eff !== 'F') return { endDate, returnDateKey: candidate, returnShiftCode: eff, skippedFolgas };
+                    skippedFolgas++;
+                }
+                candidate = addDaysToKey(candidate, 1);
+            }
+            const fallback = addDaysToKey(startDate, total);
+            return { endDate, returnDateKey: fallback, returnShiftCode: getEffectiveShift(fallback, turmaIdx), skippedFolgas: 0 };
+        }
+        function showToast(msg) {
+            const toast = document.getElementById('toast'), msgEl = document.getElementById('toast-msg');
+            if (!toast || !msgEl) return;
+            msgEl.innerText = msg;
+            toast.classList.remove('opacity-0', '-translate-y-5');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { toast.classList.remove('opacity-100', 'translate-y-0'); toast.classList.add('opacity-0', '-translate-y-5'); }, 3200);
+        }
+
+        /* 6. DIAGNÓSTICO E SINCRONIZAÇÃO */
+        function updateStorageHealthUI() {
+            const dot = document.getElementById('storage-status-dot'), title = document.getElementById('storage-status-title');
+            const detail = document.getElementById('storage-status-detail'), banner = document.getElementById('storage-warning-banner');
+            const bannerText = document.getElementById('storage-warning-text');
+            const isEphemeral = DB.isEphemeralEnvironment(), proto = window.location.protocol;
+            if (dot && title && detail) {
+                if (!isEphemeral && (DB.lsAvailable || DB.idbAvailable)) {
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-green-500 shrink-0 shadow-[0_0_6px_rgba(34,197,94,0.6)]';
+                    title.innerText = 'Salvamento automático ativo';
+                    const layers = [];
+                    if (DB.lsAvailable) layers.push('Memória Local');
+                    if (DB.idbAvailable) layers.push('IndexedDB');
+                    detail.innerText = `${layers.join(' + ')}${DB.persistedGranted ? ' • Protegido' : ''}`;
+                } else {
+                    dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0 shadow-[0_0_6px_rgba(245,158,11,0.6)]';
+                    title.innerText = 'Ambiente temporário / restrito';
+                    detail.innerText = (!DB.lsAvailable && !DB.idbAvailable) ? 'Navegador bloqueou gravação local.' : 'Abra pelo link publicado para salvar sempre.';
+                }
+            }
+            if (banner && bannerText) {
+                if (isEphemeral && !DB.warningDismissed) {
+                    bannerText.innerText = (proto === 'file:' || proto === 'content:')
+                        ? 'Você abriu o arquivo direto do aparelho. Para manter salvo sempre, use o link do GitHub Pages ou salve um Backup.'
+                        : 'Ambiente de pré-visualização temporário. Use o link publicado ou salve um Backup antes de fechar.';
+                    banner.classList.remove('hidden');
+                } else { banner.classList.add('hidden'); }
+            }
+        }
+        function dismissStorageWarning() { DB.warningDismissed = true; document.getElementById('storage-warning-banner')?.classList.add('hidden'); }
+        async function initPersistence() {
+            if (navigator.storage?.persist) { try { DB.persistedGranted = await navigator.storage.persist(); } catch (e) {} }
+            await DB.openIDB();
+            if (DB.idbAvailable) {
+                const idbData = await DB.idbGetAll();
+                let restoredAny = false;
+                STORAGE_KEYS.forEach((k) => {
+                    let lsVal = null;
+                    if (DB.lsAvailable) { try { lsVal = localStorage.getItem(k); } catch (e) {} }
+                    if (lsVal === null && idbData[k] !== undefined) {
+                        DB.memory[k] = idbData[k];
+                        try { localStorage.setItem(k, idbData[k]); } catch (e) {}
+                        restoredAny = true;
+                    } else if (lsVal !== null && idbData[k] !== lsVal) {
+                        DB.idbSet(k, lsVal);
+                    }
+                });
+                if (restoredAny) {
+                    hydrateStateFromDB();
+                    if (typeof renderApp === 'function') renderApp(false);
+                    showToast('Dados recuperados automaticamente!');
+                }
+            }
+            updateStorageHealthUI();
+        }
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') DB.flushAll(); });
+        window.addEventListener('pagehide', () => DB.flushAll());
+        window.addEventListener('storage', (ev) => { if (ev.key && STORAGE_KEYS.includes(ev.key)) { hydrateStateFromDB(); if (typeof renderApp === 'function') renderApp(false); } });
+
+        /* 7. EDITOR DE NOMES DAS EQUIPES */
+        function openTeamsModal() {
+            haptic();
+            for (let i = 0; i < 4; i++) {
+                const inp = document.getElementById(`team-input-${i}`);
+                if (inp) inp.value = teamNames[i];
+            }
+            openAnimatedModal('teams', 'teams-modal', 'teams-modal-content');
+        }
+        function closeTeamsModal() { haptic(); closeAnimatedModal('teams', 'teams-modal', 'teams-modal-content'); }
+        function resetTeamNames() {
+            haptic();
+            for (let i = 0; i < 4; i++) {
+                const inp = document.getElementById(`team-input-${i}`);
+                if (inp) inp.value = DEFAULT_TEAM_DESC[i];
+            }
+            showToast('Nomes padrão preenchidos. Toque em Salvar!');
+        }
+        function saveTeamNames() {
+            haptic();
+            const nextNames = [];
+            for (let i = 0; i < 4; i++) {
+                const inp = document.getElementById(`team-input-${i}`);
+                const clean = inp ? inp.value.trim().slice(0, 40) : '';
+                nextNames.push(clean || DEFAULT_TEAM_DESC[i]);
+            }
+            teamNames = nextNames;
+            const ok = DB.set('imerys_teams', JSON.stringify(teamNames));
+            closeTeamsModal();
+            if (typeof renderApp === 'function') renderApp(false);
+            updateStorageHealthUI();
+            showToast(ok ? 'Nomes das equipes atualizados!' : 'Aviso: salvamento bloqueado! Use o Backup em Legenda.');
+        }
+
+        /* 8. NAVEGAÇÃO E ANIMAÇÕES */
+        function setTurma(index) {
+            if (index === currentTurma) return;
+            haptic(); currentTurma = index;
+            const saved = DB.set('imerys_turma', index);
+            if (typeof renderApp === 'function') renderApp(false);
+            if (!saved) { showToast('Atenção: navegador bloqueou o salvamento.'); updateStorageHealthUI(); }
+        }
+        function changeMonth(delta) {
+            haptic();
+            stopSmoothWheel();
+            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1, 12, 0, 0);
+            const t = new Date();
+            const isTargetCurrentMonth = currentDate.getFullYear() === t.getFullYear() && currentDate.getMonth() === t.getMonth();
+            const sc = document.getElementById('table-scroll-wrap');
+            if (sc && !isTargetCurrentMonth) sc.scrollLeft = 0;
+            if (typeof renderApp === 'function') renderApp(isTargetCurrentMonth, delta > 0 ? 1 : -1);
+        }
+        function goToToday() {
+            haptic();
+            stopSmoothWheel();
+            const t = new Date();
+            const sameMonth = currentDate.getFullYear() === t.getFullYear() && currentDate.getMonth() === t.getMonth();
+            currentDate = new Date(t.getFullYear(), t.getMonth(), 1, 12, 0, 0);
+            if (typeof renderApp === 'function') renderApp(true, sameMonth ? 0 : -1);
+        }
+        function scrollToTodayColumn() {
+            requestAnimationFrame(() => {
+                const colToday = document.getElementById('col-today'), sc = document.getElementById('table-scroll-wrap');
+                if (colToday && sc && sc.scrollWidth > sc.clientWidth + 2) {
+                    const targetLeft = Math.max(0, colToday.offsetLeft - Math.max(124, Math.floor((sc.clientWidth - colToday.offsetWidth) / 2)));
+                    try { sc.scrollTo({ left: targetLeft, behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); }
+                    catch (e) { sc.scrollLeft = targetLeft; }
+                }
+            });
+        }
+        function updateTableScrollHint() {
+            const sc = document.getElementById('table-scroll-wrap'), hint = document.getElementById('table-scroll-hint');
+            if (!sc || !hint) return;
+            hint.classList.toggle('hidden', !(sc.scrollWidth > sc.clientWidth + 4));
+        }
+        function animateTableSwap(el, dir) {
+            if (!el || !dir || prefersReducedMotion() || typeof el.animate !== 'function') return;
+            const offset = dir > 0 ? 16 : -16;
+            el.animate(
+                [{ opacity: 0.45, transform: `translate3d(${offset}px, 0, 0)` }, { opacity: 1, transform: 'translate3d(0, 0, 0)' }],
+                { duration: 240, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
+            );
+        }
+        function updateCountAnimated(key, nextVal) {
+            const el = document.getElementById(`count-${key}`);
+            if (!el) return;
+            el.innerText = nextVal;
+            if (lastCounts[key] !== null && lastCounts[key] !== nextVal && !prefersReducedMotion() && typeof el.animate === 'function') {
+                el.animate(
+                    [
+                        { transform: 'scale3d(0.86, 0.86, 1)', opacity: 0.6 },
+                        { transform: 'scale3d(1.06, 1.06, 1)', opacity: 1, offset: 0.62 },
+                        { transform: 'scale3d(1, 1, 1)', opacity: 1 }
+                    ],
+                    { duration: 280, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' }
+                );
+            }
+            lastCounts[key] = nextVal;
+        }
+
+        /* 9. HELPERS GRÁFICOS (CANVAS HD) */
+        function canvasRoundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+        }
+        function canvasTruncateText(ctx, text, maxW) {
+            if (ctx.measureText(text).width <= maxW) return text;
+            let s = text;
+            while (s.length > 1 && ctx.measureText(s + '…').width > maxW) s = s.slice(0, -1);
+            return s + '…';
+        }
+        function loadLogoImage() {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = IMERYS_SVG_URI;
+            });
+        }
+
+        /* 10. CONTROLE DE MODAIS */
+        function markModalDirty() { modalDirty = true; document.getElementById('unsaved-guard')?.classList.add('hidden'); }
+        function requestCloseModal() {
+            if (modalDirty) {
+                haptic();
+                const g = document.getElementById('unsaved-guard');
+                if (g) { g.classList.remove('hidden'); g.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'nearest' }); }
+                return;
+            }
+            closeModal();
+        }
+        function closeModal() {
+            haptic(); modalDirty = false; document.getElementById('unsaved-guard')?.classList.add('hidden');
+            closeAnimatedModal('note', 'note-modal', 'modal-content');
+        }
+        function setAtestadoDays(val) {
+            haptic(); markModalDirty();
+            document.getElementById('atestado-days-input').value = Math.max(1, Math.min(180, parseInt(val, 10) || 1));
+            if (typeof updateAtestadoPreview === 'function') updateAtestadoPreview();
+        }
+        function adjustAtestadoDays(delta) { setAtestadoDays((parseInt(document.getElementById('atestado-days-input').value, 10) || 1) + delta); }
+        function onAtestadoDaysInput() { markModalDirty(); if (typeof updateAtestadoPreview === 'function') updateAtestadoPreview(); }
+        function openAtestadoEdit(startKey) { if (typeof openModal === 'function') openModal(startKey); }
+        function openInfoModal() { haptic(); updateStorageHealthUI(); openAnimatedModal('info', 'info-modal', 'info-modal-content'); }
+        function closeInfoModal() { haptic(); closeAnimatedModal('info', 'info-modal', 'info-modal-content'); }
+        function closeExportModal() { haptic(); closeAnimatedModal('export', 'export-modal', 'export-modal-content'); }
+
+        /* 11. EVENTOS DE TABELA, SCROLL E TECLADO */
+        function bindInteractions() {
+            const tableEl = document.getElementById('main-table');
+            tableEl?.addEventListener('click', (e) => {
+                const td = e.target.closest('td[data-action]');
+                if (!td) return;
+                if (td.dataset.action === 'note' && typeof openModal === 'function') openModal(td.dataset.date);
+                else if (td.dataset.action === 'team') setTurma(parseInt(td.dataset.team, 10));
+            });
+
+            const sc = document.getElementById('table-scroll-wrap');
+            sc?.addEventListener('pointerdown', stopSmoothWheel, { passive: true });
+            sc?.addEventListener('touchstart', stopSmoothWheel, { passive: true });
+            sc?.addEventListener('wheel', (e) => {
+                if (!e.shiftKey || Math.abs(e.deltaY) === 0 || sc.scrollWidth <= sc.clientWidth + 2) return;
+                e.preventDefault();
+                const maxScroll = sc.scrollWidth - sc.clientWidth;
+                const delta = e.deltaMode === 1 ? e.deltaY * 36 : (e.deltaMode === 2 ? e.deltaY * sc.clientWidth * 0.85 : e.deltaY);
+                if (prefersReducedMotion()) {
+                    sc.scrollLeft = Math.max(0, Math.min(maxScroll, sc.scrollLeft + delta));
+                    return;
+                }
+                const base = wheelTargetX !== null ? wheelTargetX : sc.scrollLeft;
+                wheelTargetX = Math.max(0, Math.min(maxScroll, base + delta));
+                if (!wheelRaf) {
+                    wheelLastTs = performance.now();
+                    const step = (ts) => {
+                        const dt = Math.min(0.05, Math.max(0.001, (ts - wheelLastTs) / 1000));
+                        wheelLastTs = ts;
+                        const diff = wheelTargetX - sc.scrollLeft;
+                        if (Math.abs(diff) < 0.5) {
+                            sc.scrollLeft = wheelTargetX;
+                            stopSmoothWheel();
+                            return;
+                        }
+                        sc.scrollLeft += diff * (1 - Math.exp(-16 * dt));
+                        wheelRaf = requestAnimationFrame(step);
+                    };
+                    wheelRaf = requestAnimationFrame(step);
+                }
+            }, { passive: false });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+            const isTyping = tag === 'input' || tag === 'textarea' || e.target?.isContentEditable;
+
+            if (e.key === 'Escape') {
+                if (!document.getElementById('note-modal').classList.contains('hidden')) requestCloseModal();
+                else if (!document.getElementById('export-modal').classList.contains('hidden')) closeExportModal();
+                else if (!document.getElementById('teams-modal').classList.contains('hidden')) closeTeamsModal();
+                else if (!document.getElementById('info-modal').classList.contains('hidden')) closeInfoModal();
+                else if (!document.getElementById('ios-install-modal').classList.contains('hidden')) closeIosInstallPrompt();
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                if (!document.getElementById('note-modal').classList.contains('hidden') && typeof saveNote === 'function') { e.preventDefault(); saveNote(); }
+                else if (!document.getElementById('teams-modal').classList.contains('hidden')) { e.preventDefault(); saveTeamNames(); }
+                return;
+            }
+            if (isTyping || isAnyModalOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
+            if (e.key === 'ArrowLeft') { e.preventDefault(); changeMonth(-1); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); changeMonth(1); }
+            else if (e.key.toLowerCase() === 't' || e.key === 'Home') { e.preventDefault(); goToToday(); }
+        });
+
+        let resizeRaf = 0;
+        window.addEventListener('resize', () => {
+            if (resizeRaf) return;
+            resizeRaf = requestAnimationFrame(() => {
+                resizeRaf = 0;
+                updateTableScrollHint();
+                if (!document.getElementById('export-modal').classList.contains('hidden') && typeof scaleA4Preview === 'function') scaleA4Preview();
+            });
+        }, { passive: true });
+
+        function bootHostApp() { bindInteractions(); initAppIcons(); initPersistence(); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootHostApp);
+        else bootHostApp();
+    </script>
+    <script src="./relatorio-supervisor.js"></script>
+</body>
+</html>
