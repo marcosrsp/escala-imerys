@@ -33,15 +33,17 @@
     }
 
     const OVERRIDE_META = {
-        HE50:  { code: '50%',  chip: '50%',  label: 'Hora Extra 50%',  short: 'HE 50%',  kind: 'extra' },
-        HE75:  { code: '75%',  chip: '75%',  label: 'Hora Extra 75%',  short: 'HE 75%',  kind: 'extra' },
-        HE110: { code: '110%', chip: '110%', label: 'Hora Extra 110%', short: 'HE 110%', kind: 'extra' },
-        TD:    { code: 'TD',   chip: 'TD',   label: 'Troca de Dia',    short: 'Troca',   kind: 'troca' },
-        F:     { code: 'F',    chip: 'F',    label: 'Folga',           short: 'Folga',   kind: 'folga' },
-        FA:    { code: 'FA',   chip: 'FA',   label: 'Falta',           short: 'Falta',   kind: 'falta' }
+        HE50:  { code: '50%',  chip: '50%',  label: 'Hora Extra 50%',   short: 'HE 50%',     kind: 'extra' },
+        HE75:  { code: '75%',  chip: '75%',  label: 'Hora Extra 75%',   short: 'HE 75%',     kind: 'extra' },
+        HE110: { code: '110%', chip: '110%', label: 'Hora Extra 110%',  short: 'HE 110%',    kind: 'extra' },
+        TD:    { code: 'TD',   chip: 'TD',   label: 'Troca de Dia',     short: 'Troca',      kind: 'troca' },
+        F:     { code: 'F',    chip: 'F',    label: 'Folga',            short: 'Folga',      kind: 'folga' },
+        FA:    { code: 'FA',   chip: 'FA',   label: 'Falta',            short: 'Falta',      kind: 'falta' },
+        EA:    { code: 'EA',   chip: 'EA',   label: 'Entrada Atrasada', short: 'Ent. Atr.',  kind: 'atraso' },
+        SA:    { code: 'SA',   chip: 'SA',   label: 'Saída Adiantada',  short: 'Saída Ant.', kind: 'saida' }
     };
 
-    const VALID_OVERRIDES = ['HE50', 'HE75', 'HE110', 'TD', 'F', 'FA', 'M', 'T', 'N'];
+    const VALID_OVERRIDES = ['HE50', 'HE75', 'HE110', 'TD', 'F', 'FA', 'EA', 'SA', 'M', 'T', 'N'];
 
     const PALETTE = {
         M:  { bg: '#dbeafe', fg: '#1e40af' },
@@ -51,7 +53,9 @@
         AT: { bg: '#ffe4e6', fg: '#be123c' },
         FA: { bg: '#fee2e2', fg: '#b91c1c' },
         HE: { bg: '#fef3c7', fg: '#92400e' },
-        TD: { bg: '#f3e8ff', fg: '#6b21a8' }
+        TD: { bg: '#f3e8ff', fg: '#6b21a8' },
+        EA: { bg: '#cffafe', fg: '#0e7490' },
+        SA: { bg: '#ccfbf1', fg: '#0f766e' }
     };
 
     /* ------------------------------------------------------------------------
@@ -155,136 +159,7 @@
     };
 
     /* ------------------------------------------------------------------------
-       2. HELPERS DE FUNCIONÁRIOS, TROCAS, DOWNLOAD E ESCALA EFETIVA
-       ------------------------------------------------------------------------ */
-    function parseTeamMembers(teamStr) {
-        const clean = String(teamStr || '').trim();
-        if (!clean) return [];
-        const parts = clean
-            .split(/\s+(?:e|&)\s+|\s*[,\/+&]\s*/i)
-            .map(s => s.trim())
-            .filter(Boolean);
-        return parts.length ? parts.slice(0, 2) : [clean];
-    }
-
-    function shortMemberName(name) {
-        const first = String(name || '').trim().split(/\s+/)[0] || '';
-        return first.length > 8 ? first.slice(0, 7) + '…' : first;
-    }
-
-    function resolveWhoInfo(rec, fallbackTurma) {
-        const turmaIdx = (rec && typeof rec.turma === 'number') ? rec.turma : fallbackTurma;
-        const teamStr = teamNames[turmaIdx] || DEFAULT_TEAM_DESC[turmaIdx] || '';
-        const members = parseTeamMembers(teamStr);
-        const whoType = rec && rec.whoType ? String(rec.whoType) : 'both';
-
-        if (whoType === 'both' || members.length < 2) {
-            if (members.length === 1) {
-                return {
-                    whoType: '0',
-                    whoName: members[0],
-                    label: members[0],
-                    fullLabel: members[0],
-                    shortLabel: shortMemberName(members[0])
-                };
-            }
-            return {
-                whoType: 'both',
-                whoName: '',
-                label: 'Os dois',
-                fullLabel: `Os dois (${teamStr})`,
-                shortLabel: 'Os dois'
-            };
-        }
-
-        const idx = whoType === '1' ? 1 : 0;
-        const resolvedName = (rec && rec.whoName) ? rec.whoName : (members[idx] || teamStr);
-        return {
-            whoType: String(idx),
-            whoName: resolvedName,
-            label: resolvedName,
-            fullLabel: resolvedName,
-            shortLabel: shortMemberName(resolvedName)
-        };
-    }
-
-    function getSelectionWhoInfo(whoState, turmaIdx) {
-        const teamStr = teamNames[turmaIdx] || DEFAULT_TEAM_DESC[turmaIdx] || '';
-        const members = parseTeamMembers(teamStr);
-        if (members.length < 2) {
-            const single = members[0] || teamStr;
-            return { whoType: '0', whoName: single, label: single, fullLabel: single, shortLabel: shortMemberName(single) };
-        }
-        if (whoState === '0' || whoState === '1') {
-            const name = members[parseInt(whoState, 10)] || members[0];
-            return { whoType: whoState, whoName: name, label: name, fullLabel: name, shortLabel: shortMemberName(name) };
-        }
-        return {
-            whoType: 'both',
-            whoName: '',
-            label: 'Os dois',
-            fullLabel: `Os dois (${teamStr})`,
-            shortLabel: 'Os dois'
-        };
-    }
-
-    function getOverrideMeta(dateKey, turmaIdx) {
-        const raw = overrideMetaDb[`${dateKey}_${turmaIdx}`];
-        return (raw && typeof raw === 'object') ? raw : null;
-    }
-
-    function formatSwapDisplay(meta, turmaIdx) {
-        const who = resolveWhoInfo(meta ? { ...meta, turma: turmaIdx } : { turma: turmaIdx, whoType: 'both' }, turmaIdx);
-        const target = meta && meta.swapWith ? String(meta.swapWith).trim() : '';
-        const targetTeam = meta && meta.swapWithTeam ? String(meta.swapWithTeam).trim() : '';
-        const targetFull = target ? (targetTeam ? `${target} (T.${targetTeam})` : target) : '';
-        const targetShort = target ? shortMemberName(target) : '';
-        const compactLabel = targetShort ? `⇄ ${targetShort}` : 'Troca';
-        const fullLabel = targetFull
-            ? `${who.label} ⇄ ${targetFull}`
-            : (who.whoType === 'both' ? 'Troca de Dia' : `${who.label} (Troca)`);
-        return { who, target, targetTeam, targetFull, targetShort, compactLabel, fullLabel };
-    }
-
-    function isExtraOverride(ov) {
-        return ov === 'HE50' || ov === 'HE75' || ov === 'HE110' || ov === 'M' || ov === 'T' || ov === 'N';
-    }
-
-    function triggerCanvasDownload(canvas, fileName, successMsg) {
-        const send = (href, isBlob) => {
-            const a = document.createElement('a');
-            a.href = href;
-            a.setAttribute('download', fileName);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            if (isBlob) setTimeout(() => window.URL.revokeObjectURL(href), 2500);
-            showToast(successMsg);
-        };
-        if (typeof canvas.toBlob === 'function') {
-            canvas.toBlob((blob) => {
-                if (blob) send(window.URL.createObjectURL(blob), true);
-                else {
-                    try { send(canvas.toDataURL('image/png'), false); }
-                    catch (e) { showToast('Não foi possível gerar a imagem.'); }
-                }
-            }, 'image/png');
-        } else {
-            try { send(canvas.toDataURL('image/png'), false); }
-            catch (e) { showToast('Não foi possível gerar a imagem.'); }
-        }
-    }
-
-    /* Mantém cálculo de retorno de atestado blindado contra HE / TD / FA */
-    window.getEffectiveShift = function (dateKey, turmaIdx) {
-        const ov = overridesDb[`${dateKey}_${turmaIdx}`];
-        if (ov === 'F' || ov === 'M' || ov === 'T' || ov === 'N') return ov;
-        const dt = parseDateKey(dateKey);
-        return getShift(dt.getFullYear(), dt.getMonth(), dt.getDate(), turmaIdx);
-    };
-
-    /* ------------------------------------------------------------------------
-       3. ESTILOS DO MÓDULO (FALTA, TROCA, ATESTADO E RELATÓRIO A4)
+       3. ESTILOS DO MÓDULO (FALTA, TROCA, ATESTADO, EA/SA E RELATÓRIO A4)
        ------------------------------------------------------------------------ */
     function injectModuleStyles() {
         if (document.getElementById('supervisor-report-styles')) return;
@@ -294,7 +169,11 @@
             .a4-cell-FA { background: #fee2e2; color: #b91c1c; box-shadow: inset 0 0 0 2px #dc2626; }
             .a4-cell-HE { background: #fef3c7; color: #92400e; }
             .a4-cell-TD { background: #f3e8ff; color: #6b21a8; }
+            .a4-cell-EA { background: #cffafe; color: #0e7490; }
+            .a4-cell-SA { background: #ccfbf1; color: #0f766e; }
             .a4-cell-td { box-shadow: inset 0 0 0 2.5px #7c3aed; }
+            .a4-cell-ea { box-shadow: inset 0 0 0 2.5px #0891b2; }
+            .a4-cell-sa { box-shadow: inset 0 0 0 2.5px #0d9488; }
             .a4-cell-who {
                 display: block;
                 font-size: 6.5px;
@@ -335,71 +214,80 @@
             .sup-kpi-grid {
                 margin-top: 14px;
                 display: grid;
-                grid-template-columns: 0.88fr 0.86fr 1.66fr 1.4fr;
-                gap: 11px;
+                grid-template-columns: repeat(7, 1fr) 1.25fr;
+                gap: 8px;
             }
             .sup-kpi-card {
                 border: 1.2px solid #cbd5e1;
                 border-radius: 10px;
                 background: #f8fafc;
-                padding: 10px 13px;
+                padding: 8px 10px;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
+                border-top-width: 3px;
+            }
+            .sup-kpi-card.is-total {
+                background: #0f172a;
+                border-color: #0f172a;
+                color: #ffffff;
             }
             .sup-kpi-label {
-                font-size: 8.6px;
+                font-size: 8px;
                 font-weight: 900;
-                letter-spacing: 0.06em;
+                letter-spacing: 0.05em;
                 text-transform: uppercase;
                 color: #475569;
+                line-height: 1.2;
             }
+            .sup-kpi-card.is-total .sup-kpi-label { color: #cbd5e1; }
             .sup-kpi-val {
-                font-size: 24px;
+                font-size: 22px;
                 font-weight: 900;
                 color: #0f172a;
                 line-height: 1.1;
                 margin-top: 4px;
                 font-variant-numeric: tabular-nums;
             }
+            .sup-kpi-card.is-total .sup-kpi-val { color: #ffffff; }
             .sup-kpi-sub {
-                font-size: 9.6px;
+                font-size: 8.5px;
                 font-weight: 700;
-                color: #64748b;
-                margin-top: 3px;
+                color: #94a3b8;
+                margin-top: 2px;
             }
-            .sup-team-chips {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 7px;
-                margin-top: 7px;
+            .sup-meta-bar {
+                margin-top: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 6px 12px;
+                border-radius: 8px;
+                background: #f1f5f9;
+                border: 1px solid #e2e8f0;
+                font-size: 10px;
+                font-weight: 800;
+                color: #334155;
             }
-            .sup-team-chip {
+            .sup-meta-teams { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+            .sup-meta-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
                 background: #ffffff;
                 border: 1px solid #cbd5e1;
-                border-radius: 7px;
-                padding: 5px 4px;
-                text-align: center;
-            }
-            .sup-team-chip.is-dim { opacity: 0.45; }
-            .sup-team-chip-lbl {
-                display: block;
-                font-size: 8.5px;
-                font-weight: 800;
-                color: #64748b;
-                text-transform: uppercase;
-            }
-            .sup-team-chip-num {
-                display: block;
-                font-size: 14px;
+                border-radius: 6px;
+                padding: 2px 7px;
+                font-size: 9.5px;
                 font-weight: 900;
                 color: #0f172a;
-                line-height: 1.15;
                 font-variant-numeric: tabular-nums;
             }
+            .sup-meta-chip.is-dim { opacity: 0.45; }
 
             .sup-table-wrap {
-                margin-top: 14px;
+                margin-top: 12px;
                 border: 1.5px solid #334155;
                 border-radius: 10px;
                 overflow: hidden;
@@ -434,9 +322,9 @@
             .sup-table tbody tr:nth-child(even) { background: #f8fafc; }
             .sup-table tbody tr:nth-child(odd) { background: #ffffff; }
 
-            .sup-col-date { width: 90px; }
-            .sup-col-team { width: 222px; }
-            .sup-col-shift { width: 196px; }
+            .sup-col-date { width: 88px; }
+            .sup-col-team { width: 196px; }
+            .sup-col-shift { width: 282px; }
 
             .sup-date-main {
                 display: block;
@@ -481,27 +369,12 @@
             }
             .sup-team-names {
                 display: block;
-                font-size: 10px;
+                font-size: 10.5px;
                 font-weight: 700;
                 color: #475569;
                 margin-top: 2px;
                 word-break: break-word;
             }
-            .sup-person-pill {
-                display: inline-block;
-                margin-top: 4px;
-                padding: 2px 6px;
-                border-radius: 5px;
-                font-size: 9px;
-                font-weight: 900;
-                line-height: 1.25;
-                border: 1px solid transparent;
-                word-break: break-word;
-            }
-            .sup-pill-at { background: #ffe4e6; border-color: #fecdd3; color: #be123c; }
-            .sup-pill-he { background: #fef3c7; border-color: #fde68a; color: #92400e; }
-            .sup-pill-fa { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
-            .sup-pill-td { background: #f3e8ff; border-color: #ddd6fe; color: #6b21a8; }
 
             .sup-shift-cell { display: flex; align-items: flex-start; gap: 8px; }
             .sup-shift-chip {
@@ -515,13 +388,15 @@
                 font-size: 10px;
                 font-weight: 900;
                 flex-shrink: 0;
+                margin-top: 1px;
             }
             .sup-shift-name {
                 display: block;
-                font-size: 11px;
+                font-size: 11.2px;
                 font-weight: 900;
                 color: #0f172a;
-                line-height: 1.2;
+                line-height: 1.28;
+                word-break: break-word;
             }
             .sup-shift-hours {
                 display: block;
@@ -625,8 +500,8 @@
 
     function upgradeInfoModalDOM() {
         const panel = document.getElementById('info-modal-content');
-        if (!panel || panel.dataset.v4Upgraded === '1') return;
-        panel.dataset.v4Upgraded = '1';
+        if (!panel || panel.dataset.v5Upgraded === '1') return;
+        panel.dataset.v5Upgraded = '1';
 
         panel.innerHTML = `
             <div class="flex justify-between items-center mb-4">
@@ -642,11 +517,13 @@
                 <div class="flex items-center justify-between p-2.5 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300 font-black text-xs">F</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Folga</span></div><span class="font-black text-green-700 dark:text-green-400 text-xs uppercase">Descanso</span></div>
                 <div class="flex items-center justify-between p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-black text-[11px]">AT</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Atestado</span></div><span class="font-black text-rose-700 dark:text-rose-400 text-xs uppercase">Afastamento</span></div>
                 <div class="flex items-center justify-between p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50"><div class="flex items-center gap-2.5"><span class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300 font-black text-[11px]">FA</span><span class="font-bold text-slate-700 dark:text-slate-200 text-sm">Falta</span></div><span class="font-black text-red-700 dark:text-red-400 text-xs uppercase">Ausência</span></div>
-                <div class="grid grid-cols-3 gap-1.5 pt-1">
+                <div class="grid grid-cols-2 gap-1.5 pt-1">
                     <div class="flex items-center gap-1.5 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span><span class="text-[10.5px] font-bold text-amber-800 dark:text-amber-300 leading-tight">Hora Extra</span></div>
-                    <div class="flex items-center gap-1.5 p-2 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0"></span><span class="text-[10.5px] font-bold text-purple-800 dark:text-purple-300 leading-tight">Troca</span></div>
-                    <div class="flex items-center gap-1.5 p-2 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0"></span><span class="text-[10.5px] font-bold text-sky-800 dark:text-sky-300 leading-tight">Dia de Volta</span></div>
+                    <div class="flex items-center gap-1.5 p-2 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0"></span><span class="text-[10.5px] font-bold text-purple-800 dark:text-purple-300 leading-tight">Troca de Dia</span></div>
+                    <div class="flex items-center gap-1.5 p-2 rounded-xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-900/40"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 shrink-0"></span><span class="text-[10.5px] font-bold text-cyan-800 dark:text-cyan-300 leading-tight">Entrada Atrasada</span></div>
+                    <div class="flex items-center gap-1.5 p-2 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-900/40"><span class="w-2.5 h-2.5 rounded-full bg-teal-500 shrink-0"></span><span class="text-[10.5px] font-bold text-teal-800 dark:text-teal-300 leading-tight">Saída Adiantada</span></div>
                 </div>
+                <div class="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900/40"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0"></span><span class="text-[10.5px] font-bold text-sky-800 dark:text-sky-300 leading-tight">Dia de Volta (Retorno de Atestado)</span></div>
             </div>
 
             <div class="mt-5 pt-4 border-t border-slate-200 dark:border-surfaceBorder">
@@ -662,8 +539,8 @@
 
     function upgradeNoteModalDOM() {
         const panel = document.getElementById('modal-content');
-        if (!panel || panel.dataset.v4Upgraded === '1') return;
-        panel.dataset.v4Upgraded = '1';
+        if (!panel || panel.dataset.v5Upgraded === '1') return;
+        panel.dataset.v5Upgraded = '1';
 
         panel.innerHTML = `
             <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
@@ -674,26 +551,28 @@
                 </button>
             </div>
 
-            <!-- Grade Unificada de Ocorrências (incluindo Atestado Médico sem chave seletora) -->
+            <!-- Grade Unificada de Ocorrências (incluindo Entrada Atrasada, Saída Adiantada e Atestado Médico) -->
             <div class="mb-4">
                 <div class="flex items-center justify-between gap-2 mb-2">
                     <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Tipo de Ocorrência</span>
                     <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Toque novamente p/ limpar</span>
                 </div>
-                <div class="grid grid-cols-3 gap-1.5">
-                    <button type="button" data-ov="HE50" onclick="selectOverride('HE50')" class="ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 50%</button>
-                    <button type="button" data-ov="HE75" onclick="selectOverride('HE75')" class="ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 75%</button>
-                    <button type="button" data-ov="HE110" onclick="selectOverride('HE110')" class="ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 110%</button>
-                    <button type="button" data-ov="TD" onclick="selectOverride('TD')" class="ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Troca de Dia</button>
-                    <button type="button" data-ov="F" onclick="selectOverride('F')" class="ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Folga</button>
-                    <button type="button" data-ov="FA" onclick="selectOverride('FA')" class="ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Falta</button>
-                    <button type="button" data-ov="AT" onclick="selectOverride('AT')" class="ov-btn col-span-3 py-2.5 px-3 rounded-xl text-xs font-extrabold border flex items-center justify-center gap-1.5 btn-smooth active:scale-[0.98] cursor-pointer">
+                <div class="grid grid-cols-6 gap-1.5">
+                    <button type="button" data-ov="HE50" onclick="selectOverride('HE50')" class="ov-btn col-span-2 py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 50%</button>
+                    <button type="button" data-ov="HE75" onclick="selectOverride('HE75')" class="ov-btn col-span-2 py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 75%</button>
+                    <button type="button" data-ov="HE110" onclick="selectOverride('HE110')" class="ov-btn col-span-2 py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Hora Extra 110%</button>
+                    <button type="button" data-ov="TD" onclick="selectOverride('TD')" class="ov-btn col-span-2 py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Troca de Dia</button>
+                    <button type="button" data-ov="F" onclick="selectOverride('F')" class="ov-btn col-span-2 py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Folga</button>
+                    <button type="button" data-ov="FA" onclick="selectOverride('FA')" class="ov-btn col-span-2 py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Falta</button>
+                    <button type="button" data-ov="EA" onclick="selectOverride('EA')" class="ov-btn col-span-3 py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Entrada Atrasada</button>
+                    <button type="button" data-ov="SA" onclick="selectOverride('SA')" class="ov-btn col-span-3 py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer">Saída Adiantada</button>
+                    <button type="button" data-ov="AT" onclick="selectOverride('AT')" class="ov-btn col-span-6 py-2.5 px-3 rounded-xl text-xs font-extrabold border flex items-center justify-center gap-1.5 btn-smooth active:scale-[0.98] cursor-pointer">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                         <span>Atestado Médico</span>
                     </button>
                 </div>
 
-                <!-- Painel Dinâmico: Funcionário (HE / Falta / Troca de Dia) -->
+                <!-- Painel Dinâmico: Funcionário (HE / Falta / Entrada Atrasada / Saída Adiantada / Troca de Dia) -->
                 <div id="override-details-box" class="hidden mt-3 rounded-2xl border p-3.5 space-y-3">
                     <div>
                         <span id="override-who-label" class="block text-[11px] font-extrabold mb-1.5"></span>
@@ -706,7 +585,7 @@
                     </div>
                 </div>
 
-                <!-- Painel Dinâmico: Atestado Médico (abre ao selecionar Atestado Médico acima) -->
+                <!-- Painel Dinâmico: Atestado Médico -->
                 <div id="atestado-controls" class="hidden mt-3 rounded-2xl border border-rose-200/80 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/20 p-3.5 space-y-3">
                     <p id="atestado-origin-notice" class="hidden text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-white/70 dark:bg-oled/60 border border-rose-200 dark:border-rose-900/40 rounded-xl px-3 py-2 leading-snug"></p>
                     <div>
@@ -753,8 +632,8 @@
 
     function upgradeExportModalDOM() {
         const panel = document.getElementById('export-modal-content');
-        if (!panel || panel.dataset.supUpgraded === '1') return;
-        panel.dataset.supUpgraded = '1';
+        if (!panel || panel.dataset.supUpgraded === '2') return;
+        panel.dataset.supUpgraded = '2';
 
         panel.innerHTML = `
             <div class="md:hidden w-12 h-1.5 bg-slate-300 dark:bg-surfaceBorder rounded-full mx-auto mb-4"></div>
@@ -774,7 +653,7 @@
                     <span>Quadro dos Turnos</span>
                 </button>
                 <button type="button" id="export-tab-supervisor" onclick="switchExportMode('supervisor')" class="py-2.5 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 btn-smooth cursor-pointer">
-                    <span>Relatório Supervisor</span>
+                    <span>Ocorrências Mensais</span>
                     <span id="sup-tab-badge" class="px-1.5 py-0.5 rounded-full text-[10px] font-black tabular-nums">0</span>
                 </button>
             </div>
@@ -816,7 +695,7 @@
 
             <label id="export-quadro-options" class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-oled border border-slate-200 dark:border-surfaceBorder mb-4 cursor-pointer">
                 <div class="min-w-0">
-                    <span class="block text-xs font-extrabold text-slate-800 dark:text-slate-100">Incluir extras, trocas, faltas e atestados no quadro</span>
+                    <span class="block text-xs font-extrabold text-slate-800 dark:text-slate-100">Incluir ocorrências (extras, trocas, faltas, atrasos e atestados)</span>
                     <span class="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Desligado imprime a escala oficial limpa de todos os turnos. Observações nunca aparecem.</span>
                 </div>
                 <input type="checkbox" id="a4-include-changes" onchange="onA4OptionsChange()" class="w-5 h-5 rounded accent-blue-600 shrink-0 cursor-pointer">
@@ -853,11 +732,13 @@
 
     function upgradeDesktopInlineLegend() {
         const legendRow = document.querySelector('section .hidden.md\\:flex.items-center.gap-3');
-        if (!legendRow || legendRow.dataset.hasExtras === '1') return;
-        legendRow.dataset.hasExtras = '1';
+        if (!legendRow || legendRow.dataset.hasExtras === '2') return;
+        legendRow.dataset.hasExtras = '2';
         [
             { cls: 'bg-red-600', label: 'Falta' },
-            { cls: 'bg-purple-500', label: 'Troca' }
+            { cls: 'bg-purple-500', label: 'Troca' },
+            { cls: 'bg-cyan-500', label: 'Atraso' },
+            { cls: 'bg-teal-500', label: 'Saída Ant.' }
         ].forEach(it => {
             const span = document.createElement('span');
             span.className = 'flex items-center gap-1';
@@ -867,7 +748,7 @@
     }
 
     /* ------------------------------------------------------------------------
-       5. PAINÉIS INTERATIVOS DO MODAL DO DIA (HE, FALTA, TROCA E ATESTADO)
+       5. PAINÉIS INTERATIVOS DO MODAL DO DIA (HE, FALTA, EA, SA, TROCA E ATESTADO)
        ------------------------------------------------------------------------ */
     function syncOccurrenceButtonsUI() {
         const activeStyles = {
@@ -877,6 +758,8 @@
             TD:    'bg-purple-600 border-purple-600 text-white shadow-sm',
             F:     'bg-green-600 border-green-600 text-white shadow-sm',
             FA:    'bg-red-600 border-red-600 text-white shadow-sm',
+            EA:    'bg-cyan-600 border-cyan-600 text-white shadow-sm',
+            SA:    'bg-teal-600 border-teal-600 text-white shadow-sm',
             AT:    'bg-rose-600 border-rose-600 text-white shadow-sm'
         };
         const idleStyle = 'bg-slate-50 hover:bg-slate-100 dark:bg-oled dark:hover:bg-zinc-900 border-slate-200 dark:border-surfaceBorder text-slate-600 dark:text-slate-300';
@@ -885,10 +768,16 @@
         document.querySelectorAll('#note-modal .ov-btn').forEach(btn => {
             const val = btn.getAttribute('data-ov') || '';
             const isAtBtn = val === 'AT';
+            const isHalfRow = val === 'EA' || val === 'SA';
             const isAct = isAtBtn ? modalAtestadoEnabled : (!modalAtestadoEnabled && val === currentSelectedOverride);
-            const baseCls = isAtBtn
-                ? 'ov-btn col-span-3 py-2.5 px-3 rounded-xl text-xs font-extrabold border flex items-center justify-center gap-1.5 btn-smooth active:scale-[0.98] cursor-pointer'
-                : 'ov-btn py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer';
+            let baseCls;
+            if (isAtBtn) {
+                baseCls = 'ov-btn col-span-6 py-2.5 px-3 rounded-xl text-xs font-extrabold border flex items-center justify-center gap-1.5 btn-smooth active:scale-[0.98] cursor-pointer';
+            } else if (isHalfRow) {
+                baseCls = 'ov-btn col-span-3 py-2.5 px-2 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer';
+            } else {
+                baseCls = 'ov-btn col-span-2 py-2.5 px-1.5 rounded-xl text-xs font-extrabold border btn-smooth active:scale-95 cursor-pointer';
+            }
             btn.className = `${baseCls} ${isAct ? (activeStyles[val] || activeStyles.HE50) : (isAtBtn ? idleAtStyle : idleStyle)}`;
         });
     }
@@ -933,9 +822,11 @@
         const code = modalAtestadoEnabled ? '' : currentSelectedOverride;
         const isHE = code === 'HE50' || code === 'HE75' || code === 'HE110';
         const isFA = code === 'FA';
+        const isEA = code === 'EA';
+        const isSA = code === 'SA';
         const isTD = code === 'TD';
 
-        if (!isHE && !isFA && !isTD) {
+        if (!isHE && !isFA && !isEA && !isSA && !isTD) {
             box.classList.add('hidden');
             return;
         }
@@ -958,6 +849,22 @@
                 act: 'bg-red-600 border-red-600 text-white shadow-sm',
                 idle: 'bg-white hover:bg-red-100/60 dark:bg-oled dark:hover:bg-red-950/40 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-200',
                 title: 'Quem faltou neste dia?'
+            };
+        } else if (isEA) {
+            theme = {
+                box: 'border-cyan-200/90 dark:border-cyan-900/60 bg-cyan-50/70 dark:bg-cyan-950/20',
+                lbl: 'text-cyan-900 dark:text-cyan-200',
+                act: 'bg-cyan-600 border-cyan-600 text-white shadow-sm',
+                idle: 'bg-white hover:bg-cyan-100/60 dark:bg-oled dark:hover:bg-cyan-950/40 border-cyan-200 dark:border-cyan-900/50 text-cyan-900 dark:text-cyan-200',
+                title: 'Quem teve entrada atrasada?'
+            };
+        } else if (isSA) {
+            theme = {
+                box: 'border-teal-200/90 dark:border-teal-900/60 bg-teal-50/70 dark:bg-teal-950/20',
+                lbl: 'text-teal-900 dark:text-teal-200',
+                act: 'bg-teal-600 border-teal-600 text-white shadow-sm',
+                idle: 'bg-white hover:bg-teal-100/60 dark:bg-oled dark:hover:bg-teal-950/40 border-teal-200 dark:border-teal-900/50 text-teal-900 dark:text-teal-200',
+                title: 'Quem teve saída adiantada?'
             };
         } else {
             theme = {
@@ -1243,7 +1150,14 @@
             }
             if (currentSelectedOverride) {
                 overridesDb[ovKey] = currentSelectedOverride;
-                if (currentSelectedOverride === 'HE50' || currentSelectedOverride === 'HE75' || currentSelectedOverride === 'HE110' || currentSelectedOverride === 'FA') {
+                if (
+                    currentSelectedOverride === 'HE50' ||
+                    currentSelectedOverride === 'HE75' ||
+                    currentSelectedOverride === 'HE110' ||
+                    currentSelectedOverride === 'FA' ||
+                    currentSelectedOverride === 'EA' ||
+                    currentSelectedOverride === 'SA'
+                ) {
                     const who = getSelectionWhoInfo(modalOverrideWho, currentTurma);
                     overrideMetaDb[ovKey] = { whoType: who.whoType, whoName: who.whoName };
                 } else if (currentSelectedOverride === 'TD') {
@@ -1294,7 +1208,7 @@
 
         const mmStr = String(month + 1).padStart(2, '0');
         const teamLtr = TEAM_LETTERS[currentTurma];
-        if (titleEl) titleEl.innerText = `Observações do Mês • Turno ${teamLtr}`;
+        if (titleEl) titleEl.innerText = `Ocorrências do Mês • Turno ${teamLtr}`;
 
         const items = [];
         const coveredAtestadoDates = new Set();
@@ -1372,6 +1286,14 @@
                 const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
                 tagHTML = `<span class="px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 text-[10px] font-black">${meta.label} • ${escapeHTML(who.fullLabel)}</span>`;
                 cardBorder = 'border-amber-200/90 dark:border-amber-900/50';
+            } else if (ovShift === 'EA') {
+                const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
+                tagHTML = `<span class="px-2 py-0.5 rounded-lg bg-cyan-100 dark:bg-cyan-950/70 text-cyan-800 dark:text-cyan-300 text-[10px] font-black">Entrada Atrasada • ${escapeHTML(who.fullLabel)}</span>`;
+                cardBorder = 'border-cyan-200/90 dark:border-cyan-900/50';
+            } else if (ovShift === 'SA') {
+                const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
+                tagHTML = `<span class="px-2 py-0.5 rounded-lg bg-teal-100 dark:bg-teal-950/70 text-teal-800 dark:text-teal-300 text-[10px] font-black">Saída Adiantada • ${escapeHTML(who.fullLabel)}</span>`;
+                cardBorder = 'border-teal-200/90 dark:border-teal-900/50';
             } else if (ovShift === 'TD') {
                 const swap = formatSwapDisplay(ovMeta, currentTurma);
                 tagHTML = `<span class="px-2 py-0.5 rounded-lg bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 text-[10px] font-black">Troca: ${escapeHTML(swap.fullLabel)}</span>`;
@@ -1581,6 +1503,20 @@
                             badgeDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-purple-500 rounded-full"></span>';
                             sub = `<span class="text-[6.5px] font-black leading-none text-purple-700 dark:text-purple-300 mt-0.5 truncate max-w-[40px]">${escapeHTML(swap.compactLabel)}</span>`;
                             tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • Troca: ${swap.fullLabel}`);
+                        } else if (ovShift === 'EA') {
+                            const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
+                            if (counts[baseShift] !== undefined) counts[baseShift]++;
+                            ring = ' ring-2 ring-inset ring-cyan-500 dark:ring-cyan-400';
+                            badgeDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>';
+                            sub = `<span class="text-[7px] font-black leading-none text-cyan-700 dark:text-cyan-300 mt-0.5">EA</span><span class="text-[6.5px] font-extrabold leading-none opacity-85 truncate max-w-[40px]">${escapeHTML(who.shortLabel)}</span>`;
+                            tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • Entrada Atrasada (${who.fullLabel})`);
+                        } else if (ovShift === 'SA') {
+                            const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
+                            if (counts[baseShift] !== undefined) counts[baseShift]++;
+                            ring = ' ring-2 ring-inset ring-teal-500 dark:ring-teal-400';
+                            badgeDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-teal-500 rounded-full"></span>';
+                            sub = `<span class="text-[7px] font-black leading-none text-teal-700 dark:text-teal-300 mt-0.5">SA</span><span class="text-[6.5px] font-extrabold leading-none opacity-85 truncate max-w-[40px]">${escapeHTML(who.shortLabel)}</span>`;
+                            tipParts.push(`${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''} • Saída Adiantada (${who.fullLabel})`);
                         } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
                             const ovCfg = SHIFTS_CONFIG[ovShift] || baseCfg;
                             code = ovShift;
@@ -1623,6 +1559,12 @@
                         } else if (ovOther === 'HE50' || ovOther === 'HE75' || ovOther === 'HE110') {
                             otherDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-amber-500/80 rounded-full"></span>';
                             extraTip = ` • ${OVERRIDE_META[ovOther].label}`;
+                        } else if (ovOther === 'EA') {
+                            otherDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-cyan-500/80 rounded-full"></span>';
+                            extraTip = ' • Entrada Atrasada';
+                        } else if (ovOther === 'SA') {
+                            otherDot = '<span class="absolute top-1 left-1 w-1.5 h-1.5 bg-teal-500/80 rounded-full"></span>';
+                            extraTip = ' • Saída Adiantada';
                         }
                         const tip = `Dia ${String(day).padStart(2, '0')}/${mmStr} • Turno ${teamLtr} (${teamNames[idx]}) • ${baseCfg.name}${baseCfg.hours ? ` (${baseCfg.hours})` : ''}${extraTip} • Clique para destacar`;
                         cells.push(`<td data-action="team" data-team="${idx}" title="${escapeHTML(tip)}" class="p-0.5 border-r border-slate-200 dark:border-surfaceBorder last:border-r-0 relative text-center text-sm cursor-pointer cell-smooth hover:opacity-90 ${isToday ? 'bg-blue-50/50 dark:bg-blue-900/20 ' : ''}${dim}"><div class="w-full h-full flex items-center justify-center min-h-[46px] md:min-h-[52px]">${baseShift}${otherDot}</div></td>`);
@@ -1662,21 +1604,7 @@
     window.buildA4Dataset = function (includeChanges) {
         const year = currentDate.getFullYear(), month = currentDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const monthLabel = currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
-        const mmStr = String(month + 1).padStart(2, '0');
-        const holidaysMap = getHolidays(year, month);
-
-        const days = [];
-        const holidaysList = [];
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dow = new Date(year, month, day, 12, 0, 0).getDay();
-            const holi = holidaysMap[day] || '';
-            const dateKey = `${year}-${mmStr}-${String(day).padStart(2, '0')}`;
-            days.push({ day, dow, dowLabel: DOW_NAMES[dow], isSunday: dow === 0, holiday: holi, dateKey });
-            if (holi) holidaysList.push({ day, dateStr: `${String(day).padStart(2, '0')}/${mmStr}`, dowPretty: DOW_PRETTY[dow], name: holi });
-        }
-
-        let hasAnyOv = false, hasAnyTd = false, hasAnyAt = false, hasAnyFa = false;
+        let hasAnyOv = false, hasAnyTd = false, hasAnyAt = false, hasAnyFa = false, hasAnyEa = false, hasAnySa = false;
         const teams = TEAM_LETTERS.map((letter, idx) => {
             const counts = { M: 0, T: 0, N: 0, F: 0, AT: 0, FA: 0 };
             const atMap = {};
@@ -1696,7 +1624,7 @@
                     if (atInfo) {
                         counts.AT++;
                         hasAnyAt = true;
-                        return { code: 'AT', sub: `${atInfo.dayIndex}/${atInfo.totalDays}`, whoShort: atInfo.whoShort, isOv: false, isTd: false };
+                        return { code: 'AT', sub: `${atInfo.dayIndex}/${atInfo.totalDays}`, whoShort: atInfo.whoShort, isOv: false, isTd: false, isEa: false, isSa: false };
                     }
                     const ov = overridesDb[`${dateKey}_${idx}`];
                     const ovMeta = getOverrideMeta(dateKey, idx);
@@ -1704,39 +1632,51 @@
                         const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                         counts.FA++;
                         hasAnyFa = true;
-                        return { code: 'FA', sub: '', whoShort: who.shortLabel, isOv: false, isTd: false };
+                        return { code: 'FA', sub: '', whoShort: who.shortLabel, isOv: false, isTd: false, isEa: false, isSa: false };
                     }
                     if (ov === 'F') {
                         counts.F++;
-                        return { code: 'F', sub: '', whoShort: '', isOv: false, isTd: false };
+                        return { code: 'F', sub: '', whoShort: '', isOv: false, isTd: false, isEa: false, isSa: false };
                     }
                     if (ov === 'HE50' || ov === 'HE75' || ov === 'HE110') {
                         const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                         counts[base]++;
                         hasAnyOv = true;
-                        return { code: base, sub: OVERRIDE_META[ov].code, whoShort: who.shortLabel, isOv: true, isTd: false };
+                        return { code: base, sub: OVERRIDE_META[ov].code, whoShort: who.shortLabel, isOv: true, isTd: false, isEa: false, isSa: false };
                     }
                     if (ov === 'TD') {
                         const swap = formatSwapDisplay(ovMeta, idx);
                         counts[base]++;
                         hasAnyTd = true;
-                        return { code: base, sub: swap.compactLabel, whoShort: '', isOv: false, isTd: true };
+                        return { code: base, sub: swap.compactLabel, whoShort: '', isOv: false, isTd: true, isEa: false, isSa: false };
+                    }
+                    if (ov === 'EA') {
+                        const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
+                        counts[base]++;
+                        hasAnyEa = true;
+                        return { code: base, sub: 'EA', whoShort: who.shortLabel, isOv: false, isTd: false, isEa: true, isSa: false };
+                    }
+                    if (ov === 'SA') {
+                        const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
+                        counts[base]++;
+                        hasAnySa = true;
+                        return { code: base, sub: 'SA', whoShort: who.shortLabel, isOv: false, isTd: false, isEa: false, isSa: true };
                     }
                     if (ov === 'M' || ov === 'T' || ov === 'N') {
                         counts[ov]++;
                         hasAnyOv = true;
-                        return { code: ov, sub: 'EX', whoShort: '', isOv: true, isTd: false };
+                        return { code: ov, sub: 'EX', whoShort: '', isOv: true, isTd: false, isEa: false, isSa: false };
                     }
                 }
                 counts[base]++;
-                return { code: base, sub: '', whoShort: '', isOv: false, isTd: false };
+                return { code: base, sub: '', whoShort: '', isOv: false, isTd: false, isEa: false, isSa: false };
             });
             return { letter, idx, name: teamNames[idx], cells, counts };
         });
 
         const issued = new Date();
         const issuedStr = `${String(issued.getDate()).padStart(2, '0')}/${String(issued.getMonth() + 1).padStart(2, '0')}/${issued.getFullYear()} às ${String(issued.getHours()).padStart(2, '0')}:${String(issued.getMinutes()).padStart(2, '0')}`;
-        return { year, month, mmStr, daysInMonth, monthLabel, days, holidaysList, teams, hasAnyOv, hasAnyTd, hasAnyAt, hasAnyFa, issuedStr, includeChanges };
+        return { year, month, mmStr, daysInMonth, monthLabel, days, holidaysList, teams, hasAnyOv, hasAnyTd, hasAnyAt, hasAnyFa, hasAnyEa, hasAnySa, issuedStr, includeChanges };
     };
 
     window.buildA4SheetHTML = function (data) {
@@ -1747,7 +1687,7 @@
 
         const rowsHTML = data.teams.map(t => {
             const cellsHTML = t.cells.map(c => {
-                const extraCls = c.isOv ? ' a4-cell-ov' : (c.isTd ? ' a4-cell-td' : '');
+                const extraCls = c.isOv ? ' a4-cell-ov' : (c.isTd ? ' a4-cell-td' : (c.isEa ? ' a4-cell-ea' : (c.isSa ? ' a4-cell-sa' : '')));
                 const subHTML = c.sub ? `<span class="a4-cell-sub">${escapeHTML(c.sub)}</span>` : '';
                 const whoHTML = c.whoShort ? `<span class="a4-cell-who">${escapeHTML(c.whoShort)}</span>` : '';
                 return `<td class="a4-cell a4-cell-${c.code}${extraCls}"><span>${c.code}</span>${whoHTML}${subHTML}</td>`;
@@ -1768,6 +1708,8 @@
         const extraLegendItems = ['<span><strong style="color:#dc2626">■</strong> Domingos / Feriados</span>'];
         if (data.hasAnyOv) extraLegendItems.push('<span><strong style="color:#d97706">□</strong> Hora Extra</span>');
         if (data.hasAnyTd) extraLegendItems.push('<span><strong style="color:#7c3aed">□</strong> Troca</span>');
+        if (data.hasAnyEa) extraLegendItems.push('<span><strong style="color:#0891b2">EA</strong> Ent. Atrasada</span>');
+        if (data.hasAnySa) extraLegendItems.push('<span><strong style="color:#0d9488">SA</strong> Saída Adiant.</span>');
         if (data.hasAnyAt) extraLegendItems.push('<span><strong style="color:#be123c">AT</strong> Atestado</span>');
         if (data.hasAnyFa) extraLegendItems.push('<span><strong style="color:#b91c1c">FA</strong> Falta</span>');
 
@@ -1939,6 +1881,12 @@
                 } else if (cell.isTd) {
                     ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 5;
                     ctx.strokeRect(x + 2.5, y + 2.5, dayColW - 5, teamRowH - 5);
+                } else if (cell.isEa) {
+                    ctx.strokeStyle = '#0891b2'; ctx.lineWidth = 5;
+                    ctx.strokeRect(x + 2.5, y + 2.5, dayColW - 5, teamRowH - 5);
+                } else if (cell.isSa) {
+                    ctx.strokeStyle = '#0d9488'; ctx.lineWidth = 5;
+                    ctx.strokeRect(x + 2.5, y + 2.5, dayColW - 5, teamRowH - 5);
                 }
 
                 ctx.fillStyle = p.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -2026,6 +1974,8 @@
         let extraFooter = '■ Domingos/Feriados';
         if (data.hasAnyOv) extraFooter += '  □ Extra';
         if (data.hasAnyTd) extraFooter += '  □ Troca';
+        if (data.hasAnyEa) extraFooter += '  EA: Atraso';
+        if (data.hasAnySa) extraFooter += '  SA: Saída';
         if (data.hasAnyAt) extraFooter += '  AT: Atest.';
         if (data.hasAnyFa) extraFooter += '  FA: Falta';
         ctx.fillText(canvasTruncateText(ctx, extraFooter, w1 - 52), x1 + 26, cardsY + cardsH - 18);
@@ -2123,7 +2073,7 @@
     }
 
     /* ------------------------------------------------------------------------
-       9. RELATÓRIO DO ENCARREGADO & SUPERVISOR (DADOS, HTML, PNG E TEXTO)
+       9. RELATÓRIO DE OCORRÊNCIAS MENSAIS (DADOS, HTML, PNG E TEXTO)
        ------------------------------------------------------------------------ */
     function buildSupervisorDataset(teamFilter, sortMode) {
         sanitizeAllData();
@@ -2157,7 +2107,17 @@
         const perTeamAll = [0, 0, 0, 0];
         const uniqueDaysSet = new Set();
         const seenAtestadoIds = new Set();
-        let extrasCount = 0, atestadosCount = 0, faltasCount = 0, trocasCount = 0;
+
+        /* Contadores separados de cada categoria (somam exatamente o Total de Ocorrências) */
+        const categoryCounts = {
+            extras: 0,
+            atestados: 0,
+            faltas: 0,
+            trocas: 0,
+            atrasos: 0,
+            saidas: 0,
+            outras: 0
+        };
 
         for (let day = 1; day <= daysInMonth; day++) {
             const dateKey = `${year}-${mmStr}-${String(day).padStart(2, '0')}`;
@@ -2175,7 +2135,6 @@
                 let displayNote = rawNote;
 
                 if (atInfo) {
-                    /* Consolida cada atestado 1 única vez no mês com todas as observações reunidas */
                     if (!seenAtestadoIds.has(atInfo.record.id)) {
                         seenAtestadoIds.add(atInfo.record.id);
                         includeEntry = true;
@@ -2192,74 +2151,71 @@
 
                 const baseShift = getShift(year, month, day, idx);
                 const baseCfg = SHIFTS_CONFIG[baseShift] || SHIFTS_CONFIG.M;
+                const baseHoursText = baseCfg.hours ? ` (${baseCfg.hours})` : '';
 
                 let chipCode = baseShift;
                 let chipPaletteKey = baseShift;
-                let shiftLabel = baseCfg.name;
+                let shiftLabel = `Escala Normal — ${baseCfg.name}`;
                 let shiftSub = baseCfg.hours || 'Descanso';
-                let personBadge = null;
 
                 if (atInfo) {
-                    atestadosCount++;
+                    categoryCounts.atestados++;
                     chipCode = 'AT';
                     chipPaletteKey = 'AT';
                     const retCfg = SHIFTS_CONFIG[atInfo.retInfo.returnShiftCode] || SHIFTS_CONFIG.M;
-                    shiftLabel = `${atInfo.totalDays} ${atInfo.totalDays === 1 ? 'dia' : 'dias'}`;
+                    shiftLabel = `Atestado Médico — ${atInfo.whoInfo.fullLabel} (${atInfo.totalDays} ${atInfo.totalDays === 1 ? 'dia' : 'dias'})`;
                     shiftSub = `Volta: ${formatShortDate(atInfo.retInfo.returnDateKey)} (${retCfg.name})`;
-                    personBadge = {
-                        text: `Atestado: ${atInfo.whoInfo.fullLabel}`,
-                        pillCls: 'sup-pill-at',
-                        bg: '#ffe4e6', bd: '#fecdd3', fg: '#be123c'
-                    };
                 } else if (ovShift === 'FA') {
-                    faltasCount++;
+                    categoryCounts.faltas++;
                     const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                     chipCode = 'FA';
                     chipPaletteKey = 'FA';
-                    shiftLabel = 'Falta';
-                    shiftSub = `Escala: ${baseCfg.name}`;
-                    personBadge = {
-                        text: `Falta: ${who.fullLabel}`,
-                        pillCls: 'sup-pill-fa',
-                        bg: '#fee2e2', bd: '#fecaca', fg: '#b91c1c'
-                    };
+                    shiftLabel = `Falta — ${who.fullLabel}`;
+                    shiftSub = `Escala: ${baseCfg.name}${baseHoursText}`;
                 } else if (ovShift === 'HE50' || ovShift === 'HE75' || ovShift === 'HE110') {
-                    extrasCount++;
+                    categoryCounts.extras++;
                     const meta = OVERRIDE_META[ovShift];
                     const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
                     chipCode = meta.chip;
                     chipPaletteKey = 'HE';
-                    shiftLabel = meta.label;
-                    shiftSub = `Escala: ${baseCfg.name}`;
-                    personBadge = {
-                        text: `${meta.short}: ${who.fullLabel}`,
-                        pillCls: 'sup-pill-he',
-                        bg: '#fef3c7', bd: '#fde68a', fg: '#92400e'
-                    };
+                    shiftLabel = `${meta.label} — ${who.fullLabel}`;
+                    shiftSub = `Escala: ${baseCfg.name}${baseHoursText}`;
                 } else if (ovShift === 'TD') {
-                    trocasCount++;
+                    categoryCounts.trocas++;
                     const swap = formatSwapDisplay(ovMeta, idx);
                     chipCode = 'TD';
                     chipPaletteKey = 'TD';
-                    shiftLabel = 'Troca de Dia';
-                    shiftSub = `Escala: ${baseCfg.name}`;
-                    personBadge = {
-                        text: `Troca: ${swap.fullLabel}`,
-                        pillCls: 'sup-pill-td',
-                        bg: '#f3e8ff', bd: '#ddd6fe', fg: '#6b21a8'
-                    };
+                    shiftLabel = `Troca de Dia — ${swap.fullLabel}`;
+                    shiftSub = `Escala: ${baseCfg.name}${baseHoursText}`;
+                } else if (ovShift === 'EA') {
+                    categoryCounts.atrasos++;
+                    const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
+                    chipCode = 'EA';
+                    chipPaletteKey = 'EA';
+                    shiftLabel = `Entrada Atrasada — ${who.fullLabel}`;
+                    shiftSub = `Escala: ${baseCfg.name}${baseHoursText}`;
+                } else if (ovShift === 'SA') {
+                    categoryCounts.saidas++;
+                    const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: idx } : { turma: idx, whoType: 'both' }, idx);
+                    chipCode = 'SA';
+                    chipPaletteKey = 'SA';
+                    shiftLabel = `Saída Adiantada — ${who.fullLabel}`;
+                    shiftSub = `Escala: ${baseCfg.name}${baseHoursText}`;
                 } else if (ovShift === 'F') {
+                    categoryCounts.outras++;
                     chipCode = 'F';
                     chipPaletteKey = 'F';
-                    shiftLabel = 'Folga';
-                    shiftSub = baseShift !== 'F' ? `Alterado de ${baseCfg.name}` : 'Descanso';
+                    shiftLabel = baseShift !== 'F' ? `Folga (Alterado de ${baseCfg.name})` : 'Folga';
+                    shiftSub = 'Descanso';
                 } else if (ovShift === 'M' || ovShift === 'T' || ovShift === 'N') {
-                    extrasCount++;
+                    categoryCounts.extras++;
                     const ovCfg = SHIFTS_CONFIG[ovShift] || baseCfg;
                     chipCode = ovShift;
                     chipPaletteKey = 'HE';
-                    shiftLabel = `Hora Extra (${ovCfg.name})`;
+                    shiftLabel = `Hora Extra — ${ovCfg.name}`;
                     shiftSub = ovCfg.hours;
+                } else {
+                    categoryCounts.outras++;
                 }
 
                 uniqueDaysSet.add(day);
@@ -2277,7 +2233,6 @@
                     chipPaletteKey,
                     shiftLabel,
                     shiftSub,
-                    personBadge,
                     text: displayNote
                 });
             }
@@ -2287,13 +2242,14 @@
         else entries.sort((a, b) => (a.day - b.day) || (a.turmaIdx - b.turmaIdx));
 
         const totalAllMonth = perTeamAll.reduce((acc, n) => acc + n, 0);
-        const specialCount = extrasCount + atestadosCount + faltasCount + trocasCount;
-        const specialParts = [];
-        if (extrasCount) specialParts.push(`${extrasCount} HE`);
-        if (atestadosCount) specialParts.push(`${atestadosCount} Atest.`);
-        if (faltasCount) specialParts.push(`${faltasCount} Falta${faltasCount > 1 ? 's' : ''}`);
-        if (trocasCount) specialParts.push(`${trocasCount} Troca${trocasCount > 1 ? 's' : ''}`);
-        const specialSub = specialParts.length ? specialParts.join(' • ') : 'Nenhuma ocorrência';
+        const totalOcorrencias =
+            categoryCounts.extras +
+            categoryCounts.atestados +
+            categoryCounts.faltas +
+            categoryCounts.trocas +
+            categoryCounts.atrasos +
+            categoryCounts.saidas +
+            categoryCounts.outras;
 
         const scopeLabel = teamFilter === 'all'
             ? 'Todos os Turnos (A, B, C e D)'
@@ -2308,31 +2264,51 @@
         return {
             year, month, mmStr, daysInMonth, monthLabel, teamFilter, sortMode,
             scopeLabel, sortLabel, entries,
-            totalNotes: entries.length,
+            totalNotes: totalOcorrencias,
             totalAllMonth,
             uniqueDays: uniqueDaysSet.size,
             perTeam: perTeamAll,
-            specialCount,
-            specialSub,
+            categoryCounts,
             issuedStr
         };
     }
 
     function buildSupervisorSheetHTML(data) {
-        const teamChipsHTML = TEAM_LETTERS.map((ltr, idx) => {
+        const c = data.categoryCounts;
+        const summaryCards = [
+            { label: 'Hora Extra',    val: c.extras,    accent: '#d97706' },
+            { label: 'Atestados',     val: c.atestados, accent: '#e11d48' },
+            { label: 'Faltas',        val: c.faltas,    accent: '#dc2626' },
+            { label: 'Trocas',        val: c.trocas,    accent: '#7c3aed' },
+            { label: 'Ent. Atrasada', val: c.atrasos,   accent: '#0891b2' },
+            { label: 'Saída Adiant.', val: c.saidas,    accent: '#0d9488' },
+            { label: 'Outras / Folgas', val: c.outras,  accent: '#64748b' }
+        ];
+
+        const kpiCardsHTML = summaryCards.map(card => `
+            <div class="sup-kpi-card" style="border-top-color:${card.accent}">
+                <span class="sup-kpi-label">${card.label}</span>
+                <div class="sup-kpi-val">${card.val}</div>
+            </div>
+        `).join('') + `
+            <div class="sup-kpi-card is-total">
+                <span class="sup-kpi-label">Total de Ocorrências</span>
+                <div class="sup-kpi-val">${data.totalNotes}</div>
+                <span class="sup-kpi-sub">${data.teamFilter === 'all' ? 'Soma geral do mês' : `de ${data.totalAllMonth} no mês`}</span>
+            </div>
+        `;
+
+        const teamMetaChips = TEAM_LETTERS.map((ltr, idx) => {
             const dimCls = (data.teamFilter !== 'all' && String(idx) !== String(data.teamFilter)) ? ' is-dim' : '';
-            return `<div class="sup-team-chip${dimCls}"><span class="sup-team-chip-lbl">Turno ${ltr}</span><span class="sup-team-chip-num">${data.perTeam[idx]}</span></div>`;
+            return `<span class="sup-meta-chip${dimCls}">Turno ${ltr}: ${data.perTeam[idx]}</span>`;
         }).join('');
 
         let tableBodyHTML = '';
         if (!data.entries.length) {
-            tableBodyHTML = `<tr><td colspan="4" class="sup-empty-box">Nenhum registro ou observação encontrada para o filtro selecionado neste mês.</td></tr>`;
+            tableBodyHTML = `<tr><td colspan="4" class="sup-empty-box">Nenhuma ocorrência registrada para o filtro selecionado neste mês.</td></tr>`;
         } else {
             tableBodyHTML = data.entries.map(item => {
                 const redCls = (item.isSunday || item.holiday) ? ' sup-is-red' : '';
-                const badgeHTML = item.personBadge
-                    ? `<span class="sup-person-pill ${item.personBadge.pillCls}">${escapeHTML(item.personBadge.text)}</span>`
-                    : '';
                 const obsHTML = item.text
                     ? `<div class="sup-obs-text">${escapeHTML(item.text)}</div>`
                     : `<div class="sup-obs-text sup-obs-empty">—</div>`;
@@ -2348,7 +2324,6 @@
                             <div>
                                 <span class="sup-team-title">Turno ${item.letter}</span>
                                 <span class="sup-team-names">${escapeHTML(item.teamName)}</span>
-                                ${badgeHTML}
                             </div>
                         </div>
                     </td>
@@ -2371,7 +2346,7 @@
                 <div class="a4-brand">
                     <img class="a4-logo" src="${IMERYS_SVG_URI}" alt="Imerys">
                     <div>
-                        <h2 class="a4-title">RELATÓRIO DE OBSERVAÇÕES — FECHAMENTO</h2>
+                        <h2 class="a4-title">RELATÓRIO DE OCORRÊNCIAS MENSAIS</h2>
                         <div class="a4-subtitle">IMERYS • BRITAGEM ICP 1 • ENCARREGADO &amp; SUPERVISOR DE BRITAGEM</div>
                     </div>
                 </div>
@@ -2381,26 +2356,14 @@
                 </div>
             </div>
 
-            <div class="sup-kpi-grid">
-                <div class="sup-kpi-card">
-                    <span class="sup-kpi-label">Registros no Mês</span>
-                    <div class="sup-kpi-val">${data.totalNotes}</div>
-                    <span class="sup-kpi-sub">${data.teamFilter === 'all' ? 'Todos os turnos' : `de ${data.totalAllMonth} no mês`}</span>
+            <div class="sup-kpi-grid">${kpiCardsHTML}</div>
+
+            <div class="sup-meta-bar">
+                <div class="sup-meta-teams">
+                    <span>Ocorrências por turno:</span>
+                    ${teamMetaChips}
                 </div>
-                <div class="sup-kpi-card">
-                    <span class="sup-kpi-label">Dias com Registro</span>
-                    <div class="sup-kpi-val">${data.uniqueDays}</div>
-                    <span class="sup-kpi-sub">de ${data.daysInMonth} dias do mês</span>
-                </div>
-                <div class="sup-kpi-card">
-                    <span class="sup-kpi-label">Registros por Turno</span>
-                    <div class="sup-team-chips">${teamChipsHTML}</div>
-                </div>
-                <div class="sup-kpi-card">
-                    <span class="sup-kpi-label">Extras / Atest. / Faltas / Trocas</span>
-                    <div class="sup-kpi-val">${data.specialCount}</div>
-                    <span class="sup-kpi-sub">${escapeHTML(data.specialSub)}</span>
-                </div>
+                <span>Dias com ocorrência: ${data.uniqueDays} de ${data.daysInMonth}</span>
             </div>
 
             <div class="sup-table-wrap">
@@ -2424,7 +2387,7 @@
             </div>
 
             <div class="a4-footer">
-                <span>Imerys • Britagem ICP 1 • Relatório Gerencial de Observações (Fechamento Mensal)</span>
+                <span>Imerys • Britagem ICP 1 • Relatório de Ocorrências Mensais (Fechamento)</span>
                 <span>Emitido em ${data.issuedStr} • Formato A4 Horizontal</span>
             </div>
         </div>`;
@@ -2466,9 +2429,9 @@
                 ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-wider border border-indigo-200/70 dark:border-indigo-900/50 mb-1.5'
                 : 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-[10px] font-black uppercase tracking-wider border border-blue-200/70 dark:border-blue-900/50 mb-1.5';
         }
-        if (title) title.innerText = isSup ? 'Relatório de Observações' : 'Exportar & Imprimir Escala';
+        if (title) title.innerText = isSup ? 'Relatório de Ocorrências Mensais' : 'Exportar & Imprimir Escala';
         if (sub) sub.innerText = isSup
-            ? 'Todas as ocorrências e observações da escala geral organizadas para fechamento.'
+            ? 'Soma separada por categoria, motivo por extenso e observações do mês.'
             : 'Todos os 4 turnos, horários, totais e feriados — sem observações individuais.';
         if (caption) caption.innerText = isSup
             ? 'Prévia do Relatório (A4 Paisagem • Role para conferir)'
@@ -2477,11 +2440,11 @@
         quadroOpts?.classList.toggle('hidden', isSup);
         supOpts?.classList.toggle('hidden', !isSup);
         copyBtn?.classList.toggle('hidden', !isSup);
-        if (printLbl) printLbl.innerText = isSup ? 'Imprimir / PDF Relatório' : 'Imprimir / Salvar PDF (A4)';
+        if (printLbl) printLbl.innerText = isSup ? 'Imprimir / PDF Ocorrências' : 'Imprimir / Salvar PDF (A4)';
         if (pngLbl) pngLbl.innerText = isSup ? 'Baixar Relatório HD (.PNG)' : 'Baixar Imagem A4 HD (.PNG)';
 
         if (countPill && supData) {
-            countPill.innerText = `${supData.totalNotes} ${supData.totalNotes === 1 ? 'registro' : 'registros'}`;
+            countPill.innerText = `${supData.totalNotes} ${supData.totalNotes === 1 ? 'ocorrência' : 'ocorrências'}`;
         }
 
         document.querySelectorAll('.sup-filter-btn').forEach(btn => {
@@ -2586,23 +2549,30 @@
         const font = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
         const padX = 58, padTop = 50, contentW = W - padX * 2;
-        const colDateW = 188, colTeamW = 468, colShiftW = 408;
+        const colDateW = 184, colTeamW = 410, colShiftW = 588;
         const colObsW = contentW - colDateW - colTeamW - colShiftW;
 
         const mCanvas = document.createElement('canvas');
         const mCtx = mCanvas.getContext('2d');
-        mCtx.font = `600 24px ${font}`;
         const measuredRows = data.entries.map(item => {
-            const lines = item.text ? wrapCanvasLines(mCtx, item.text, colObsW - 44) : ['—'];
-            const textH = lines.length * 34;
-            const minH = item.personBadge ? 130 : 104;
-            const rowH = Math.max(minH, textH + 44);
-            return { item, lines, rowH };
+            const chipW = item.chipCode.length >= 4 ? 76 : 62;
+            const shiftTextMaxW = colShiftW - (chipW + 54);
+            mCtx.font = `900 21px ${font}`;
+            const shiftLines = wrapCanvasLines(mCtx, item.shiftLabel, shiftTextMaxW);
+            const shiftBlockH = shiftLines.length * 28 + 30;
+
+            mCtx.font = `600 24px ${font}`;
+            const obsLines = item.text ? wrapCanvasLines(mCtx, item.text, colObsW - 44) : ['—'];
+            const obsBlockH = obsLines.length * 34;
+
+            const rowH = Math.max(106, shiftBlockH + 40, obsBlockH + 44);
+            return { item, chipW, shiftLines, obsLines, rowH };
         });
 
         const headerBottomY = padTop + 114 + 24;
-        const kpiY = headerBottomY + 26, kpiH = 148;
-        const tblY = kpiY + kpiH + 28, tblHeadH = 68;
+        const kpiY = headerBottomY + 26, kpiH = 126;
+        const metaY = kpiY + kpiH + 16, metaH = 54;
+        const tblY = metaY + metaH + 22, tblHeadH = 68;
         const rowsTotalH = measuredRows.length ? measuredRows.reduce((acc, r) => acc + r.rowH, 0) : 260;
         const signBlockH = 136, footerBlockH = 74;
         const neededH = tblY + tblHeadH + rowsTotalH + signBlockH + footerBlockH + 44;
@@ -2636,8 +2606,8 @@
         }
 
         ctx.textBaseline = 'top'; ctx.textAlign = 'left';
-        ctx.fillStyle = '#0f172a'; ctx.font = `900 45px ${font}`;
-        ctx.fillText('RELATÓRIO DE OBSERVAÇÕES — FECHAMENTO', padX + logoSize + 28, padTop + 12);
+        ctx.fillStyle = '#0f172a'; ctx.font = `900 46px ${font}`;
+        ctx.fillText('RELATÓRIO DE OCORRÊNCIAS MENSAIS', padX + logoSize + 28, padTop + 12);
         ctx.fillStyle = '#475569'; ctx.font = `800 22px ${font}`;
         ctx.fillText('IMERYS • BRITAGEM ICP 1 • ENCARREGADO & SUPERVISOR DE BRITAGEM', padX + logoSize + 28, padTop + 74);
 
@@ -2656,55 +2626,86 @@
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(padX, headerBottomY, contentW, 5);
 
-        /* 2. Faixa de KPIs */
-        const gap = 22;
-        const kw1 = Math.round((contentW - gap * 3) * 0.18);
-        const kw2 = Math.round((contentW - gap * 3) * 0.17);
-        const kw3 = Math.round((contentW - gap * 3) * 0.35);
-        const kw4 = contentW - gap * 3 - kw1 - kw2 - kw3;
-        const kx1 = padX, kx2 = kx1 + kw1 + gap, kx3 = kx2 + kw2 + gap, kx4 = kx3 + kw3 + gap;
+        /* 2. Soma Separada por Categoria + Total de Ocorrências no Final */
+        const cc = data.categoryCounts;
+        const kpiItems = [
+            { label: 'HORA EXTRA',      val: cc.extras,    accent: '#d97706', isTotal: false },
+            { label: 'ATESTADOS',       val: cc.atestados, accent: '#e11d48', isTotal: false },
+            { label: 'FALTAS',          val: cc.faltas,    accent: '#dc2626', isTotal: false },
+            { label: 'TROCAS',          val: cc.trocas,    accent: '#7c3aed', isTotal: false },
+            { label: 'ENT. ATRASADA',   val: cc.atrasos,   accent: '#0891b2', isTotal: false },
+            { label: 'SAÍDA ADIANT.',   val: cc.saidas,    accent: '#0d9488', isTotal: false },
+            { label: 'OUTRAS / FOLGAS', val: cc.outras,    accent: '#64748b', isTotal: false },
+            { label: 'TOTAL OCORRÊNCIAS', val: data.totalNotes, accent: '#0f172a', isTotal: true }
+        ];
+        const kGap = 16;
+        const unitW = (contentW - kGap * 7) / 8.25;
+        let curKX = padX;
+        kpiItems.forEach(item => {
+            const w = item.isTotal ? Math.round(unitW * 1.25) : Math.round(unitW);
+            ctx.save();
+            canvasRoundRect(ctx, curKX, kpiY, w, kpiH, 16);
+            ctx.fillStyle = item.isTotal ? '#0f172a' : '#f8fafc';
+            ctx.fill();
+            ctx.strokeStyle = item.isTotal ? '#0f172a' : '#cbd5e1';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            if (!item.isTotal) {
+                ctx.clip();
+                ctx.fillStyle = item.accent;
+                ctx.fillRect(curKX, kpiY, w, 7);
+            }
+            ctx.restore();
 
-        const drawKpi = (x, w, label, val, sub) => {
-            canvasRoundRect(ctx, x, kpiY, w, kpiH, 18);
-            ctx.fillStyle = '#f8fafc'; ctx.fill();
-            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2.5; ctx.stroke();
             ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-            ctx.fillStyle = '#475569'; ctx.font = `900 17px ${font}`;
-            ctx.fillText(canvasTruncateText(ctx, label, w - 44), x + 22, kpiY + 20);
-            if (val !== null) {
-                ctx.fillStyle = '#0f172a'; ctx.font = `900 44px ${font}`;
-                ctx.fillText(String(val), x + 22, kpiY + 50);
-            }
-            if (sub) {
-                ctx.fillStyle = '#64748b'; ctx.font = `700 18px ${font}`;
-                ctx.fillText(canvasTruncateText(ctx, sub, w - 44), x + 22, kpiY + 106);
-            }
-        };
+            ctx.fillStyle = item.isTotal ? '#cbd5e1' : '#475569';
+            ctx.font = `900 15px ${font}`;
+            ctx.fillText(canvasTruncateText(ctx, item.label, w - 28), curKX + 16, kpiY + 20);
 
-        drawKpi(kx1, kw1, 'REGISTROS NO MÊS', data.totalNotes, data.teamFilter === 'all' ? 'Todos os turnos' : `de ${data.totalAllMonth} no mês`);
-        drawKpi(kx2, kw2, 'DIAS COM REGISTRO', data.uniqueDays, `de ${data.daysInMonth} dias do mês`);
-        drawKpi(kx3, kw3, 'REGISTROS POR TURNO', null, '');
+            ctx.fillStyle = item.isTotal ? '#ffffff' : '#0f172a';
+            ctx.font = `900 44px ${font}`;
+            ctx.fillText(String(item.val), curKX + 16, kpiY + 50);
 
-        const chipGap = 14, chipW = Math.floor((kw3 - 44 - chipGap * 3) / 4);
+            if (item.isTotal) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = `700 15px ${font}`;
+                const subTot = data.teamFilter === 'all' ? 'Soma geral do mês' : `de ${data.totalAllMonth} no mês`;
+                ctx.fillText(canvasTruncateText(ctx, subTot, w - 28), curKX + 16, kpiY + 98);
+            }
+            curKX += w + kGap;
+        });
+
+        /* Barra auxiliar de Turnos + Dias com ocorrência */
+        canvasRoundRect(ctx, padX, metaY, contentW, metaH, 12);
+        ctx.fillStyle = '#f1f5f9'; ctx.fill();
+        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.stroke();
+
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#334155'; ctx.font = `800 19px ${font}`;
+        ctx.fillText('Ocorrências por turno:', padX + 20, metaY + metaH / 2);
+
+        let mx = padX + 245;
         TEAM_LETTERS.forEach((ltr, idx) => {
-            const cx = kx3 + 22 + idx * (chipW + chipGap), cy = kpiY + 58;
+            const txt = `Turno ${ltr}: ${data.perTeam[idx] || 0}`;
+            ctx.font = `900 18px ${font}`;
+            const tw = ctx.measureText(txt).width + 26;
             const isDim = data.teamFilter !== 'all' && String(idx) !== String(data.teamFilter);
             ctx.save();
             if (isDim) ctx.globalAlpha = 0.45;
-            canvasRoundRect(ctx, cx, cy, chipW, 66, 12);
+            canvasRoundRect(ctx, mx, metaY + 10, tw, metaH - 20, 8);
             ctx.fillStyle = '#ffffff'; ctx.fill();
-            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
-            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-            ctx.fillStyle = '#64748b'; ctx.font = `800 16px ${font}`;
-            ctx.fillText(`TURNO ${ltr}`, cx + chipW / 2, cy + 9);
-            ctx.fillStyle = '#0f172a'; ctx.font = `900 26px ${font}`;
-            ctx.fillText(String(data.perTeam[idx] || 0), cx + chipW / 2, cy + 32);
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.fillStyle = '#0f172a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(txt, mx + tw / 2, metaY + metaH / 2 + 1);
             ctx.restore();
+            mx += tw + 14;
         });
 
-        drawKpi(kx4, kw4, 'EXTRAS / ATEST. / FALTAS / TROCAS', data.specialCount, data.specialSub);
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#334155'; ctx.font = `800 19px ${font}`;
+        ctx.fillText(`Dias com ocorrência: ${data.uniqueDays} de ${data.daysInMonth}`, padX + contentW - 20, metaY + metaH / 2);
 
-        /* 3. Tabela de Observações */
+        /* 3. Tabela de Ocorrências */
         const colX0 = padX;
         const colX1 = colX0 + colDateW;
         const colX2 = colX1 + colTeamW;
@@ -2731,11 +2732,11 @@
             ctx.fillRect(padX, curY, contentW, 260);
             ctx.fillStyle = '#64748b'; ctx.font = `700 26px ${font}`;
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('Nenhum registro ou observação encontrada para o filtro selecionado neste mês.', padX + contentW / 2, curY + 130);
+            ctx.fillText('Nenhuma ocorrência registrada para o filtro selecionado neste mês.', padX + contentW / 2, curY + 130);
             curY += 260;
         } else {
             measuredRows.forEach((row, rIdx) => {
-                const { item, lines, rowH } = row;
+                const { item, chipW, shiftLines, obsLines, rowH } = row;
                 ctx.fillStyle = rIdx % 2 === 0 ? '#ffffff' : '#f8fafc';
                 ctx.fillRect(padX, curY, contentW, rowH);
 
@@ -2753,7 +2754,7 @@
                 ctx.fillStyle = isRed ? '#ef4444' : '#64748b'; ctx.font = `800 19px ${font}`;
                 ctx.fillText(item.dowPretty.toUpperCase(), colX0 + 22, curY + 58);
 
-                /* Turno / Equipe + Selo de Funcionário / Troca */
+                /* Turno / Equipe (somente Turno + nomes dos trabalhadores) */
                 canvasRoundRect(ctx, colX1 + 22, curY + 22, 42, 42, 10);
                 ctx.fillStyle = '#0f172a'; ctx.fill();
                 ctx.fillStyle = '#ffffff'; ctx.font = `900 22px ${font}`;
@@ -2763,23 +2764,11 @@
                 ctx.textAlign = 'left'; ctx.textBaseline = 'top';
                 ctx.fillStyle = '#0f172a'; ctx.font = `900 23px ${font}`;
                 ctx.fillText(`Turno ${item.letter}`, colX1 + 78, curY + 20);
-                ctx.fillStyle = '#475569'; ctx.font = `700 19px ${font}`;
-                ctx.fillText(canvasTruncateText(ctx, item.teamName, colTeamW - 96), colX1 + 78, curY + 50);
+                ctx.fillStyle = '#475569'; ctx.font = `700 20px ${font}`;
+                ctx.fillText(canvasTruncateText(ctx, item.teamName, colTeamW - 96), colX1 + 78, curY + 51);
 
-                if (item.personBadge) {
-                    ctx.font = `900 16px ${font}`;
-                    const pillTxt = canvasTruncateText(ctx, item.personBadge.text, colTeamW - 116);
-                    const pw = ctx.measureText(pillTxt).width + 20;
-                    canvasRoundRect(ctx, colX1 + 78, curY + 80, pw, 30, 7);
-                    ctx.fillStyle = item.personBadge.bg; ctx.fill();
-                    ctx.strokeStyle = item.personBadge.bd; ctx.lineWidth = 1.5; ctx.stroke();
-                    ctx.fillStyle = item.personBadge.fg; ctx.textBaseline = 'middle';
-                    ctx.fillText(pillTxt, colX1 + 88, curY + 95);
-                }
-
-                /* Escala do Dia */
+                /* Escala do Dia (motivo da ocorrência por extenso + subtítulo) */
                 const pal = PALETTE[item.chipPaletteKey] || PALETTE.M;
-                const chipW = item.chipCode.length >= 4 ? 76 : 62;
                 canvasRoundRect(ctx, colX2 + 22, curY + 22, chipW, 42, 10);
                 ctx.fillStyle = pal.bg; ctx.fill();
                 ctx.fillStyle = pal.fg; ctx.font = `900 20px ${font}`;
@@ -2787,18 +2776,20 @@
                 ctx.fillText(item.chipCode, colX2 + 22 + chipW / 2, curY + 43);
 
                 const shiftTxtX = colX2 + 22 + chipW + 14;
-                const shiftMaxW = colShiftW - (chipW + 50);
+                const shiftMaxW = colShiftW - (chipW + 54);
                 ctx.textAlign = 'left'; ctx.textBaseline = 'top';
                 ctx.fillStyle = '#0f172a'; ctx.font = `900 21px ${font}`;
-                ctx.fillText(canvasTruncateText(ctx, item.shiftLabel, shiftMaxW), shiftTxtX, curY + 20);
+                shiftLines.forEach((ln, li) => {
+                    ctx.fillText(ln, shiftTxtX, curY + 20 + li * 28);
+                });
                 ctx.fillStyle = '#475569'; ctx.font = `700 18px ${font}`;
-                ctx.fillText(canvasTruncateText(ctx, item.shiftSub, shiftMaxW), shiftTxtX, curY + 50);
+                ctx.fillText(canvasTruncateText(ctx, item.shiftSub, shiftMaxW), shiftTxtX, curY + 24 + shiftLines.length * 28);
 
                 /* Observação Registrada (somente texto digitado) */
                 ctx.fillStyle = item.text ? '#0f172a' : '#94a3b8';
                 ctx.font = `600 24px ${font}`;
                 ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-                lines.forEach((ln, li) => {
+                obsLines.forEach((ln, li) => {
                     ctx.fillText(ln, colX3 + 22, curY + 22 + li * 34);
                 });
 
@@ -2832,12 +2823,12 @@
         ctx.fillRect(padX, footY - 14, contentW, 2);
         ctx.textBaseline = 'top'; ctx.fillStyle = '#64748b'; ctx.font = `700 19px ${font}`;
         ctx.textAlign = 'left';
-        ctx.fillText('Imerys • Britagem ICP 1 • Relatório Gerencial de Observações (Fechamento Mensal)', padX, footY);
+        ctx.fillText('Imerys • Britagem ICP 1 • Relatório de Ocorrências Mensais (Fechamento)', padX, footY);
         ctx.textAlign = 'right';
         ctx.fillText(`Emitido em ${data.issuedStr} • Formato A4 Horizontal (HD)`, W - padX, footY);
 
         const suffix = data.teamFilter === 'all' ? 'Todos' : `Turno_${TEAM_LETTERS[parseInt(data.teamFilter, 10)]}`;
-        triggerCanvasDownload(c, `Relatorio_Supervisor_Imerys_${suffix}_${data.mmStr}_${data.year}.png`, 'Relatório HD (.PNG) baixado!');
+        triggerCanvasDownload(c, `Relatorio_Ocorrencias_Mensais_Imerys_${suffix}_${data.mmStr}_${data.year}.png`, 'Relatório HD (.PNG) baixado!');
     }
 
     function copyTextFallback(text) {
@@ -2856,24 +2847,24 @@
     async function copySupervisorSummary() {
         haptic();
         const data = buildSupervisorDataset(supTeamFilter, supSortMode);
+        const cc = data.categoryCounts;
         const lines = [
-            `*RELATÓRIO DE OBSERVAÇÕES — FECHAMENTO MENSAL*`,
+            `*RELATÓRIO DE OCORRÊNCIAS MENSAIS*`,
             `Imerys • Britagem ICP 1`,
             `Período: *${data.monthLabel}*`,
             `Escopo: ${data.scopeLabel} | ${data.sortLabel}`,
-            `Resumo: *${data.totalNotes}* registro(s) em *${data.uniqueDays}* dia(s) | Ocorrências: *${data.specialCount}* (${data.specialSub})`,
+            `Soma por tipo: Hora Extra (${cc.extras}) • Atestados (${cc.atestados}) • Faltas (${cc.faltas}) • Trocas (${cc.trocas}) • Ent. Atrasada (${cc.atrasos}) • Saída Adiant. (${cc.saidas}) • Outras/Folgas (${cc.outras})`,
+            `*Total de Ocorrências:* ${data.totalNotes} (em ${data.uniqueDays} de ${data.daysInMonth} dias)`,
             `Por turno: A (${data.perTeam[0]}) • B (${data.perTeam[1]}) • C (${data.perTeam[2]}) • D (${data.perTeam[3]})`,
             `----------------------------------------`
         ];
 
         if (!data.entries.length) {
-            lines.push('Nenhum registro ou observação encontrada para o filtro selecionado neste mês.');
+            lines.push('Nenhuma ocorrência registrada para o filtro selecionado neste mês.');
         } else {
             data.entries.forEach(item => {
-                const detailStr = item.personBadge ? ` • ${item.personBadge.text}` : '';
-                const shiftStr = `${item.shiftLabel} (${item.shiftSub})`;
-                lines.push(`• *${item.dateStr} (${item.dowPretty})* — *Turno ${item.letter}* (${item.teamName}${detailStr}) — ${shiftStr}`);
-                if (item.text) lines.push(`  ${item.text.replace(/\r?\n/g, '\n  ')}`);
+                lines.push(`• *${item.dateStr} (${item.dowPretty})* — *Turno ${item.letter}* (${item.teamName}) — ${item.shiftLabel} (${item.shiftSub})`);
+                if (item.text) lines.push(`  Obs: ${item.text.replace(/\r?\n/g, '\n  ')}`);
             });
         }
         lines.push(`----------------------------------------`);
@@ -3014,11 +3005,12 @@
             const sCode = getEffectiveShift(dateKey, currentTurma);
             const isExtra = isExtraOverride(ov);
             const isTd = ov === 'TD';
-            if (sCode === 'F' && !isExtra && !isTd) continue;
+            const isEaSa = ov === 'EA' || ov === 'SA';
+            if (sCode === 'F' && !isExtra && !isTd && !isEaSa) continue;
 
             const ovMetaInfo = OVERRIDE_META[ov];
             let tagSuffix = '';
-            if (ov === 'HE50' || ov === 'HE75' || ov === 'HE110') {
+            if (ov === 'HE50' || ov === 'HE75' || ov === 'HE110' || ov === 'EA' || ov === 'SA') {
                 const who = resolveWhoInfo(ovMeta ? { ...ovMeta, turma: currentTurma } : { turma: currentTurma, whoType: 'both' }, currentTurma);
                 tagSuffix = ` (${ovMetaInfo.label} - ${who.label})`;
             } else if (isTd) {
@@ -3087,7 +3079,7 @@
         const data = refreshAllExportOutputs();
         const originalTitle = document.title;
         document.title = exportMode === 'supervisor'
-            ? `Relatorio_Supervisor_Imerys_${data.mmStr}_${data.year}`
+            ? `Relatorio_Ocorrencias_Mensais_Imerys_${data.mmStr}_${data.year}`
             : `Escala_Imerys_Quadro_A4_${data.mmStr}_${data.year}`;
         const restore = () => { document.title = originalTitle; };
         window.addEventListener('afterprint', restore, { once: true });
